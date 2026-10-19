@@ -110,6 +110,10 @@
   button.btn:hover { filter: brightness(1.2); box-shadow: 0 0 15px var(--glow); transform: translateY(-2px); }
   button.btn-ghost { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
   button.btn-ghost:hover { background: var(--accent); color: #000; }
+  button.btn-live { background: transparent; border: 1px solid #4ade80; color: #4ade80; }
+  button.btn-live:hover { background: #4ade80; color: #000; }
+  button.btn-live.active { background: #4ade80; color: #000; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--line); }
@@ -316,6 +320,28 @@
     background: var(--accent); color: #000; border-color: var(--accent);
     box-shadow: 0 0 10px var(--glow);
   }
+
+  .gps-banner {
+    background: linear-gradient(90deg, rgba(74,222,128,0.15), rgba(212,175,55,0.15));
+    border: 1px solid var(--ok); border-radius: 10px;
+    padding: 12px 15px; margin-bottom: 15px;
+    font-size: 13px; color: var(--text);
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .gps-banner strong { color: var(--ok); }
+  .gps-banner .gps-btn {
+    background: var(--ok); color: #000; border: none;
+    padding: 8px 16px; border-radius: 8px; font-weight: 700;
+    cursor: pointer; font-size: 13px;
+  }
+  .gps-banner .gps-btn:hover { filter: brightness(1.15); }
+
+  @media (max-width: 600px) {
+    .header-buttons { position: static; justify-content: center; margin-bottom: 10px; }
+    header { padding-top: 15px; }
+    .logo-container { width: 90px; height: 90px; }
+    header h1 { font-size: 22px; }
+  }
 </style>
 </head>
 <body id="appBody">
@@ -353,6 +379,12 @@
 
 <main>
   <div id="tab-sun" class="tab-content active">
+    <!-- Banner GPS automatico per smartphone -->
+    <div id="gpsBanner" class="gps-banner" style="display:none;">
+      <span>📡 <strong>GPS disponibile!</strong> Tocca per usare la posizione del telefono.</span>
+      <button class="gps-btn" onclick="activateGPS()">Usa GPS ora</button>
+    </div>
+
     <div class="card">
       <h2>📍 Coordinate e Data</h2>
       <div class="grid">
@@ -384,6 +416,7 @@
       <div style="margin-top:20px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <button class="btn" onclick="updateAll()">Aggiorna Dati</button>
         <button class="btn btn-ghost" onclick="getLocation()">📍 Usa GPS</button>
+        <button class="btn btn-live" id="gpsLiveBtn" onclick="toggleGPSLive()">📡 GPS Live</button>
         <span class="msg" id="msg-coord" style="margin:0;">Pronto.</span>
       </div>
       <div class="grid" id="sky-quality-grid" style="margin-top:20px;"></div>
@@ -575,12 +608,14 @@
 const state = {
   lat: 41.9028, lon: 12.4964,
   baseTime: new Date(), currentTime: new Date(),
-  planets: [], 
-  // CAMERA 3D: direzione di puntamento (alt, az) e FOV
+  planets: [],
   camAlt: 45, camAz: 180, fov: 120,
   clouds: 0, target: null,
   sqm: 21.0,
-  autoRotate: false
+  autoRotate: false,
+  gpsLiveWatchId: null,
+  gpsLiveActive: false,
+  gpsAccuracy: null
 };
 
 const rad = d => d * Math.PI / 180;
@@ -880,8 +915,62 @@ function loadCity() {
 }
 
 // ============================================
-// GPS DOPPIA MODALITÀ
+// GPS: rilevamento automatico + GPS reale + GPS Live
 // ============================================
+
+// Controlla all'avvio se possiamo usare il GPS
+function checkGPSAvailability() {
+  const banner = document.getElementById('gpsBanner');
+  const isSecure = location.protocol === 'https:' ||
+                   location.hostname === 'localhost' ||
+                   location.hostname === '127.0.0.1';
+  const hasGeo = !!navigator.geolocation;
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  if (hasGeo && (isSecure || !isMobile)) {
+    // Su mobile solo se HTTPS, su desktop anche HTTP va bene
+    banner.style.display = 'flex';
+    // Nascondi il banner dopo 30 secondi se non interagisce
+    setTimeout(() => { banner.style.display = 'none'; }, 30000);
+  }
+}
+
+// Attiva GPS dal banner
+function activateGPS() {
+  document.getElementById('gpsBanner').style.display = 'none';
+  getLocation();
+}
+
+// Applica coordinate ovunque
+function applyCoordinates(lat, lon, city, accuracy) {
+  const latStr = parseFloat(lat).toFixed(4);
+  const lonStr = parseFloat(lon).toFixed(4);
+  document.getElementById('lat').value = latStr;
+  document.getElementById('lon').value = lonStr;
+  state.lat = parseFloat(latStr);
+  state.lon = parseFloat(lonStr);
+  state.gpsAccuracy = accuracy || null;
+
+  const msg = document.getElementById('msg-coord');
+  const accStr = accuracy ? ` ±${Math.round(accuracy)}m` : '';
+  msg.innerHTML = `📍 Posizione (${city || 'GPS'})${accStr} — <a href="https://www.google.com/maps?q=${latStr},${lonStr}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:underline;">Apri in Google Maps</a>`;
+  msg.className = "msg success";
+  msg.style.color = "";
+
+  state.planets = calcPlanetsPrecise(state.currentTime);
+  state.sqm = estimateSQM(state.lat, state.lon);
+  renderSunMoon();
+  renderQuality();
+  renderSkyQuality();
+  if (document.getElementById('tab-sky').classList.contains('active')) {
+    document.getElementById('timeSlider').value = 0;
+    onSliderChange();
+  }
+  if (document.getElementById('tab-tonight').classList.contains('active')) {
+    renderTonight();
+  }
+}
+
 function getLocation() {
   const msg = document.getElementById('msg-coord');
   msg.innerText = "Richiesta posizione GPS...";
@@ -901,40 +990,11 @@ function getLocation() {
                    location.hostname === '127.0.0.1';
 
   if (isMobile && !isSecure) {
-    msg.innerHTML = "⚠️ Su mobile il GPS funziona meglio in HTTPS. Provo comunque...";
+    msg.innerHTML = "⚠️ Su mobile il GPS richiede HTTPS. Provo comunque...";
     msg.style.color = "var(--warn)";
   }
 
   let resolved = false;
-
-  function applyCoords(lat, lon, city, accuracy) {
-    if (resolved) return;
-    resolved = true;
-    const latStr = parseFloat(lat).toFixed(4);
-    const lonStr = parseFloat(lon).toFixed(4);
-    document.getElementById('lat').value = latStr;
-    document.getElementById('lon').value = lonStr;
-    msg.innerHTML = `📍 Posizione (${city || 'GPS'})` +
-      (accuracy ? ` ±${Math.round(accuracy)}m` : '') +
-      ` — <a href="https://www.google.com/maps?q=${latStr},${lonStr}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:underline;">Apri in Google Maps</a>`;
-    msg.className = "msg success";
-    msg.style.color = "";
-    state.lat = parseFloat(latStr);
-    state.lon = parseFloat(lonStr);
-    state.planets = calcPlanetsPrecise(state.currentTime);
-    state.sqm = estimateSQM(state.lat, state.lon);
-    renderSunMoon();
-    renderQuality();
-    renderSkyQuality();
-    if (document.getElementById('tab-sky').classList.contains('active')) {
-      document.getElementById('timeSlider').value = 0;
-      onSliderChange();
-    }
-    if (document.getElementById('tab-tonight').classList.contains('active')) {
-      renderTonight();
-    }
-    fetchWeather();
-  }
 
   function tryIPFallback() {
     if (resolved) return;
@@ -943,36 +1003,28 @@ function getLocation() {
     const ipApply = (lat, lon, city) => {
       if (ipResolved || resolved) return;
       ipResolved = true;
-      applyCoords(lat, lon, (city || 'IP') + ' (stima IP, non GPS)');
+      resolved = true;
+      applyCoordinates(lat, lon, (city || 'IP') + ' (stima IP, non GPS)', null);
     };
     fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) })
       .then(r => r.json()).then(d => { if (d.latitude) ipApply(d.latitude, d.longitude, d.city); }).catch(()=>{});
     fetch('https://ipwho.is/', { signal: AbortSignal.timeout(5000) })
       .then(r => r.json()).then(d => { if (d.latitude) ipApply(d.latitude, d.longitude, d.city); }).catch(()=>{});
     setTimeout(() => {
-      if (!resolved && !ipResolved) {
+      if (!resolved) {
         msg.innerHTML = "⚠️ Impossibile ottenere la posizione. Seleziona una città manualmente.";
         msg.style.color = "var(--warn)";
       }
     }, 8000);
   }
 
-  const options = {
-    enableHighAccuracy: true,
-    timeout: isMobile ? 25000 : 15000,
-    maximumAge: 0
-  };
-
   navigator.geolocation.getCurrentPosition(
     (pos) => {
+      if (resolved) return;
+      resolved = true;
       const acc = pos.coords.accuracy;
-      if (acc > 3000) {
-        msg.innerText = `⚠️ GPS impreciso (±${Math.round(acc/1000)} km). Accetto comunque...`;
-        msg.style.color = "var(--warn)";
-        applyCoords(pos.coords.latitude, pos.coords.longitude, 'GPS (impreciso)', acc);
-      } else {
-        applyCoords(pos.coords.latitude, pos.coords.longitude, 'GPS', acc);
-      }
+      applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS', acc);
+      fetchWeather();
     },
     (err) => {
       console.warn('GPS error:', err);
@@ -988,13 +1040,75 @@ function getLocation() {
         tryIPFallback();
       }
     },
-    options
+    { enableHighAccuracy: true, timeout: isMobile ? 25000 : 15000, maximumAge: 0 }
+  );
+}
+
+// GPS LIVE: aggiornamento continuo tramite watchPosition
+function toggleGPSLive() {
+  const btn = document.getElementById('gpsLiveBtn');
+  const msg = document.getElementById('msg-coord');
+
+  if (state.gpsLiveActive) {
+    // Disattiva
+    if (state.gpsLiveWatchId !== null) {
+      navigator.geolocation.clearWatch(state.gpsLiveWatchId);
+      state.gpsLiveWatchId = null;
+    }
+    state.gpsLiveActive = false;
+    btn.classList.remove('active');
+    btn.innerHTML = '📡 GPS Live';
+    msg.innerText = "GPS Live disattivato.";
+    msg.className = "msg";
+    msg.style.color = "";
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    msg.innerText = "❌ Geolocalizzazione non supportata.";
+    msg.style.color = "var(--bad)";
+    return;
+  }
+
+  state.gpsLiveActive = true;
+  btn.classList.add('active');
+  btn.innerHTML = '📡 Live ON';
+  msg.innerText = "📡 GPS Live attivo: aggiornamento continuo...";
+  msg.className = "msg";
+  msg.style.color = "var(--ok)";
+
+  state.gpsLiveWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const acc = pos.coords.accuracy;
+      applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS Live', acc);
+    },
+    (err) => {
+      console.warn('GPS Live error:', err);
+      const msg = document.getElementById('msg-coord');
+      if (err.code === 1) {
+        msg.innerText = "❌ GPS Live: permesso negato.";
+        msg.style.color = "var(--bad)";
+        toggleGPSLive(); // disattiva
+      } else if (err.code === 3) {
+        msg.innerText = "⚠️ GPS Live: timeout. Riprovo...";
+        msg.style.color = "var(--warn)";
+      } else {
+        msg.innerText = "⚠️ GPS Live: errore " + err.message;
+        msg.style.color = "var(--warn)";
+      }
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
   );
 }
 
 function renderSkyQuality() {
   const sqm = state.sqm;
   const desc = sqmToDesc(sqm);
+  let gpsInfo = '';
+  if (state.gpsAccuracy) {
+    const accColor = state.gpsAccuracy < 50 ? 'var(--ok)' : (state.gpsAccuracy < 500 ? 'var(--warn)' : 'var(--bad)');
+    gpsInfo = `<div class="card"><label>Precisione GPS</label><div class="val" style="color:${accColor}; font-size:16px;">±${Math.round(state.gpsAccuracy)} m</div></div>`;
+  }
   document.getElementById('sky-quality-grid').innerHTML = `
     <div class="card">
       <label>Qualità Cielo (SQM stimato)</label>
@@ -1004,6 +1118,7 @@ function renderSkyQuality() {
       <label>Giudizio Cielo</label>
       <div class="val" style="color:var(--${desc.badge})">${desc.label}</div>
     </div>
+    ${gpsInfo}
   `;
 }
 
@@ -1146,7 +1261,6 @@ function gotoObject(idx) {
   switchTab('tab-sky', navBtns[1]);
   readInputs();
   state.planets = calcPlanetsPrecise(state.currentTime);
-  // Puntiamo la camera verso l'oggetto
   const pos = getAltAz(obj.ra, obj.dec, state.currentTime);
   state.camAlt = clamp(pos.alt, 0, 89);
   state.camAz = pos.az;
@@ -1161,13 +1275,11 @@ function clearSearch() {
 
 // ============================================
 // MAPPA DEL CIELO INTERATTIVA STILE STELLARIUM
-// Proiezione stereografica, camera con alt/az + FOV
 // ============================================
 const canvas = document.getElementById('skyCanvas');
 const ctx = canvas.getContext('2d');
 const SIZE = 1000;
 
-// Stelle di sfondo procedurali (distribuzione uniforme sfera celeste)
 const BG_STARS = [];
 (function() {
   let seed = 12345;
@@ -1206,12 +1318,8 @@ function getAltAz(ra, dec, date) {
   return { alt: deg(alt), az: norm360(deg(az)) };
 }
 
-// Proiezione stereografica: prende alt/az, restituisce x,y schermo
-// Usa camera con direzione (camAlt, camAz) e FOV
 function project(alt, az) {
   const cx = SIZE / 2, cy = SIZE / 2;
-  // Convertiamo alt/az in coordinate sferiche relative alla camera
-  // Vettore unitario dell'oggetto (az=0 => nord, az cresce verso est)
   const altR = rad(alt);
   const azR = rad(az);
   const objVec = {
@@ -1220,70 +1328,52 @@ function project(alt, az) {
     z: Math.sin(altR)
   };
 
-  // Camera: guarda verso camAz (azimuth) e camAlt (altitudine)
   const camAltR = rad(state.camAlt);
   const camAzR = rad(state.camAz);
-  // Direzione forward camera
   const fwd = {
     x: Math.cos(camAltR) * Math.sin(camAzR),
     y: Math.cos(camAltR) * Math.cos(camAzR),
     z: Math.sin(camAltR)
   };
-  // Right vector (perpendicolare a forward, parallelo al piano orizzontale)
   const right = {
     x: Math.cos(camAzR),
     y: -Math.sin(camAzR),
     z: 0
   };
-  // Up = right × forward
   const up = {
     x: right.y * fwd.z - right.z * fwd.y,
     y: right.z * fwd.x - right.x * fwd.z,
     z: right.x * fwd.y - right.y * fwd.x
   };
 
-  // Prodotto scalare con forward (z-view)
   const zView = objVec.x * fwd.x + objVec.y * fwd.y + objVec.z * fwd.z;
-  // Se dietro la camera, non visibile
   if (zView < 0.05) return { x: cx, y: cy, visible: false };
 
-  // Coordinate camera
   const xView = objVec.x * right.x + objVec.y * right.y + objVec.z * right.z;
   const yView = objVec.x * up.x + objVec.y * up.y + objVec.z * up.z;
 
-  // Scala basata su FOV (proiezione stereografica)
   const fovRad = rad(state.fov);
   const focal = (SIZE / 2) / Math.tan(fovRad / 2);
 
-  // Proiezione stereografica
   const denom = 1 + zView;
   const x = cx + (xView * focal) / denom;
   const y = cy - (yView * focal) / denom;
 
-  // Visibilità bordo
   const visible = x >= -50 && x <= SIZE + 50 && y >= -50 && y <= SIZE + 50;
   return { x, y, visible, zView };
 }
 
-// Proietta solo per filtro visibilità orizzonte
 function isAboveHorizon(alt) { return alt > -5; }
 
 function drawMilkyWay(cx, cy, isNight) {
-  // Disegna la Via Lattea come fascia di rumore lungo un arco del cielo
-  // La Via Lattea attraversa il cielo lungo il piano galattico
-  // Semplificazione: disegnamo una banda con punti casuali vicino a un grande cerchio
   ctx.save();
   let seed = 777;
   const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
 
-  // Punti della Via Lattea: campioniamo lungo il piano galattico
-  // Polo nord galattico in coordinate equatoriali: RA 192.86°, Dec 27.13°
   const ngpRa = 192.86, ngpDec = 27.13;
   for (let i = 0; i < 400; i++) {
-    // Punto lungo il piano galattico (longitudine galattica casuale)
     const l = rand() * 360;
-    const b = (rand() - 0.5) * 20; // latitudine galattica ±10°
-    // Converti in equatoriali
+    const b = (rand() - 0.5) * 20;
     const bR = rad(b), lR = rad(l);
     const sinDec = Math.sin(rad(ngpDec)) * Math.sin(bR) + Math.cos(rad(ngpDec)) * Math.cos(bR) * Math.cos(lR);
     const dec = deg(Math.asin(sinDec));
@@ -1306,7 +1396,6 @@ function drawMilkyWay(cx, cy, isNight) {
     ctx.fill();
   }
 
-  // Nucleo galattico più luminoso (Sagittario)
   for (let i = 0; i < 120; i++) {
     const l = (rand() - 0.5) * 60;
     const b = (rand() - 0.5) * 12;
@@ -1343,7 +1432,6 @@ function drawMap() {
   const colorGrid = isNight ? 'rgba(255,80,80,0.12)' : 'rgba(150,180,255,0.12)';
   const colorText = isNight ? '#ff9999' : '#c9d1e3';
 
-  // Sfondo cielo
   const skyBg = ctx.createRadialGradient(cx, cy, 10, cx, cy, SIZE * 0.8);
   if (isNight) {
     skyBg.addColorStop(0, '#1a0000');
@@ -1357,7 +1445,6 @@ function drawMap() {
   ctx.fillStyle = skyBg;
   ctx.fillRect(0, 0, SIZE, SIZE);
 
-  // Stelle di sfondo procedurali
   BG_STARS.forEach(s => {
     const pos = getAltAz(s.ra, s.dec, state.currentTime);
     if (!isAboveHorizon(pos.alt)) return;
@@ -1372,14 +1459,11 @@ function drawMap() {
     ctx.fill();
   });
 
-  // Via Lattea
   drawMilkyWay(cx, cy, isNight);
 
-  // Griglia altazimutale
   if (document.getElementById('filtroGriglia').checked) {
     ctx.strokeStyle = colorGrid;
     ctx.lineWidth = 1;
-    // Cerchi di altitudine
     for (let alt = 0; alt <= 80; alt += 20) {
       ctx.beginPath();
       let started = false;
@@ -1391,7 +1475,6 @@ function drawMap() {
       }
       ctx.stroke();
     }
-    // Linee meridiane (azimuth)
     for (let az = 0; az < 360; az += 30) {
       ctx.beginPath();
       let started = false;
@@ -1405,7 +1488,6 @@ function drawMap() {
     }
   }
 
-  // Orizzonte
   ctx.strokeStyle = isNight ? 'rgba(255,60,60,0.5)' : 'rgba(120,160,255,0.5)';
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -1418,7 +1500,6 @@ function drawMap() {
   }
   ctx.stroke();
 
-  // Direzioni cardinali
   const directions = [
     { label: 'N', az: 0 }, { label: 'NE', az: 45 }, { label: 'E', az: 90 },
     { label: 'SE', az: 135 }, { label: 'S', az: 180 }, { label: 'SO', az: 225 },
@@ -1436,7 +1517,6 @@ function drawMap() {
     ctx.shadowBlur = 0;
   });
 
-  // Costellazioni
   if (document.getElementById('filtroCostellazioni').checked) {
     ctx.strokeStyle = isNight ? 'rgba(255,100,100,0.45)' : 'rgba(150,200,255,0.45)';
     ctx.lineWidth = 1.5;
@@ -1466,7 +1546,6 @@ function drawMap() {
     ctx.shadowBlur = 0;
   }
 
-  // Stelle principali
   if (document.getElementById('filtroStelle').checked) {
     STARS.forEach(s => {
       const pos = getAltAz(s.ra, s.dec, state.currentTime);
@@ -1501,7 +1580,6 @@ function drawMap() {
     });
   }
 
-  // Pianeti
   if (document.getElementById('filtroPianeti').checked) {
     const planets = state.planets.length > 0 ? state.planets : calcPlanetsPrecise(state.currentTime);
     planets.forEach(p => {
@@ -1535,7 +1613,6 @@ function drawMap() {
     });
   }
 
-  // Oggetti profondo cielo
   const showNeb = document.getElementById('filtroNebulose').checked;
   const showGal = document.getElementById('filtroGalassie').checked;
   const showAmm = document.getElementById('filtroAmmassi').checked;
@@ -1567,7 +1644,6 @@ function drawMap() {
     ctx.shadowBlur = 0;
   });
 
-  // Target highlight
   if (state.target) {
     const pos = getAltAz(state.target.ra, state.target.dec, state.currentTime);
     if (isAboveHorizon(pos.alt)) {
@@ -1587,7 +1663,6 @@ function drawMap() {
     }
   }
 
-  // HUD
   document.getElementById('hud-az').innerText = state.camAz.toFixed(0) + '°';
   document.getElementById('hud-alt').innerText = state.camAlt.toFixed(0) + '°';
   document.getElementById('hud-zoom').innerText = (120 / state.fov).toFixed(1) + 'x';
@@ -1595,7 +1670,6 @@ function drawMap() {
   const min = state.currentTime.getMinutes().toString().padStart(2, '0');
   document.getElementById('hud-time').innerText = h + ':' + min;
 
-  // Aggiorna bussola
   const compMap = { N: 0, NE: 45, E: 90, SE: 135, S: 180, SO: 225, O: 270, NO: 315 };
   Object.keys(compMap).forEach(k => {
     const el = document.getElementById('comp' + k);
@@ -1648,7 +1722,6 @@ function toggleAutoRotate() {
   }
 }
 
-// --- MOUSE/TOUCH: trascinamento per puntare camera ---
 let isDragging = false;
 let lastMouseX = 0, lastMouseY = 0;
 let dragMoved = false;
@@ -1772,7 +1845,6 @@ function showInfo(obj) {
   panel.style.display = 'block';
 }
 
-// --- BARRA TEMPO 0-48 ORE ---
 function onSliderChange() {
   const offsetMinutes = parseInt(document.getElementById('timeSlider').value);
   state.currentTime = new Date(state.baseTime.getTime() + offsetMinutes * 60000);
@@ -1991,6 +2063,7 @@ window.onload = () => {
   }
 
   updateAll();
+  checkGPSAvailability();
 };
 </script>
 </body>
