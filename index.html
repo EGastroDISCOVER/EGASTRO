@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
 <style>
   :root {
     --bg: #03050a; --bg2: #080c14; --card: #0d121c; 
@@ -120,7 +121,6 @@
   .astro-icon-box svg { width: 80px; height: 80px; margin-bottom: 10px; filter: drop-shadow(0 0 10px var(--glow)); }
   .astro-icon-title { font-family: 'Orbitron', sans-serif; color: var(--accent2); font-size: 16px; font-weight: bold; }
 
-  /* Layout mappa con controlli laterali esterni (come codice precedente) */
   .skymap-layout {
     display: flex; gap: 20px; justify-content: center; align-items: flex-start;
     flex-wrap: wrap;
@@ -161,8 +161,15 @@
 
   .legend { display: flex; justify-content: center; gap: 15px; font-size: 12px; color: var(--muted); margin-top: 15px; font-weight: 600; flex-wrap: wrap; }
 
-  .preview { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; color: var(--muted); }
-  .preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .preview {
+    width: 100%; min-height: 200px; max-height: 60vh;
+    background: #000; border-radius: 10px; border: 1px solid var(--line);
+    display: grid; place-items: center; overflow: hidden; color: var(--muted); padding: 10px;
+  }
+  .preview img {
+    width: auto; height: auto; max-width: 100%; max-height: 55vh;
+    object-fit: contain; display: none; border-radius: 6px;
+  }
   
   .val { font-size: 20px; font-weight: 700; color: var(--text); font-family: 'Orbitron', sans-serif; }
   .msg { font-size: 12px; color: var(--muted); margin-top: 12px; font-weight: 600; }
@@ -213,8 +220,9 @@
     box-shadow: 0 0 60px var(--glow);
   }
   #preview-modal img {
-    width: 100%; border-radius: 10px; display: block;
-    background: #000; min-height: 200px; object-fit: contain;
+    width: auto; height: auto; max-width: 100%; max-height: 75vh;
+    object-fit: contain; display: block; margin: 0 auto;
+    border-radius: 10px; background: #000;
   }
   #preview-modal .close-btn {
     position: absolute; top: -14px; right: -14px;
@@ -238,6 +246,42 @@
     flex: 1; min-width: 200px; padding: 10px;
   }
   .preview-quickbar .btn { padding: 10px 18px; }
+
+  .tonight-summary {
+    background: var(--bg2); border: 1px solid var(--accent); border-radius: 12px;
+    padding: 15px; margin-bottom: 20px; text-align: center;
+  }
+  .tonight-summary .big-time {
+    font-family: 'Orbitron', sans-serif; font-size: 28px; color: var(--accent2);
+    font-weight: 900; text-shadow: 0 0 15px var(--glow);
+  }
+  .tonight-summary .location {
+    font-size: 13px; color: var(--muted); margin-top: 5px;
+  }
+  .object-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 12px; border-bottom: 1px solid var(--line);
+    font-size: 14px; transition: background 0.2s;
+  }
+  .object-row:hover { background: rgba(255,255,255,0.02); }
+  .object-row:last-child { border-bottom: none; }
+  .object-name { font-weight: 600; color: var(--text); }
+  .object-type { font-size: 11px; color: var(--muted); margin-left: 8px; }
+  .object-alt { font-family: 'Orbitron', sans-serif; font-size: 13px; color: var(--accent2); font-weight: bold; }
+  .object-alt.low { color: var(--warn); }
+  .visibility-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 10px; font-weight: 700; margin-left: 8px;
+  }
+  .visibility-badge.naked { background: rgba(74, 222, 128, 0.2); color: var(--ok); }
+  .visibility-badge.binocular { background: rgba(251, 191, 36, 0.2); color: var(--warn); }
+  .visibility-badge.telescope { background: rgba(248, 113, 113, 0.2); color: var(--bad); }
+  .section-divider {
+    font-family: 'Orbitron', sans-serif; font-size: 13px; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--line);
+  }
+  .section-divider:first-of-type { margin-top: 0; }
 </style>
 </head>
 <body id="appBody">
@@ -267,6 +311,7 @@
 <nav id="menu">
   <button class="active" onclick="switchTab('tab-sun', this)">Coordinate</button>
   <button onclick="switchTab('tab-sky', this)">Mappa Cielo</button>
+  <button onclick="switchTab('tab-tonight', this)">Stasera</button>
   <button onclick="switchTab('tab-weather', this)">Meteo</button>
   <button onclick="switchTab('tab-allsky', this)">AllSkyCam</button>
   <button onclick="switchTab('tab-nina', this)">N.I.N.A.</button>
@@ -344,15 +389,12 @@
 
   <div id="tab-sky" class="tab-content">
     <div class="card">
-      <h2>🌌 Mappa del Cielo</h2>
-
-      <!-- Info oggetto ESTERNA -->
+      <h2>🌌 Mappa del Cielo (Zenit)</h2>
       <div id="info-panel">
         <h3 id="info-title">Oggetto</h3>
         <p>RA: <strong id="info-ra">--</strong> | Dec: <strong id="info-dec">--</strong></p>
         <p>Altitudine: <strong id="info-alt">--</strong> | Azimuth: <strong id="info-az">--</strong></p>
       </div>
-
       <div class="filters">
         <strong style="color:var(--accent);">Mostra:</strong>
         <label><input type="checkbox" id="filtroPianeti" checked onchange="drawMap()"> Pianeti</label>
@@ -363,12 +405,12 @@
         <label><input type="checkbox" id="filtroAmmassi" checked onchange="drawMap()"> Ammassi</label>
       </div>
       
-      <!-- Layout mappa: riquadro + controlli laterali esterni -->
       <div class="skymap-layout">
         <div class="skymap-wrapper">
           <div class="skymap-container">
             <canvas id="skyCanvas" width="1000" height="1000"></canvas>
           </div>
+          <!-- Barra del tempo 0-48 ore -->
           <div class="time-slider-inline">
             <input type="range" id="timeSlider" min="0" max="2880" value="0" oninput="onSliderChange()">
             <div class="time-display-inline" id="sliderTimeDisplay">Ora Attuale</div>
@@ -392,6 +434,22 @@
         <span style="color:#8bd3ff">● Oggetti Profondi</span>
         <span>Trascina per ruotare · Rotella per zoom</span>
       </div>
+    </div>
+  </div>
+
+  <div id="tab-tonight" class="tab-content">
+    <div class="card">
+      <h2>🌙 Oggetti visibili stasera</h2>
+      <div class="tonight-summary">
+        <div class="big-time" id="tonight-time">--:--</div>
+        <div class="location" id="tonight-location">--</div>
+      </div>
+      <div class="section-divider">🪐 Pianeti</div>
+      <div id="tonight-planets"></div>
+      <div class="section-divider">✨ Oggetti del cielo profondo (Messier)</div>
+      <div id="tonight-messier"></div>
+      <div class="section-divider">⭐ Costellazioni visibili</div>
+      <div id="tonight-constellations"></div>
     </div>
   </div>
 
@@ -420,7 +478,7 @@
         </label>
         <button class="btn btn-ghost" onclick="openPreview()">📷 Apri Anteprima</button>
       </div>
-      <div class="preview" id="allsky-prev" style="margin-top:15px;"><span>Nessuna immagine</span><img id="allsky-img" src="" alt="AllSky"></div>
+      <div class="preview" id="allsky-prev"><span>Nessuna immagine</span><img id="allsky-img" src="" alt="AllSky"></div>
     </div>
   </div>
 
@@ -430,7 +488,7 @@
       <label>URL API (es. http://localhost:1888)</label>
       <input type="text" id="nina-url" placeholder="http://localhost:1888">
       <div style="margin-top:15px;"><button class="btn" onclick="loadNina()">Collega</button></div>
-      <div class="preview" id="nina-prev" style="margin-top:15px;"><span>Stato non disponibile</span></div>
+      <div class="preview" id="nina-prev"><span>Stato non disponibile</span></div>
       <div class="msg" id="nina-msg"></div>
     </div>
   </div>
@@ -440,14 +498,12 @@
   <div class="preview-box">
     <button class="close-btn" onclick="closePreview()">×</button>
     <div class="preview-title">📷 Anteprima AllSkyCam</div>
-    
     <img id="preview-modal-img" src="" alt="Anteprima" style="display:none;">
     <div class="preview-empty" id="preview-modal-empty">
       <div style="font-size:40px; margin-bottom:10px;">📷</div>
       <div>Nessuna immagine configurata.</div>
       <div style="margin-top:8px; font-size:12px;">Inserisci una URL qui sotto o vai nella tab AllSkyCam.</div>
     </div>
-    
     <div class="preview-quickbar">
       <input type="text" id="preview-quick-url" placeholder="http://... (URL immagine AllSkyCam)">
       <button class="btn" onclick="loadPreviewQuick()">Carica</button>
@@ -462,7 +518,6 @@ const state = {
   lat: 41.9028, lon: 12.4964, 
   baseTime: new Date(), currentTime: new Date(), 
   planets: [], rot: 0, zoom: 1, 
-  drag: false, lastX: 0, 
   clouds: 0, target: null,
   sqm: 21.0
 };
@@ -472,17 +527,9 @@ const deg = r => r * 180 / Math.PI;
 const norm360 = x => ((x % 360) + 360) % 360;
 const getDays = date => (date.getTime() - Date.UTC(2000, 0, 1, 12, 0, 0)) / 86400000;
 
-const PLANETS = [
-  {n:"Sole", s:"☉", L:280.46, v:0.9856, color:"#ffcc00"}, 
-  {n:"Luna", s:"☽", L:218.32, v:13.176, color:"#d4d4d4"},
-  {n:"Mercurio", s:"☿", L:252.25, v:4.092, color:"#a8a8a8"}, 
-  {n:"Venere", s:"♀", L:181.98, v:1.602, color:"#f0e68c"},
-  {n:"Marte", s:"♂", L:355.45, v:0.524, color:"#ff6347"}, 
-  {n:"Giove", s:"♃", L:34.40, v:0.083, color:"#ffd700"},
-  {n:"Saturno", s:"♄", L:49.94, v:0.033, color:"#f4e4a1"}, 
-  {n:"Urano", s:"♅", L:313.23, v:0.011, color:"#87ceeb"},
-  {n:"Nettuno", s:"♆", L:304.88, v:0.005, color:"#4169e1"}
-];
+const PLANET_NAMES = ["Mercury","Venus","Mars","Jupiter","Saturn","Uranus","Neptune"];
+const PLANET_SYMBOLS = {Mercury:"☿", Venus:"♀", Mars:"♂", Jupiter:"♃", Saturn:"♄", Uranus:"♅", Neptune:"♆"};
+const PLANET_COLORS = {Mercury:"#a8a8a8", Venus:"#f0e68c", Mars:"#ff6347", Jupiter:"#ffd700", Saturn:"#f4e4a1", Uranus:"#87ceeb", Neptune:"#4169e1"};
 
 const STARS = [
   {n:"Polaris", ra:37.95, dec:89.26, mag:1.98}, {n:"Kochab", ra:222.68, dec:74.16, mag:2.08},
@@ -508,15 +555,15 @@ const STARS = [
 ];
 
 const MESSIER = {
-  "M1": {n:"M1 Granchio", ra:83.63, dec:22.01, type:"Nebulosa"},
-  "M13": {n:"M13 Ercole", ra:250.42, dec:36.46, type:"Ammasso"},
-  "M31": {n:"M31 Andromeda", ra:10.68, dec:41.26, type:"Galassia"},
-  "M42": {n:"M42 Orione", ra:83.82, dec:-5.39, type:"Nebulosa"},
-  "M45": {n:"M45 Pleiadi", ra:56.75, dec:24.11, type:"Ammasso"},
-  "M51": {n:"M51 Vortice", ra:202.47, dec:47.19, type:"Galassia"},
-  "M57": {n:"M57 Anello", ra:283.39, dec:33.02, type:"Nebulosa"},
-  "M81": {n:"M81 Bode", ra:148.80, dec:69.06, type:"Galassia"},
-  "M101": {n:"M101 Girandola", ra:210.80, dec:54.35, type:"Galassia"}
+  "M1": {n:"M1 Granchio", ra:83.63, dec:22.01, type:"Nebulosa", mag:8.4},
+  "M13": {n:"M13 Ercole", ra:250.42, dec:36.46, type:"Ammasso", mag:5.8},
+  "M31": {n:"M31 Andromeda", ra:10.68, dec:41.26, type:"Galassia", mag:3.4},
+  "M42": {n:"M42 Orione", ra:83.82, dec:-5.39, type:"Nebulosa", mag:4.0},
+  "M45": {n:"M45 Pleiadi", ra:56.75, dec:24.11, type:"Ammasso", mag:1.6},
+  "M51": {n:"M51 Vortice", ra:202.47, dec:47.19, type:"Galassia", mag:8.4},
+  "M57": {n:"M57 Anello", ra:283.39, dec:33.02, type:"Nebulosa", mag:8.8},
+  "M81": {n:"M81 Bode", ra:148.80, dec:69.06, type:"Galassia", mag:6.9},
+  "M101": {n:"M101 Girandola", ra:210.80, dec:54.35, type:"Galassia", mag:7.9}
 };
 
 const CONSTELLATIONS = [
@@ -527,20 +574,57 @@ const CONSTELLATIONS = [
   {name:"Lira", stars:[{ra:279.23,dec:38.78},{ra:282.52,dec:33.36},{ra:284.74,dec:32.69},{ra:279.23,dec:38.78}]}
 ];
 
+// --- PIANETI PRECISI ---
+function calcPlanetsPrecise(date) {
+  if (typeof Astronomy === 'undefined') {
+    return calcPlanetsFallback(date);
+  }
+  const obs = new Astronomy.Observer(state.lat, state.lon, 0);
+  const time = new Astronomy.AstroTime(date);
+  const result = [];
+  PLANET_NAMES.forEach(name => {
+    try {
+      const body = Astronomy.Body[name];
+      if (!body) return;
+      const eq = Astronomy.Equator(body, time, obs, true, true);
+      const hor = Astronomy.Horizon(time, obs, eq.ra, eq.dec, 'normal');
+      result.push({
+        n: name, s: PLANET_SYMBOLS[name], color: PLANET_COLORS[name],
+        ra: eq.ra * 15, dec: eq.dec, alt: hor.altitude, az: hor.azimuth
+      });
+    } catch(e) { console.warn('Errore', name, e); }
+  });
+  return result;
+}
+
+function calcPlanetsFallback(date) {
+  const d = getDays(date);
+  const PLANETS = [
+    {n:"Mercurio", s:"☿", L:252.25, v:4.092, color:"#a8a8a8"}, 
+    {n:"Venere", s:"♀", L:181.98, v:1.602, color:"#f0e68c"},
+    {n:"Marte", s:"♂", L:355.45, v:0.524, color:"#ff6347"}, 
+    {n:"Giove", s:"♃", L:34.40, v:0.083, color:"#ffd700"},
+    {n:"Saturno", s:"♄", L:49.94, v:0.033, color:"#f4e4a1"}, 
+    {n:"Urano", s:"♅", L:313.23, v:0.011, color:"#87ceeb"},
+    {n:"Nettuno", s:"♆", L:304.88, v:0.005, color:"#4169e1"}
+  ];
+  return PLANETS.map(p => {
+    const lon = norm360(p.L + p.v * d);
+    const eps = rad(23.4393);
+    const ra = deg(Math.atan2(Math.cos(eps) * Math.sin(rad(lon)), Math.cos(rad(lon))));
+    const dec = deg(Math.asin(Math.sin(eps) * Math.sin(rad(lon))));
+    return { ...p, ra: norm360(ra), dec };
+  });
+}
+
 function estimateSQM(lat, lon) {
   const urbanCenters = [
-    {lat: 41.9028, lon: 12.4964, w: 1.0},
-    {lat: 45.4642, lon: 9.1900, w: 1.0},
-    {lat: 40.8518, lon: 14.2681, w: 0.8},
-    {lat: 45.0703, lon: 7.6869, w: 0.7},
-    {lat: 44.4949, lon: 11.3426, w: 0.6},
-    {lat: 43.7696, lon: 11.2558, w: 0.6},
-    {lat: 41.1171, lon: 16.8719, w: 0.5},
-    {lat: 38.1157, lon: 13.3615, w: 0.5},
-    {lat: 37.5079, lon: 15.0830, w: 0.4},
-    {lat: 45.4408, lon: 12.3155, w: 0.5},
-    {lat: 44.4056, lon: 8.9463, w: 0.4},
-    {lat: 39.2238, lon: 9.1217, w: 0.4}
+    {lat: 41.9028, lon: 12.4964, w: 1.0}, {lat: 45.4642, lon: 9.1900, w: 1.0},
+    {lat: 40.8518, lon: 14.2681, w: 0.8}, {lat: 45.0703, lon: 7.6869, w: 0.7},
+    {lat: 44.4949, lon: 11.3426, w: 0.6}, {lat: 43.7696, lon: 11.2558, w: 0.6},
+    {lat: 41.1171, lon: 16.8719, w: 0.5}, {lat: 38.1157, lon: 13.3615, w: 0.5},
+    {lat: 37.5079, lon: 15.0830, w: 0.4}, {lat: 45.4408, lon: 12.3155, w: 0.5},
+    {lat: 44.4056, lon: 8.9463, w: 0.4}, {lat: 39.2238, lon: 9.1217, w: 0.4}
   ];
   let influence = 0;
   urbanCenters.forEach(c => {
@@ -560,17 +644,6 @@ function sqmToDesc(sqm) {
   return { label: "Scarsa", badge: "bad" };
 }
 
-function calcPlanets(date) {
-  const d = getDays(date);
-  return PLANETS.map(p => {
-    const lon = norm360(p.L + p.v * d);
-    const eps = rad(23.4393);
-    const ra = deg(Math.atan2(Math.cos(eps) * Math.sin(rad(lon)), Math.cos(rad(lon))));
-    const dec = deg(Math.asin(Math.sin(eps) * Math.sin(rad(lon))));
-    return { ...p, ra: norm360(ra), dec };
-  });
-}
-
 function getMoonDataPure(lat, lon, date) {
   const d = getDays(date);
   let L = norm360(218.32 + 13.176396 * d);
@@ -578,45 +651,34 @@ function getMoonDataPure(lat, lon, date) {
   const Mm = norm360(134.963 + 13.064993 * d);  
   const D = norm360(297.850 + 12.190749 * d);   
   const F = norm360(93.272 + 13.229350 * d);    
-  
   const lonCorr = L + 6.289 * Math.sin(rad(Mm)) + 1.274 * Math.sin(rad(2*D - Mm)) + 
                   0.658 * Math.sin(rad(2*D)) + 0.214 * Math.sin(rad(2*Mm)) - 
                   0.186 * Math.sin(rad(M)) - 0.114 * Math.sin(rad(2*F));
-                  
   const sunLon = norm360(280.46 + 0.9856 * d);
   const elong = norm360(lonCorr - sunLon);
   const illum = (1 - Math.cos(rad(elong))) / 2;
   const illumPct = illum * 100;
   const isWaxing = elong < 180;
-  
   let phaseName = "";
   if (illumPct < 1) phaseName = "Luna Nuova";
   else if (illumPct < 45) phaseName = isWaxing ? "Luna Crescente" : "Luna Calante";
   else if (illumPct < 55) phaseName = isWaxing ? "Primo Quarto" : "Ultimo Quarto";
   else if (illumPct < 99) phaseName = isWaxing ? "Gibbosa Crescente" : "Gibbosa Calante";
   else phaseName = "Luna Piena";
-  
   return { illum, illumPct, name: phaseName, elong, isWaxing };
 }
 
 function getMoonPathSVG(illumPct, isWaxing) {
   const r = 30, cx = 50, cy = 50;
   if (illumPct < 2) return "";
-  if (illumPct > 98) {
-    return `M ${cx} ${cy-r} A ${r} ${r} 0 1 1 ${cx} ${cy+r} A ${r} ${r} 0 1 1 ${cx} ${cy-r} Z`;
-  }
+  if (illumPct > 98) return `M ${cx} ${cy-r} A ${r} ${r} 0 1 1 ${cx} ${cy+r} A ${r} ${r} 0 1 1 ${cx} ${cy-r} Z`;
   const cosElong = Math.cos(rad(illumPct * 180 / 100));
   const rx = r * Math.abs(cosElong);
   const sweep1 = isWaxing ? 1 : 0;
   const sweep2 = isWaxing ? 0 : 1;
-  if (illumPct < 50) {
-    return `M ${cx} ${cy-r} A ${r} ${r} 0 0 ${sweep1} ${cx} ${cy+r} A ${rx} ${r} 0 0 ${sweep2} ${cx} ${cy-r} Z`;
-  }
-  if (isWaxing) {
-    return `M ${cx} ${cy-r} A ${r} ${r} 0 0 1 ${cx} ${cy+r} A ${rx} ${r} 0 0 1 ${cx} ${cy-r} Z`;
-  } else {
-    return `M ${cx} ${cy-r} A ${r} ${r} 0 0 0 ${cx} ${cy+r} A ${rx} ${r} 0 0 0 ${cx} ${cy-r} Z`;
-  }
+  if (illumPct < 50) return `M ${cx} ${cy-r} A ${r} ${r} 0 0 ${sweep1} ${cx} ${cy+r} A ${rx} ${r} 0 0 ${sweep2} ${cx} ${cy-r} Z`;
+  if (isWaxing) return `M ${cx} ${cy-r} A ${r} ${r} 0 0 1 ${cx} ${cy+r} A ${rx} ${r} 0 0 1 ${cx} ${cy-r} Z`;
+  return `M ${cx} ${cy-r} A ${r} ${r} 0 0 0 ${cx} ${cy+r} A ${rx} ${r} 0 0 0 ${cx} ${cy-r} Z`;
 }
 
 function getSunTimesPure(lat, lon, date, alt) {
@@ -661,9 +723,14 @@ function switchTab(id, btn) {
   btn.classList.add('active');
   if (id === 'tab-sky') {
     readInputs();
-    state.planets = calcPlanets(state.currentTime);
+    state.planets = calcPlanetsPrecise(state.currentTime);
     document.getElementById('timeSlider').value = 0;
     onSliderChange();
+  }
+  if (id === 'tab-tonight') {
+    readInputs();
+    state.planets = calcPlanetsPrecise(state.currentTime);
+    renderTonight();
   }
 }
 
@@ -676,17 +743,21 @@ function toggleNightMode() {
   document.getElementById('icon-sun').querySelector('circle').setAttribute('fill', isNight ? '#ff0000' : '#ffcc00');
   document.getElementById('icon-sun').querySelector('path').setAttribute('stroke', isNight ? '#ff0000' : '#ffcc00');
   if (document.getElementById('tab-sky').classList.contains('active')) drawMap();
+  if (document.getElementById('tab-tonight').classList.contains('active')) renderTonight();
 }
 
 function updateAll() {
   readInputs();
-  state.planets = calcPlanets(state.currentTime);
+  state.planets = calcPlanetsPrecise(state.currentTime);
   renderSunMoon(); 
   renderQuality();
   renderSkyQuality();
   if (document.getElementById('tab-sky').classList.contains('active')) {
     document.getElementById('timeSlider').value = 0;
     onSliderChange();
+  }
+  if (document.getElementById('tab-tonight').classList.contains('active')) {
+    renderTonight();
   }
   document.getElementById('msg-coord').innerText = "✅ Dati aggiornati!";
   document.getElementById('msg-coord').className = "msg success";
@@ -704,10 +775,37 @@ function loadCity() {
   updateAll();
 }
 
+// ============================================
+// GPS AMBIVALENTE (PC senza HTTPS, smartphone con HTTPS)
+// ============================================
 function getLocation() {
   const msg = document.getElementById('msg-coord');
   msg.innerText = "Richiesta posizione...";
   msg.className = "msg";
+  msg.style.color = "";
+  
+  if (!navigator.geolocation) {
+    msg.innerText = "❌ Geolocalizzazione non supportata.";
+    msg.style.color = "var(--bad)";
+    return;
+  }
+  
+  const isSecure = location.protocol === 'https:' || 
+                   location.hostname === 'localhost' || 
+                   location.hostname === '127.0.0.1';
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  
+  // Su smartphone: richiedi HTTPS. Su PC: prova comunque (file://, localhost, http)
+  if (isMobile && !isSecure) {
+    msg.innerHTML = "❌ <strong>Su smartphone serve HTTPS per il GPS.</strong><br>" +
+      "Sei su <code>" + location.protocol + "//" + location.host + "</code>. " +
+      "Apri l'app via HTTPS (Netlify, Vercel, GitHub Pages) o server locale HTTPS.<br>" +
+      "Nel frattempo uso la stima IP...";
+    msg.style.color = "var(--warn)";
+    tryIPFallback();
+    return;
+  }
+  
   let resolved = false;
   
   function applyCoords(lat, lon, city) {
@@ -719,9 +817,10 @@ function getLocation() {
     document.getElementById('lon').value = lonStr;
     msg.innerText = `📍 Posizione (${city || 'GPS'})`;
     msg.className = "msg success";
+    msg.style.color = "";
     state.lat = parseFloat(latStr);
     state.lon = parseFloat(lonStr);
-    state.planets = calcPlanets(state.currentTime);
+    state.planets = calcPlanetsPrecise(state.currentTime);
     state.sqm = estimateSQM(state.lat, state.lon);
     renderSunMoon();
     renderQuality();
@@ -730,36 +829,68 @@ function getLocation() {
       document.getElementById('timeSlider').value = 0;
       onSliderChange();
     }
+    if (document.getElementById('tab-tonight').classList.contains('active')) {
+      renderTonight();
+    }
     fetchWeather();
   }
   
   function tryIPFallback() {
-    fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) })
+    msg.innerText = "Stima posizione via IP...";
+    fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) })
       .then(res => res.json())
-      .then(data => { if (data.latitude && data.longitude) applyCoords(data.latitude, data.longitude, data.city); })
+      .then(data => { 
+        if (data.latitude && data.longitude) {
+          applyCoords(data.latitude, data.longitude, (data.city || 'IP') + ' (stima IP)');
+        }
+      })
       .catch(() => {});
-    fetch('https://ipwho.is/', { signal: AbortSignal.timeout(4000) })
+    fetch('https://ipwho.is/', { signal: AbortSignal.timeout(5000) })
       .then(res => res.json())
-      .then(data => { if (data.latitude && data.longitude) applyCoords(data.latitude, data.longitude, data.city); })
+      .then(data => { 
+        if (data.latitude && data.longitude) {
+          applyCoords(data.latitude, data.longitude, (data.city || 'IP') + ' (stima IP)');
+        }
+      })
       .catch(() => {});
     setTimeout(() => {
       if (!resolved) {
-        msg.innerText = "📍 Seleziona una città dal menu in alto";
-        msg.className = "msg";
+        msg.innerText = "⚠️ Impossibile ottenere la posizione. Seleziona una città manualmente.";
         msg.style.color = "var(--warn)";
       }
-    }, 5000);
+    }, 8000);
   }
   
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => applyCoords(pos.coords.latitude, pos.coords.longitude, 'GPS'),
-      () => { msg.innerText = "⚠️ GPS bloccato. Provo stima IP..."; tryIPFallback(); },
-      { timeout: 5000, enableHighAccuracy: false }
-    );
-  } else {
-    tryIPFallback();
-  }
+  const options = {
+    enableHighAccuracy: isMobile,  // GPS reale su mobile, più veloce su PC
+    timeout: isMobile ? 20000 : 10000,
+    maximumAge: 0
+  };
+  
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const accuracy = pos.coords.accuracy;
+      if (accuracy > 5000) {
+        msg.innerText = `⚠️ Posizione imprecisa (±${Math.round(accuracy/1000)} km). Provo GPS più preciso...`;
+        msg.style.color = "var(--warn)";
+      }
+      applyCoords(pos.coords.latitude, pos.coords.longitude, `GPS ±${Math.round(accuracy)}m`);
+    },
+    (err) => {
+      console.warn('GPS error:', err);
+      if (err.code === 1) {
+        msg.innerText = "❌ Permesso negato. Provo stima IP...";
+        msg.style.color = "var(--warn)";
+        tryIPFallback();
+      } else if (err.code === 3) {
+        msg.innerText = "⚠️ Timeout GPS. Provo stima IP...";
+        tryIPFallback();
+      } else {
+        tryIPFallback();
+      }
+    },
+    options
+  );
 }
 
 function renderSkyQuality() {
@@ -782,7 +913,6 @@ function renderSunMoon() {
   const tStd = getSunTimesPure(state.lat, state.lon, state.currentTime, -0.833);
   const tNaut = getSunTimesPure(state.lat, state.lon, state.currentTime, -12);
   const fmt = d => d ? d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '—';
-
   document.getElementById('table-sun').innerHTML = `
     <tr><td>Alba</td><td>${fmt(tStd?.rise)}</td></tr>
     <tr><td>Tramonto</td><td>${fmt(tStd?.set)}</td></tr>
@@ -797,85 +927,60 @@ function renderSunMoon() {
   document.getElementById('moon-phase-name').innerText = m.name;
 }
 
-function onSliderChange() {
-  const offsetMinutes = parseInt(document.getElementById('timeSlider').value);
-  state.currentTime = new Date(state.baseTime.getTime() + offsetMinutes * 60000);
-  const h = state.currentTime.getHours().toString().padStart(2, '0');
-  const min = state.currentTime.getMinutes().toString().padStart(2, '0');
-  const day = state.currentTime.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'});
-  document.getElementById('sliderTimeDisplay').innerText = `${h}:${min} (${day})`;
-  state.planets = calcPlanets(state.currentTime);
-  if (document.getElementById('tab-sky').classList.contains('active')) {
-    drawMap();
-    if (state.target) showInfo(state.target);
-  }
-}
+function renderTonight() {
+  readInputs();
+  const now = state.currentTime;
+  const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('tonight-time').innerText = timeStr;
+  document.getElementById('tonight-location').innerText = 
+    `${state.lat.toFixed(2)}°, ${state.lon.toFixed(2)}° — ${now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}`;
 
-async function fetchWeather() {
-  const msg = document.getElementById('msg-weather');
-  msg.innerText = "Caricamento meteo...";
-  msg.className = "msg";
-  try {
-    const refTime = state.currentTime;
-    const startStr = refTime.toISOString().slice(0, 13) + ":00";
-    const nextDay = new Date(refTime);
-    nextDay.setDate(nextDay.getDate() + 1);
-    const endStr = nextDay.toISOString().slice(0, 13) + ":00";
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${state.lat}&longitude=${state.lon}&hourly=cloud_cover,temperature_2m,relative_humidity_2m,wind_speed_10m&timezone=auto&forecast_days=2`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
-    const data = await res.json();
-    let clouds = [], temps = [], hums = [], winds = [];
-    data.hourly.time.forEach((t, i) => {
-      if (t >= startStr && t <= endStr) {
-        clouds.push(data.hourly.cloud_cover[i]);
-        temps.push(data.hourly.temperature_2m[i]);
-        hums.push(data.hourly.relative_humidity_2m[i]);
-        winds.push(data.hourly.wind_speed_10m[i]);
-      }
-    });
-    if (clouds.length === 0) {
-      clouds = data.hourly.cloud_cover.slice(0, 12);
-      temps = data.hourly.temperature_2m.slice(0, 12);
-      hums = data.hourly.relative_humidity_2m.slice(0, 12);
-      winds = data.hourly.wind_speed_10m.slice(0, 12);
-    }
-    if (clouds.length === 0) throw new Error("Dati non disponibili");
-    const avgClouds = clouds.reduce((a,b) => a+b, 0) / clouds.length;
-    state.clouds = avgClouds;
-    document.getElementById('weather-grid').innerHTML = `
-      <div class="card"><label>Nuvole (Media Notte)</label><div class="val">${avgClouds.toFixed(0)} %</div></div>
-      <div class="card"><label>Temp (Min)</label><div class="val">${Math.min(...temps).toFixed(1)} °C</div></div>
-      <div class="card"><label>Umidità (Max)</label><div class="val">${Math.max(...hums).toFixed(0)} %</div></div>
-      <div class="card"><label>Vento (Max)</label><div class="val">${Math.max(...winds).toFixed(0)} km/h</div></div>
-    `;
-    msg.innerText = "✅ Meteo notturno aggiornato.";
-    msg.className = "msg success";
-    renderQuality();
-  } catch(e) { 
-    msg.innerText = "❌ Errore meteo: " + e.message; 
-    msg.className = "msg";
-    msg.style.color = "var(--bad)";
-  }
-}
+  const planets = state.planets.length > 0 ? state.planets : calcPlanetsPrecise(now);
+  const planetRows = planets.map(p => {
+    if (p.alt !== undefined) return p;
+    const pos = getAltAz(p.ra, p.dec, now);
+    return { ...p, alt: pos.alt };
+  }).filter(p => p.alt > 0);
 
-function renderQuality() {
-  const m = getMoonDataPure(state.lat, state.lon, state.currentTime);
-  const sqmScore = Math.max(0, Math.min(10, (state.sqm - 17) / 0.5));
-  const moonPenalty = m.illum > 0.5 ? 2 : (m.illum > 0.2 ? 1 : 0);
-  const cloudPenalty = state.clouds > 70 ? 3 : (state.clouds > 30 ? 1 : 0);
-  const score = Math.max(1, Math.min(10, sqmScore - moonPenalty - cloudPenalty));
-  const badge = score > 7 ? 'ok' : (score > 4 ? 'warn' : 'bad');
-  const text = score > 7 ? 'Eccellente' : (score > 4 ? 'Discreto' : 'Scarso');
-  document.getElementById('quality-grid').innerHTML = `
-    <div class="card"><label>Punteggio (Notte)</label><div class="val">${score.toFixed(1)} / 10</div></div>
-    <div class="card"><label>Giudizio</label><div class="val" style="color:var(--${badge})">${text}</div></div>
-    <div class="card"><label>SQM (qualità cielo)</label><div class="val">${state.sqm.toFixed(2)}</div></div>
-    <div class="card"><label>Nuvole (Notte)</label><div class="val">${state.clouds.toFixed(0)}%</div></div>
-  `;
+  const planetsDiv = document.getElementById('tonight-planets');
+  planetsDiv.innerHTML = planetRows.length === 0 
+    ? '<div style="color:var(--muted); padding:10px;">Nessun pianeta sopra l\'orizzonte.</div>'
+    : planetRows.sort((a, b) => b.alt - a.alt).map(p => 
+        `<div class="object-row"><div><span class="object-name">${p.s} ${p.n}</span></div><div><span class="object-alt ${p.alt < 20 ? 'low' : ''}">${p.alt.toFixed(1)}°</span></div></div>`
+      ).join('');
+
+  const messierRows = Object.values(MESSIER).map(m => {
+    const pos = getAltAz(m.ra, m.dec, now);
+    return { ...m, alt: pos.alt };
+  }).filter(m => m.alt > 10);
+
+  const messierDiv = document.getElementById('tonight-messier');
+  messierDiv.innerHTML = messierRows.length === 0
+    ? '<div style="color:var(--muted); padding:10px;">Nessun oggetto Messier ben posizionato.</div>'
+    : messierRows.sort((a, b) => b.alt - a.alt).map(m => {
+        let badge = '';
+        if (m.mag && m.mag <= 5) badge = '<span class="visibility-badge naked">occhio nudo</span>';
+        else if (m.mag && m.mag <= 8) badge = '<span class="visibility-badge binocular">binocolo</span>';
+        else badge = '<span class="visibility-badge telescope">telescopio</span>';
+        return `<div class="object-row"><div><span class="object-name">${m.n}</span><span class="object-type">${m.type}</span>${badge}</div><div><span class="object-alt ${m.alt < 30 ? 'low' : ''}">${m.alt.toFixed(1)}°</span></div></div>`;
+      }).join('');
+
+  const constRows = CONSTELLATIONS.map(c => {
+    const midStar = c.stars[Math.floor(c.stars.length / 2)];
+    const pos = getAltAz(midStar.ra, midStar.dec, now);
+    return { ...c, alt: pos.alt };
+  }).filter(c => c.alt > 15);
+
+  const constDiv = document.getElementById('tonight-constellations');
+  constDiv.innerHTML = constRows.length === 0
+    ? '<div style="color:var(--muted); padding:10px;">Nessuna costellazione ben visibile.</div>'
+    : constRows.sort((a, b) => b.alt - a.alt).map(c => 
+        `<div class="object-row"><div><span class="object-name">${c.name}</span></div><div><span class="object-alt ${c.alt < 30 ? 'low' : ''}">${c.alt.toFixed(1)}°</span></div></div>`
+      ).join('');
 }
 
 // ============================================
-// MAPPA STELLARE (come codice precedente)
+// MAPPA ZENITALE (tutto il cielo fino allo zenit)
 // ============================================
 const canvas = document.getElementById('skyCanvas');
 const ctx = canvas.getContext('2d');
@@ -999,6 +1104,7 @@ function drawMap() {
   ctx.fillStyle = skyGrad;
   ctx.fill();
   
+  // Cerchi concentrici (altitudine)
   ctx.strokeStyle = colorGrid;
   ctx.lineWidth = 1;
   [30, 60].forEach(alt => {
@@ -1008,6 +1114,8 @@ function drawMap() {
     ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.stroke();
   });
+  
+  // Linee radiali (azimut)
   for (let az = 0; az < 360; az += 30) {
     const pt = project(0, az);
     ctx.beginPath();
@@ -1016,6 +1124,7 @@ function drawMap() {
     ctx.stroke();
   }
   
+  // Bordo
   ctx.save();
   ctx.shadowColor = colorLine;
   ctx.shadowBlur = 20;
@@ -1026,6 +1135,7 @@ function drawMap() {
   ctx.stroke();
   ctx.restore();
   
+  // Direzioni cardinali
   const directions = [
     { label: 'N', az: 0, primary: true }, { label: 'E', az: 90, primary: true },
     { label: 'S', az: 180, primary: true }, { label: 'O', az: 270, primary: true },
@@ -1049,6 +1159,7 @@ function drawMap() {
     ctx.shadowBlur = 0;
   });
   
+  // Costellazioni
   if (document.getElementById('filtroCostellazioni').checked) {
     ctx.strokeStyle = isNight ? 'rgba(255,100,100,0.5)' : 'rgba(150,200,255,0.5)';
     ctx.lineWidth = 1.8;
@@ -1070,6 +1181,7 @@ function drawMap() {
     ctx.shadowBlur = 0;
   }
   
+  // Stelle
   if (document.getElementById('filtroStelle').checked) {
     STARS.forEach(s => {
       const pos = getAltAz(s.ra, s.dec, state.currentTime);
@@ -1103,9 +1215,11 @@ function drawMap() {
     });
   }
   
+  // Pianeti
   if (document.getElementById('filtroPianeti').checked) {
-    state.planets.forEach(p => {
-      const pos = getAltAz(p.ra, p.dec, state.currentTime);
+    const planets = state.planets.length > 0 ? state.planets : calcPlanetsPrecise(state.currentTime);
+    planets.forEach(p => {
+      const pos = p.alt !== undefined ? p : getAltAz(p.ra, p.dec, state.currentTime);
       const pt = project(pos.alt, pos.az);
       if (pt.visible) {
         const planetColor = isNight ? '#ff0000' : (p.color || '#d4af37');
@@ -1135,6 +1249,7 @@ function drawMap() {
     });
   }
   
+  // Messier
   const showNeb = document.getElementById('filtroNebulose').checked;
   const showGal = document.getElementById('filtroGalassie').checked;
   const showAmm = document.getElementById('filtroAmmassi').checked;
@@ -1183,7 +1298,6 @@ function drawMap() {
     }
   }
   
-  // HUD ESTERNO
   document.getElementById('hud-az').innerText = state.rot.toFixed(0) + '°';
   document.getElementById('hud-zoom').innerText = state.zoom.toFixed(1) + 'x';
   const h = state.currentTime.getHours().toString().padStart(2, '0');
@@ -1191,7 +1305,6 @@ function drawMap() {
   document.getElementById('hud-time').innerText = h + ':' + min;
 }
 
-// RESET: Nord in alto
 function resetView() {
   state.rot = 0;
   state.zoom = 1;
@@ -1206,7 +1319,7 @@ function zoomOut() {
   drawMap();
 }
 
-// --- GESTIONE MOUSE/TOUCH (rotazione fluida e libera 360°, direzione invertita) ---
+// --- MOUSE/TOUCH MAPPA ---
 let isDragging = false;
 let lastMouseX = 0;
 let dragMoved = false;
@@ -1220,30 +1333,25 @@ canvas.addEventListener('mousedown', e => {
   canvas.style.cursor = 'grabbing';
   e.preventDefault();
 });
-
 window.addEventListener('mouseup', () => {
   isDragging = false;
   canvas.style.cursor = 'grab';
 });
-
 canvas.addEventListener('mousemove', e => {
   if (!isDragging) return;
   const dx = e.clientX - lastMouseX;
   if (Math.abs(e.clientX - dragStartX) > 3) dragMoved = true;
   if (dragMoved) {
-    // Direzione invertita: trascinando a destra la mappa ruota in senso antiorario
     state.rot = norm360(state.rot - dx * 0.5);
     lastMouseX = e.clientX;
     drawMap();
   }
 });
-
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
   state.zoom = Math.max(0.5, Math.min(2.5, state.zoom + (e.deltaY < 0 ? 0.1 : -0.1)));
   drawMap();
 }, { passive: false });
-
 canvas.addEventListener('touchstart', e => {
   if (e.touches.length === 1) {
     isDragging = true;
@@ -1252,7 +1360,6 @@ canvas.addEventListener('touchstart', e => {
     lastMouseX = e.touches[0].clientX;
   }
 }, {passive: true});
-
 canvas.addEventListener('touchmove', e => {
   if (isDragging && e.touches.length === 1) {
     const dx = e.touches[0].clientX - lastMouseX;
@@ -1264,7 +1371,6 @@ canvas.addEventListener('touchmove', e => {
     }
   }
 }, {passive: true});
-
 canvas.addEventListener('touchend', () => { isDragging = false; });
 
 canvas.addEventListener('click', e => {
@@ -1283,7 +1389,8 @@ canvas.addEventListener('click', e => {
     }
   };
   if (document.getElementById('filtroStelle').checked) STARS.forEach(checkObj);
-  if (document.getElementById('filtroPianeti').checked) state.planets.forEach(checkObj);
+  const planets = state.planets.length > 0 ? state.planets : calcPlanetsPrecise(state.currentTime);
+  if (document.getElementById('filtroPianeti').checked) planets.forEach(checkObj);
   const showNeb = document.getElementById('filtroNebulose').checked;
   const showGal = document.getElementById('filtroGalassie').checked;
   const showAmm = document.getElementById('filtroAmmassi').checked;
@@ -1302,6 +1409,89 @@ function showInfo(obj) {
   document.getElementById('info-alt').innerText = `${pos.alt.toFixed(1)}°`;
   document.getElementById('info-az').innerText = `${pos.az.toFixed(1)}°`;
   panel.style.display = 'block';
+}
+
+// --- BARRA TEMPO 0-48 ORE ---
+function onSliderChange() {
+  const offsetMinutes = parseInt(document.getElementById('timeSlider').value);
+  state.currentTime = new Date(state.baseTime.getTime() + offsetMinutes * 60000);
+  const h = state.currentTime.getHours().toString().padStart(2, '0');
+  const min = state.currentTime.getMinutes().toString().padStart(2, '0');
+  const day = state.currentTime.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit'});
+  const deltaH = Math.floor(offsetMinutes / 60);
+  const deltaM = offsetMinutes % 60;
+  document.getElementById('sliderTimeDisplay').innerText = `${h}:${min} (${day}) +${deltaH}h${deltaM}m`;
+  state.planets = calcPlanetsPrecise(state.currentTime);
+  if (document.getElementById('tab-sky').classList.contains('active')) {
+    drawMap();
+    if (state.target) showInfo(state.target);
+  }
+  if (document.getElementById('tab-tonight').classList.contains('active')) {
+    renderTonight();
+  }
+}
+
+async function fetchWeather() {
+  const msg = document.getElementById('msg-weather');
+  msg.innerText = "Caricamento meteo...";
+  msg.className = "msg";
+  try {
+    const refTime = state.currentTime;
+    const startStr = refTime.toISOString().slice(0, 13) + ":00";
+    const nextDay = new Date(refTime);
+    nextDay.setDate(nextDay.getDate() + 1);
+    const endStr = nextDay.toISOString().slice(0, 13) + ":00";
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${state.lat}&longitude=${state.lon}&hourly=cloud_cover,temperature_2m,relative_humidity_2m,wind_speed_10m&timezone=auto&forecast_days=2`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    const data = await res.json();
+    let clouds = [], temps = [], hums = [], winds = [];
+    data.hourly.time.forEach((t, i) => {
+      if (t >= startStr && t <= endStr) {
+        clouds.push(data.hourly.cloud_cover[i]);
+        temps.push(data.hourly.temperature_2m[i]);
+        hums.push(data.hourly.relative_humidity_2m[i]);
+        winds.push(data.hourly.wind_speed_10m[i]);
+      }
+    });
+    if (clouds.length === 0) {
+      clouds = data.hourly.cloud_cover.slice(0, 12);
+      temps = data.hourly.temperature_2m.slice(0, 12);
+      hums = data.hourly.relative_humidity_2m.slice(0, 12);
+      winds = data.hourly.wind_speed_10m.slice(0, 12);
+    }
+    if (clouds.length === 0) throw new Error("Dati non disponibili");
+    const avgClouds = clouds.reduce((a,b) => a+b, 0) / clouds.length;
+    state.clouds = avgClouds;
+    document.getElementById('weather-grid').innerHTML = `
+      <div class="card"><label>Nuvole (Media Notte)</label><div class="val">${avgClouds.toFixed(0)} %</div></div>
+      <div class="card"><label>Temp (Min)</label><div class="val">${Math.min(...temps).toFixed(1)} °C</div></div>
+      <div class="card"><label>Umidità (Max)</label><div class="val">${Math.max(...hums).toFixed(0)} %</div></div>
+      <div class="card"><label>Vento (Max)</label><div class="val">${Math.max(...winds).toFixed(0)} km/h</div></div>
+    `;
+    msg.innerText = "✅ Meteo notturno aggiornato.";
+    msg.className = "msg success";
+    renderQuality();
+  } catch(e) { 
+    msg.innerText = "❌ Errore meteo: " + e.message; 
+    msg.className = "msg";
+    msg.style.color = "var(--bad)";
+  }
+}
+
+function renderQuality() {
+  const m = getMoonDataPure(state.lat, state.lon, state.currentTime);
+  const sqmScore = Math.max(0, Math.min(10, (state.sqm - 17) / 0.5));
+  const moonPenalty = m.illum > 0.5 ? 2 : (m.illum > 0.2 ? 1 : 0);
+  const cloudPenalty = state.clouds > 70 ? 3 : (state.clouds > 30 ? 1 : 0);
+  const score = Math.max(1, Math.min(10, sqmScore - moonPenalty - cloudPenalty));
+  const badge = score > 7 ? 'ok' : (score > 4 ? 'warn' : 'bad');
+  const text = score > 7 ? 'Eccellente' : (score > 4 ? 'Discreto' : 'Scarso');
+  document.getElementById('quality-grid').innerHTML = `
+    <div class="card"><label>Punteggio (Notte)</label><div class="val">${score.toFixed(1)} / 10</div></div>
+    <div class="card"><label>Giudizio</label><div class="val" style="color:var(--${badge})">${text}</div></div>
+    <div class="card"><label>SQM (qualità cielo)</label><div class="val">${state.sqm.toFixed(2)}</div></div>
+    <div class="card"><label>Nuvole (Notte)</label><div class="val">${state.clouds.toFixed(0)}%</div></div>
+  `;
 }
 
 let autoTimer = null;
@@ -1353,19 +1543,15 @@ function handleLogoUpload(event) {
   reader.readAsDataURL(file);
 }
 
-// --- ANTEPRIMA (sempre funzionante) ---
 function openPreview() {
   const modal = document.getElementById('preview-modal');
   const img = document.getElementById('preview-modal-img');
   const empty = document.getElementById('preview-modal-empty');
   const quickInput = document.getElementById('preview-quick-url');
-  
   let url = document.getElementById('allsky-url').value.trim();
   if (!url) url = localStorage.getItem('egastro_allsky_url') || '';
   quickInput.value = url;
-  
   modal.classList.add('open');
-  
   if (url) {
     loadPreviewImage(url);
   } else {
@@ -1378,21 +1564,17 @@ function openPreview() {
 function loadPreviewImage(url) {
   const img = document.getElementById('preview-modal-img');
   const empty = document.getElementById('preview-modal-empty');
-  
   if (!url) {
     img.style.display = 'none';
     empty.style.display = 'block';
     empty.innerHTML = '<div style="font-size:40px; margin-bottom:10px;">📷</div><div>Nessuna URL inserita.</div>';
     return;
   }
-  
   img.style.display = 'none';
   empty.style.display = 'block';
   empty.innerHTML = '<div style="font-size:40px; margin-bottom:10px;">⏳</div><div>Caricamento immagine...</div>';
-  
   const testImg = new Image();
   const fullUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
-  
   testImg.onload = () => {
     img.src = fullUrl;
     img.style.display = 'block';
@@ -1400,13 +1582,11 @@ function loadPreviewImage(url) {
     localStorage.setItem('egastro_allsky_url', url);
     document.getElementById('allsky-url').value = url;
   };
-  
   testImg.onerror = () => {
     img.style.display = 'none';
     empty.style.display = 'block';
     empty.innerHTML = '<div style="font-size:40px; margin-bottom:10px;">❌</div><div>Impossibile caricare l\'immagine.</div><div style="margin-top:8px; font-size:12px;">Controlla la URL o la connessione alla camera.</div>';
   };
-  
   testImg.src = fullUrl;
 }
 
