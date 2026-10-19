@@ -36,14 +36,19 @@
     box-shadow: 0 4px 20px var(--glow); transition: all 0.3s;
   }
   
-  .btn-night {
+  .header-buttons {
     position: absolute; top: 20px; right: 20px;
+    display: flex; gap: 10px; z-index: 101;
+  }
+  .btn-night {
     background: var(--card); color: var(--accent); border: 1px solid var(--accent);
     padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;
     cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;
     box-shadow: 0 0 10px var(--glow);
   }
   .btn-night:hover { background: var(--accent); color: var(--bg); }
+  .btn-preview { border-color: #8bd3ff; color: #8bd3ff; }
+  .btn-preview:hover { background: #8bd3ff; color: #000; }
 
   .logo-container {
     width: 110px; height: 110px; margin: 0 auto 10px; border-radius: 50%;
@@ -116,7 +121,7 @@
   .astro-icon-title { font-family: 'Orbitron', sans-serif; color: var(--accent2); font-size: 16px; font-weight: bold; }
 
   .skymap-wrapper {
-    position: relative; width: 100%; max-width: 800px; margin: 0 auto;
+    position: relative; width: 100%; max-width: 640px; margin: 0 auto;
     border-radius: 20px; overflow: hidden;
     box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px var(--line);
     background: #000;
@@ -174,27 +179,77 @@
   .filters label { display: flex; align-items: center; gap: 5px; text-transform: none; font-weight: normal; cursor: pointer; margin: 0; color: var(--text); }
   .filters input { width: auto; }
 
-  .time-slider-container {
-    display: flex; flex-direction: column; align-items: center; gap: 10px; 
-    margin-bottom: 20px; background: var(--bg2); padding: 20px; border-radius: 10px; border: 1px solid var(--line);
+  .time-slider-inline {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 15px; background: rgba(0,0,0,0.6);
+    border-top: 1px solid var(--line);
   }
-  .slider-labels { display: flex; justify-content: space-between; width: 100%; font-size: 11px; color: var(--muted); }
-  .time-slider-container input[type="range"] {
-    width: 100%; -webkit-appearance: none; height: 8px; background: var(--line); border-radius: 4px; outline: none;
+  .time-slider-inline input[type="range"] {
+    flex: 1; -webkit-appearance: none; height: 6px;
+    background: var(--line); border-radius: 3px; outline: none;
   }
-  .time-slider-container input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); cursor: pointer;
-    box-shadow: 0 0 10px var(--glow);
+  .time-slider-inline input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px;
+    border-radius: 50%; background: var(--accent); cursor: pointer;
+    box-shadow: 0 0 8px var(--glow);
   }
-  .time-display { font-family: 'Orbitron', sans-serif; color: var(--accent2); font-size: 18px; font-weight: bold; }
+  .time-display-inline {
+    font-family: 'Orbitron', sans-serif; color: var(--accent2);
+    font-size: 13px; font-weight: bold; white-space: nowrap;
+    min-width: 110px; text-align: right;
+  }
+
+  #preview-modal {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.92); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  #preview-modal.open { display: flex; }
+  #preview-modal .preview-box {
+    position: relative; width: min(90vw, 900px);
+    background: var(--card); border: 2px solid var(--accent);
+    border-radius: 16px; padding: 20px;
+    box-shadow: 0 0 60px var(--glow);
+  }
+  #preview-modal img {
+    width: 100%; border-radius: 10px; display: block;
+    background: #000; min-height: 200px; object-fit: contain;
+  }
+  #preview-modal .close-btn {
+    position: absolute; top: -14px; right: -14px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--accent); color: #000; border: none;
+    font-size: 20px; font-weight: bold; cursor: pointer;
+    box-shadow: 0 0 15px var(--glow);
+  }
+  #preview-modal .preview-title {
+    font-family: 'Orbitron', sans-serif; color: var(--accent);
+    margin-bottom: 12px; font-size: 16px;
+  }
+  #preview-modal .preview-empty {
+    color: var(--muted); text-align: center; padding: 40px;
+    font-size: 14px;
+  }
+  .preview-quickbar {
+    display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap;
+  }
+  .preview-quickbar input {
+    flex: 1; min-width: 200px; padding: 10px;
+  }
+  .preview-quickbar .btn { padding: 10px 18px; }
 </style>
 </head>
 <body id="appBody">
 
 <header>
-  <button class="btn-night" id="nightBtn" onclick="toggleNightMode()">
-    <span>🔴</span> Visione Notturna
-  </button>
+  <div class="header-buttons">
+    <button class="btn-night" id="nightBtn" onclick="toggleNightMode()">
+      <span>🔴</span> Visione Notturna
+    </button>
+    <button class="btn-night btn-preview" onclick="openPreview()">
+      <span>📷</span> Anteprima
+    </button>
+  </div>
   
   <div class="logo-container" onclick="document.getElementById('logoInput').click()" title="Clicca per caricare il tuo logo">
     <img id="logoImg" src="" alt="Logo">
@@ -245,13 +300,13 @@
         <div><label>Longitudine</label><input type="number" id="lon" value="12.4964" step="0.0001"></div>
         <div><label>Data (Inizio)</label><input type="date" id="date"></div>
         <div><label>Ora Locale</label><input type="time" id="time" step="1"></div>
-        <div><label>Bortle (1-9)</label><input type="number" id="bortle" value="5" min="1" max="9"></div>
       </div>
-      <div style="margin-top:20px; display:flex; gap:10px; align-items:center;">
+      <div style="margin-top:20px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <button class="btn" onclick="updateAll()">Aggiorna Dati</button>
         <button class="btn btn-ghost" onclick="getLocation()">Usa GPS</button>
         <span class="msg" id="msg-coord" style="margin:0;">Pronto.</span>
       </div>
+      <div class="grid" id="sky-quality-grid" style="margin-top:20px;"></div>
     </div>
 
     <div class="card">
@@ -289,11 +344,6 @@
   <div id="tab-sky" class="tab-content">
     <div class="card">
       <h2>🌌 Mappa del Cielo</h2>
-      <div class="time-slider-container">
-        <div class="time-display" id="sliderTimeDisplay">Ora Attuale</div>
-        <input type="range" id="timeSlider" min="0" max="2880" value="0" oninput="onSliderChange()">
-        <div class="slider-labels"><span>Adesso</span><span>+24 Ore</span><span>+48 Ore</span></div>
-      </div>
       <div id="info-panel">
         <h3 id="info-title">Oggetto</h3>
         <p>RA: <strong id="info-ra">--</strong> | Dec: <strong id="info-dec">--</strong></p>
@@ -327,6 +377,10 @@
             <button class="map-btn" onclick="zoomOut()">➖ Zoom</button>
           </div>
         </div>
+        <div class="time-slider-inline">
+          <input type="range" id="timeSlider" min="0" max="2880" value="0" oninput="onSliderChange()">
+          <div class="time-display-inline" id="sliderTimeDisplay">Ora Attuale</div>
+        </div>
       </div>
       <div class="legend">
         <span style="color:var(--text)">● Stelle</span>
@@ -355,11 +409,12 @@
       <h2>📷 AllSkyCam</h2>
       <label>URL Immagine (es. http://192.168.1.x:8080/current.jpg)</label>
       <input type="text" id="allsky-url" placeholder="http://...">
-      <div style="margin-top:15px; display:flex; align-items:center;">
+      <div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
         <button class="btn" onclick="loadAllSky()">Collega</button>
-        <label style="display:inline-flex; align-items:center; gap:5px; margin-left:15px; text-transform:none; margin-bottom:0; font-weight:normal;">
+        <label style="display:inline-flex; align-items:center; gap:5px; text-transform:none; margin-bottom:0; font-weight:normal;">
           <input type="checkbox" id="allsky-auto" style="width:auto" onchange="toggleAutoRefresh()"> Auto 30s
         </label>
+        <button class="btn btn-ghost" onclick="openPreview()">📷 Apri Anteprima</button>
       </div>
       <div class="preview" id="allsky-prev" style="margin-top:15px;"><span>Nessuna immagine</span><img id="allsky-img" src="" alt="AllSky"></div>
     </div>
@@ -377,14 +432,35 @@
   </div>
 </main>
 
+<div id="preview-modal" onclick="if(event.target===this)closePreview()">
+  <div class="preview-box">
+    <button class="close-btn" onclick="closePreview()">×</button>
+    <div class="preview-title">📷 Anteprima AllSkyCam</div>
+    
+    <img id="preview-modal-img" src="" alt="Anteprima" style="display:none;">
+    <div class="preview-empty" id="preview-modal-empty">
+      <div style="font-size:40px; margin-bottom:10px;">📷</div>
+      <div>Nessuna immagine configurata.</div>
+      <div style="margin-top:8px; font-size:12px;">Inserisci una URL qui sotto o vai nella tab AllSkyCam.</div>
+    </div>
+    
+    <div class="preview-quickbar">
+      <input type="text" id="preview-quick-url" placeholder="http://... (URL immagine AllSkyCam)">
+      <button class="btn" onclick="loadPreviewQuick()">Carica</button>
+      <button class="btn btn-ghost" onclick="reloadPreview()">🔄 Ricarica</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // --- STATO GLOBALE ---
 const state = { 
-  lat: 41.9028, lon: 12.4964, bortle: 5, 
+  lat: 41.9028, lon: 12.4964, 
   baseTime: new Date(), currentTime: new Date(), 
-  planets: [], rot: 180, zoom: 1, 
+  planets: [], rot: 0, zoom: 1, 
   drag: false, lastX: 0, 
-  clouds: 0, target: null 
+  clouds: 0, target: null,
+  sqm: 21.0
 };
 
 const rad = d => d * Math.PI / 180;
@@ -447,6 +523,39 @@ const CONSTELLATIONS = [
   {name:"Lira", stars:[{ra:279.23,dec:38.78},{ra:282.52,dec:33.36},{ra:284.74,dec:32.69},{ra:279.23,dec:38.78}]}
 ];
 
+function estimateSQM(lat, lon) {
+  const urbanCenters = [
+    {lat: 41.9028, lon: 12.4964, w: 1.0},
+    {lat: 45.4642, lon: 9.1900, w: 1.0},
+    {lat: 40.8518, lon: 14.2681, w: 0.8},
+    {lat: 45.0703, lon: 7.6869, w: 0.7},
+    {lat: 44.4949, lon: 11.3426, w: 0.6},
+    {lat: 43.7696, lon: 11.2558, w: 0.6},
+    {lat: 41.1171, lon: 16.8719, w: 0.5},
+    {lat: 38.1157, lon: 13.3615, w: 0.5},
+    {lat: 37.5079, lon: 15.0830, w: 0.4},
+    {lat: 45.4408, lon: 12.3155, w: 0.5},
+    {lat: 44.4056, lon: 8.9463, w: 0.4},
+    {lat: 39.2238, lon: 9.1217, w: 0.4}
+  ];
+  let influence = 0;
+  urbanCenters.forEach(c => {
+    const d = Math.hypot((lat - c.lat) * 111, (lon - c.lon) * 111 * Math.cos(rad(lat)));
+    influence += c.w * Math.exp(-d / 40);
+  });
+  let sqm = 22.0 - influence * 2.5;
+  sqm = Math.max(17.5, Math.min(22.0, sqm));
+  return Math.round(sqm * 100) / 100;
+}
+
+function sqmToDesc(sqm) {
+  if (sqm >= 21.8) return { label: "Eccellente", badge: "ok" };
+  if (sqm >= 21.0) return { label: "Buona", badge: "ok" };
+  if (sqm >= 20.0) return { label: "Discreta", badge: "warn" };
+  if (sqm >= 19.0) return { label: "Mediocre", badge: "warn" };
+  return { label: "Scarsa", badge: "bad" };
+}
+
 function calcPlanets(date) {
   const d = getDays(date);
   return PLANETS.map(p => {
@@ -458,9 +567,6 @@ function calcPlanets(date) {
   });
 }
 
-// ============================================
-// NOMENCLATURA LUNA CORRETTA PER FASCE PERCENTUALI
-// ============================================
 function getMoonDataPure(lat, lon, date) {
   const d = getDays(date);
   let L = norm360(218.32 + 13.176396 * d);
@@ -477,61 +583,31 @@ function getMoonDataPure(lat, lon, date) {
   const elong = norm360(lonCorr - sunLon);
   const illum = (1 - Math.cos(rad(elong))) / 2;
   const illumPct = illum * 100;
-  
-  // Fase crescente se elongazione < 180, calante se > 180
   const isWaxing = elong < 180;
   
-  // ==========================================
-  // CLASSIFICAZIONE CORRETTA PER FASCE PERCENTUALI
-  // ==========================================
-  // - 0-1%: Luna Nuova
-  // - 1-45%: Luna Crescente / Calante
-  // - 45-55%: Primo Quarto / Ultimo Quarto (solo quando è davvero al 50%)
-  // - 55-99%: Gibbosa Crescente / Calante
-  // - 99-100%: Luna Piena
   let phaseName = "";
-  if (illumPct < 1) {
-    phaseName = "Luna Nuova";
-  } else if (illumPct < 45) {
-    phaseName = isWaxing ? "Luna Crescente" : "Luna Calante";
-  } else if (illumPct < 55) {
-    phaseName = isWaxing ? "Primo Quarto" : "Ultimo Quarto";
-  } else if (illumPct < 99) {
-    phaseName = isWaxing ? "Gibbosa Crescente" : "Gibbosa Calante";
-  } else {
-    phaseName = "Luna Piena";
-  }
+  if (illumPct < 1) phaseName = "Luna Nuova";
+  else if (illumPct < 45) phaseName = isWaxing ? "Luna Crescente" : "Luna Calante";
+  else if (illumPct < 55) phaseName = isWaxing ? "Primo Quarto" : "Ultimo Quarto";
+  else if (illumPct < 99) phaseName = isWaxing ? "Gibbosa Crescente" : "Gibbosa Calante";
+  else phaseName = "Luna Piena";
   
-  return { 
-    illum, 
-    illumPct,
-    name: phaseName, 
-    elong, 
-    isWaxing 
-  };
+  return { illum, illumPct, name: phaseName, elong, isWaxing };
 }
 
-// ============================================
-// SVG PATH PER OGNI FASE LUNARE
-// ============================================
 function getMoonPathSVG(illumPct, isWaxing) {
   const r = 30, cx = 50, cy = 50;
-  
   if (illumPct < 2) return "";
   if (illumPct > 98) {
     return `M ${cx} ${cy-r} A ${r} ${r} 0 1 1 ${cx} ${cy+r} A ${r} ${r} 0 1 1 ${cx} ${cy-r} Z`;
   }
-  
   const cosElong = Math.cos(rad(illumPct * 180 / 100));
   const rx = r * Math.abs(cosElong);
-  
   const sweep1 = isWaxing ? 1 : 0;
   const sweep2 = isWaxing ? 0 : 1;
-  
   if (illumPct < 50) {
     return `M ${cx} ${cy-r} A ${r} ${r} 0 0 ${sweep1} ${cx} ${cy+r} A ${rx} ${r} 0 0 ${sweep2} ${cx} ${cy-r} Z`;
   }
-  
   if (isWaxing) {
     return `M ${cx} ${cy-r} A ${r} ${r} 0 0 1 ${cx} ${cy+r} A ${rx} ${r} 0 0 1 ${cx} ${cy-r} Z`;
   } else {
@@ -555,15 +631,12 @@ function getSunTimesPure(lat, lon, date, alt) {
     const H = deg(Math.acos(cosH));
     const toDate = j => new Date((j - 2440587.5) * 86400000);
     return { rise: toDate(Jtransit - H / 360), set: toDate(Jtransit + H / 360) };
-  } catch(e) {
-    return null;
-  }
+  } catch(e) { return null; }
 }
 
 function readInputs() {
   state.lat = parseFloat(document.getElementById('lat').value) || 0;
   state.lon = parseFloat(document.getElementById('lon').value) || 0;
-  state.bortle = parseInt(document.getElementById('bortle').value) || 5;
   const d = document.getElementById('date').value;
   const t = document.getElementById('time').value;
   if (d && t) {
@@ -574,6 +647,7 @@ function readInputs() {
     state.baseTime = new Date();
   }
   state.currentTime = new Date(state.baseTime);
+  state.sqm = estimateSQM(state.lat, state.lon);
 }
 
 function switchTab(id, btn) {
@@ -605,6 +679,7 @@ function updateAll() {
   state.planets = calcPlanets(state.currentTime);
   renderSunMoon(); 
   renderQuality();
+  renderSkyQuality();
   if (document.getElementById('tab-sky').classList.contains('active')) {
     document.getElementById('timeSlider').value = 0;
     onSliderChange();
@@ -629,7 +704,6 @@ function getLocation() {
   const msg = document.getElementById('msg-coord');
   msg.innerText = "Richiesta posizione...";
   msg.className = "msg";
-  
   let resolved = false;
   
   function applyCoords(lat, lon, city) {
@@ -644,8 +718,10 @@ function getLocation() {
     state.lat = parseFloat(latStr);
     state.lon = parseFloat(lonStr);
     state.planets = calcPlanets(state.currentTime);
+    state.sqm = estimateSQM(state.lat, state.lon);
     renderSunMoon();
     renderQuality();
+    renderSkyQuality();
     if (document.getElementById('tab-sky').classList.contains('active')) {
       document.getElementById('timeSlider').value = 0;
       onSliderChange();
@@ -656,15 +732,11 @@ function getLocation() {
   function tryIPFallback() {
     fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) })
       .then(res => res.json())
-      .then(data => {
-        if (data.latitude && data.longitude) applyCoords(data.latitude, data.longitude, data.city);
-      })
+      .then(data => { if (data.latitude && data.longitude) applyCoords(data.latitude, data.longitude, data.city); })
       .catch(() => {});
     fetch('https://ipwho.is/', { signal: AbortSignal.timeout(4000) })
       .then(res => res.json())
-      .then(data => {
-        if (data.latitude && data.longitude) applyCoords(data.latitude, data.longitude, data.city);
-      })
+      .then(data => { if (data.latitude && data.longitude) applyCoords(data.latitude, data.longitude, data.city); })
       .catch(() => {});
     setTimeout(() => {
       if (!resolved) {
@@ -678,15 +750,27 @@ function getLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (pos) => applyCoords(pos.coords.latitude, pos.coords.longitude, 'GPS'),
-      () => {
-        msg.innerText = "⚠️ GPS bloccato. Provo stima IP...";
-        tryIPFallback();
-      },
+      () => { msg.innerText = "⚠️ GPS bloccato. Provo stima IP..."; tryIPFallback(); },
       { timeout: 5000, enableHighAccuracy: false }
     );
   } else {
     tryIPFallback();
   }
+}
+
+function renderSkyQuality() {
+  const sqm = state.sqm;
+  const desc = sqmToDesc(sqm);
+  document.getElementById('sky-quality-grid').innerHTML = `
+    <div class="card">
+      <label>Qualità Cielo (SQM stimato)</label>
+      <div class="val">${sqm.toFixed(2)} <span style="font-size:12px; color:var(--muted);">mag/arcsec²</span></div>
+    </div>
+    <div class="card">
+      <label>Giudizio Cielo</label>
+      <div class="val" style="color:var(--${desc.badge})">${desc.label}</div>
+    </div>
+  `;
 }
 
 function renderSunMoon() {
@@ -772,15 +856,16 @@ async function fetchWeather() {
 
 function renderQuality() {
   const m = getMoonDataPure(state.lat, state.lon, state.currentTime);
+  const sqmScore = Math.max(0, Math.min(10, (state.sqm - 17) / 0.5));
   const moonPenalty = m.illum > 0.5 ? 2 : (m.illum > 0.2 ? 1 : 0);
   const cloudPenalty = state.clouds > 70 ? 3 : (state.clouds > 30 ? 1 : 0);
-  const score = Math.max(1, 10 - state.bortle / 2 - moonPenalty - cloudPenalty);
+  const score = Math.max(1, Math.min(10, sqmScore - moonPenalty - cloudPenalty));
   const badge = score > 7 ? 'ok' : (score > 4 ? 'warn' : 'bad');
   const text = score > 7 ? 'Eccellente' : (score > 4 ? 'Discreto' : 'Scarso');
   document.getElementById('quality-grid').innerHTML = `
     <div class="card"><label>Punteggio (Notte)</label><div class="val">${score.toFixed(1)} / 10</div></div>
     <div class="card"><label>Giudizio</label><div class="val" style="color:var(--${badge})">${text}</div></div>
-    <div class="card"><label>Luna</label><div class="val">${(m.illum * 100).toFixed(0)}%</div></div>
+    <div class="card"><label>SQM (qualità cielo)</label><div class="val">${state.sqm.toFixed(2)}</div></div>
     <div class="card"><label>Nuvole (Notte)</label><div class="val">${state.clouds.toFixed(0)}%</div></div>
   `;
 }
@@ -1101,8 +1186,9 @@ function drawMap() {
   document.getElementById('hud-time').innerText = h + ':' + min;
 }
 
+// RESET: Nord in alto
 function resetView() {
-  state.rot = 180;
+  state.rot = 0;
   state.zoom = 1;
   drawMap();
 }
@@ -1115,15 +1201,38 @@ function zoomOut() {
   drawMap();
 }
 
-canvas.addEventListener('mousedown', e => { state.drag = true; state.lastX = e.clientX; });
-window.addEventListener('mouseup', () => state.drag = false);
-canvas.addEventListener('mousemove', e => {
-  if (!state.drag) return;
-  const dx = e.clientX - state.lastX;
-  state.rot = norm360(state.rot - dx * 0.4);
-  state.lastX = e.clientX;
-  drawMap();
+// --- GESTIONE MOUSE/TOUCH (rotazione fluida e libera 360°, direzione invertita) ---
+let isDragging = false;
+let lastMouseX = 0;
+let dragMoved = false;
+let dragStartX = 0;
+
+canvas.addEventListener('mousedown', e => {
+  isDragging = true;
+  dragMoved = false;
+  dragStartX = e.clientX;
+  lastMouseX = e.clientX;
+  canvas.style.cursor = 'grabbing';
+  e.preventDefault();
 });
+
+window.addEventListener('mouseup', () => {
+  isDragging = false;
+  canvas.style.cursor = 'grab';
+});
+
+canvas.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - lastMouseX;
+  if (Math.abs(e.clientX - dragStartX) > 3) dragMoved = true;
+  if (dragMoved) {
+    // Direzione invertita: trascinando a destra la mappa ruota in senso antiorario
+    state.rot = norm360(state.rot - dx * 0.5);
+    lastMouseX = e.clientX;
+    drawMap();
+  }
+});
+
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
   state.zoom = Math.max(0.5, Math.min(2.5, state.zoom + (e.deltaY < 0 ? 0.1 : -0.1)));
@@ -1131,24 +1240,35 @@ canvas.addEventListener('wheel', e => {
 }, { passive: false });
 
 canvas.addEventListener('touchstart', e => {
-  if (e.touches.length === 1) { state.drag = true; state.lastX = e.touches[0].clientX; }
-}, {passive: true});
-canvas.addEventListener('touchmove', e => {
-  if (state.drag && e.touches.length === 1) {
-    const dx = e.touches[0].clientX - state.lastX;
-    state.rot = norm360(state.rot - dx * 0.4);
-    state.lastX = e.touches[0].clientX;
-    drawMap();
+  if (e.touches.length === 1) {
+    isDragging = true;
+    dragMoved = false;
+    dragStartX = e.touches[0].clientX;
+    lastMouseX = e.touches[0].clientX;
   }
 }, {passive: true});
-canvas.addEventListener('touchend', () => state.drag = false);
+
+canvas.addEventListener('touchmove', e => {
+  if (isDragging && e.touches.length === 1) {
+    const dx = e.touches[0].clientX - lastMouseX;
+    if (Math.abs(e.touches[0].clientX - dragStartX) > 3) dragMoved = true;
+    if (dragMoved) {
+      state.rot = norm360(state.rot - dx * 0.5);
+      lastMouseX = e.touches[0].clientX;
+      drawMap();
+    }
+  }
+}, {passive: true});
+
+canvas.addEventListener('touchend', () => { isDragging = false; });
 
 canvas.addEventListener('click', e => {
+  if (dragMoved) return;
   const rect = canvas.getBoundingClientRect();
   const clickX = (e.clientX - rect.left) * (SIZE / rect.width);
   const clickY = (e.clientY - rect.top) * (SIZE / rect.height);
   let closest = null;
-  let minDist = 35;
+  let minDist = 30;
   const checkObj = (obj) => {
     const pos = getAltAz(obj.ra, obj.dec, state.currentTime);
     const pt = project(pos.alt, pos.az);
@@ -1181,14 +1301,26 @@ function showInfo(obj) {
 
 let autoTimer = null;
 function loadAllSky() {
-  const url = document.getElementById('allsky-url').value;
+  const url = document.getElementById('allsky-url').value.trim();
   const img = document.getElementById('allsky-img');
   const prev = document.getElementById('allsky-prev');
-  if (!url) return;
-  img.src = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+  if (!url) {
+    document.getElementById('msg-weather').innerText = "Inserisci una URL valida.";
+    return;
+  }
+  localStorage.setItem('egastro_allsky_url', url);
+  const fullUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
   img.style.display = 'block';
   prev.querySelector('span').style.display = 'none';
-  img.onerror = () => { img.style.display = 'none'; prev.querySelector('span').style.display = 'block'; prev.querySelector('span').innerText = "Errore."; };
+  img.src = fullUrl;
+  img.onerror = () => {
+    img.style.display = 'none';
+    prev.querySelector('span').style.display = 'block';
+    prev.querySelector('span').innerText = "Errore: impossibile caricare l'immagine.";
+  };
+  img.onload = () => {
+    prev.querySelector('span').style.display = 'none';
+  };
 }
 function toggleAutoRefresh() {
   if (document.getElementById('allsky-auto').checked) autoTimer = setInterval(loadAllSky, 30000);
@@ -1216,6 +1348,83 @@ function handleLogoUpload(event) {
   reader.readAsDataURL(file);
 }
 
+// --- ANTEPRIMA (sempre funzionante) ---
+function openPreview() {
+  const modal = document.getElementById('preview-modal');
+  const img = document.getElementById('preview-modal-img');
+  const empty = document.getElementById('preview-modal-empty');
+  const quickInput = document.getElementById('preview-quick-url');
+  
+  let url = document.getElementById('allsky-url').value.trim();
+  if (!url) url = localStorage.getItem('egastro_allsky_url') || '';
+  quickInput.value = url;
+  
+  modal.classList.add('open');
+  
+  if (url) {
+    loadPreviewImage(url);
+  } else {
+    img.style.display = 'none';
+    empty.style.display = 'block';
+    empty.innerHTML = '<div style="font-size:40px; margin-bottom:10px;">📷</div><div>Nessuna immagine configurata.</div><div style="margin-top:8px; font-size:12px;">Inserisci una URL qui sotto o vai nella tab AllSkyCam.</div>';
+  }
+}
+
+function loadPreviewImage(url) {
+  const img = document.getElementById('preview-modal-img');
+  const empty = document.getElementById('preview-modal-empty');
+  
+  if (!url) {
+    img.style.display = 'none';
+    empty.style.display = 'block';
+    empty.innerHTML = '<div style="font-size:40px; margin-bottom:10px;">📷</div><div>Nessuna URL inserita.</div>';
+    return;
+  }
+  
+  img.style.display = 'none';
+  empty.style.display = 'block';
+  empty.innerHTML = '<div style="font-size:40px; margin-bottom:10px;">⏳</div><div>Caricamento immagine...</div>';
+  
+  const testImg = new Image();
+  const fullUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+  
+  testImg.onload = () => {
+    img.src = fullUrl;
+    img.style.display = 'block';
+    empty.style.display = 'none';
+    localStorage.setItem('egastro_allsky_url', url);
+    document.getElementById('allsky-url').value = url;
+  };
+  
+  testImg.onerror = () => {
+    img.style.display = 'none';
+    empty.style.display = 'block';
+    empty.innerHTML = '<div style="font-size:40px; margin-bottom:10px;">❌</div><div>Impossibile caricare l\'immagine.</div><div style="margin-top:8px; font-size:12px;">Controlla la URL o la connessione alla camera.</div>';
+  };
+  
+  testImg.src = fullUrl;
+}
+
+function loadPreviewQuick() {
+  const url = document.getElementById('preview-quick-url').value.trim();
+  if (!url) {
+    const empty = document.getElementById('preview-modal-empty');
+    empty.innerHTML = '<div style="font-size:40px; margin-bottom:10px;">⚠️</div><div>Inserisci una URL valida.</div>';
+    return;
+  }
+  loadPreviewImage(url);
+}
+
+function reloadPreview() {
+  const url = document.getElementById('preview-quick-url').value.trim() || localStorage.getItem('egastro_allsky_url') || '';
+  if (url) loadPreviewImage(url);
+}
+
+function closePreview() {
+  document.getElementById('preview-modal').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
+
 window.onload = () => {
   const now = new Date();
   const offset = now.getTimezoneOffset() * 60000;
@@ -1230,7 +1439,12 @@ window.onload = () => {
     document.getElementById('logoFallback').style.display = 'none';
   }
 
-  updateAll(); 
+  const savedAllSky = localStorage.getItem('egastro_allsky_url');
+  if (savedAllSky) {
+    document.getElementById('allsky-url').value = savedAllSky;
+  }
+
+  updateAll();
 };
 </script>
 </body>
