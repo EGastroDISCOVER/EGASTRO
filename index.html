@@ -304,8 +304,8 @@
 <main>
   <div id="tab-sun" class="tab-content active">
     <div id="gpsBanner" class="gps-banner">
-      <span>📡 <strong>GPS disponibile!</strong> Tocca per usare la posizione del telefono.</span>
-      <button class="gps-btn" onclick="activateGPS()">Usa GPS ora</button>
+      <span>📡 <strong>Posizione:</strong> rileva con GPS (smartphone) o IP (PC).</span>
+      <button class="gps-btn" onclick="activateGPS()">📍 Rileva posizione</button>
     </div>
     <div class="card">
       <h2>📍 Coordinate e Data</h2>
@@ -385,7 +385,7 @@
       </div>
       <div class="filters">
         <strong style="color:var(--accent);">Mostra:</strong>
-        <label><input type="checkbox" id="filtroPianeti" checked onchange="drawMap()"> Pianeti</label>
+        <label><input type="checkbox" id="filtroPianeti" checked onchange="drawMap()"> Pianeti/Sole/Luna</label>
         <label><input type="checkbox" id="filtroStelle" checked onchange="drawMap()"> Stelle</label>
         <label><input type="checkbox" id="filtroCostellazioni" checked onchange="drawMap()"> Costellazioni</label>
         <label><input type="checkbox" id="filtroNebulose" checked onchange="drawMap()"> Nebulose</label>
@@ -435,6 +435,8 @@
       <div class="legend">
         <span style="color:var(--text)">● Stelle</span>
         <span style="color:var(--accent)">● Pianeti</span>
+        <span style="color:#ffcc00">☀️ Sole</span>
+        <span style="color:#f3e5ab">🌙 Luna</span>
         <span style="color:#8bd3ff">● Oggetti Profondi</span>
         <span>Trascina per ruotare · Rotella per zoom · Clicca oggetto per info</span>
       </div>
@@ -473,7 +475,7 @@
       </div>
       <div class="cat-tabs" id="catTabs">
         <button class="cat-tab active" data-cat="all" onclick="setCatalogFilter('all', this)">Tutti</button>
-        <button class="cat-tab" data-cat="planet" onclick="setCatalogFilter('planet', this)">🪐 Pianeti</button>
+        <button class="cat-tab" data-cat="planet" onclick="setCatalogFilter('planet', this)">🪐 Pianeti / Sole / Luna</button>
         <button class="cat-tab" data-cat="star" onclick="setCatalogFilter('star', this)">⭐ Stelle</button>
         <button class="cat-tab" data-cat="constellation" onclick="setCatalogFilter('constellation', this)">✨ Costellazioni</button>
         <button class="cat-tab" data-cat="nebula" onclick="setCatalogFilter('nebula', this)">🌫️ Nebulose</button>
@@ -578,6 +580,8 @@ const state = {
   catalogDetailObj: null
 };
 
+const _planetCache = { key: null, data: null };
+
 const rad = d => d * Math.PI / 180;
 const deg = r => r * 180 / Math.PI;
 const norm360 = x => ((x % 360) + 360) % 360;
@@ -597,6 +601,28 @@ const PLANET_FACTS = {
   Saturn:  { diam:"116.460 km", mass:"5,68×10²⁶ kg", dist:"9,58 UA", period:"29,46 anni", temp:"-139 °C", moons:146, type:"Gigante gassoso", desc:"Famoso per gli spettacolari anelli di ghiaccio e roccia." },
   Uranus:  { diam:"50.724 km", mass:"8,68×10²⁵ kg", dist:"19,18 UA", period:"84 anni", temp:"-197 °C", moons:27, type:"Gigante ghiacciato", desc:"Ruota inclinato di 98° sul piano orbitale." },
   Neptune: { diam:"49.244 km", mass:"1,02×10²⁶ kg", dist:"30,07 UA", period:"164,8 anni", temp:"-201 °C", moons:14, type:"Gigante ghiacciato", desc:"Il pianeta più lontano, con venti fino a 2.100 km/h." }
+};
+
+const SUN_FACTS = {
+  diam: "1.392.700 km (109× Terra)",
+  mass: "1,989×10³⁰ kg (333.000× Terra)",
+  dist: "1 UA = 149.597.870 km",
+  period: "—",
+  temp: "5.500 °C (superficie) · 15 M°C (nucleo)",
+  moons: "8 pianeti + milioni di corpi minori",
+  type: "Stella nana gialla (G2V)",
+  desc: "La stella al centro del Sistema Solare. Contiene il 99,86% della massa del sistema e produce energia tramite fusione nucleare idrogeno→elio."
+};
+
+const MOON_FACTS = {
+  diam: "3.474 km (0,27× Terra)",
+  mass: "7,35×10²² kg (0,012× Terra)",
+  dist: "384.400 km dalla Terra (media)",
+  period: "27,32 giorni (siderale)",
+  temp: "-173 °C (notte) / +127 °C (giorno)",
+  moons: 0,
+  type: "Satellite naturale della Terra",
+  desc: "L'unico satellite naturale della Terra. Mostra sempre la stessa faccia (accoppiamento mareale). Causa le maree e stabilizza l'asse terrestre."
 };
 
 const STARS = [
@@ -834,11 +860,86 @@ function getObjectEmoji(type) {
   return '•';
 }
 
+/* ===== SOLE E LUNA ===== */
+function getSunPositionPure(date) {
+  const d = getDays(date);
+  const L = norm360(280.460 + 0.9856474 * d);
+  const g = norm360(357.528 + 0.9856003 * d);
+  const lambda = norm360(L + 1.915 * Math.sin(rad(g)) + 0.020 * Math.sin(rad(2 * g)));
+  const eps = rad(23.439 - 0.0000004 * d);
+  const ra = deg(Math.atan2(Math.cos(eps) * Math.sin(rad(lambda)), Math.cos(rad(lambda))));
+  const dec = deg(Math.asin(Math.sin(eps) * Math.sin(rad(lambda))));
+  return { ra: norm360(ra), dec };
+}
+
+function getMoonPositionPure(date) {
+  const d = getDays(date);
+  const L  = norm360(218.32 + 13.176396 * d);
+  const M  = norm360(357.5291 + 0.98560028 * d);
+  const Mm = norm360(134.963 + 13.064993 * d);
+  const D  = norm360(297.850 + 12.190749 * d);
+  const F  = norm360(93.272 + 13.229350 * d);
+  const lambda = norm360(L + 6.289 * Math.sin(rad(Mm))
+                          + 1.274 * Math.sin(rad(2*D - Mm))
+                          + 0.658 * Math.sin(rad(2*D))
+                          + 0.214 * Math.sin(rad(2*Mm))
+                          - 0.186 * Math.sin(rad(M))
+                          - 0.114 * Math.sin(rad(2*F)));
+  const beta = 5.128 * Math.sin(rad(F))
+             + 0.281 * Math.sin(rad(Mm + F))
+             - 0.278 * Math.sin(rad(F - Mm))
+             - 0.173 * Math.sin(rad(2*D - F))
+             - 0.055 * Math.sin(rad(2*D + F - Mm))
+             - 0.046 * Math.sin(rad(2*D - F - Mm));
+  const eps = rad(23.4393);
+  const ra = deg(Math.atan2(
+    Math.sin(rad(lambda)) * Math.cos(eps) - Math.tan(rad(beta)) * Math.sin(eps),
+    Math.cos(rad(lambda))
+  ));
+  const dec = deg(Math.asin(
+    Math.sin(rad(beta)) * Math.cos(eps) + Math.cos(rad(beta)) * Math.sin(eps) * Math.sin(rad(lambda))
+  ));
+  return { ra: norm360(ra), dec };
+}
+
+function calcSunMoonPrecise(date) {
+  if (typeof Astronomy !== 'undefined') {
+    try {
+      const obs = new Astronomy.Observer(state.lat, state.lon, 0);
+      const time = new Astronomy.AstroTime(date);
+      const sunEq  = Astronomy.Equator(Astronomy.Body.Sun,  time, obs, true, true);
+      const sunHor = Astronomy.Horizon(time, obs, sunEq.ra, sunEq.dec, 'normal');
+      const moonEq  = Astronomy.Equator(Astronomy.Body.Moon, time, obs, true, true);
+      const moonHor = Astronomy.Horizon(time, obs, moonEq.ra, moonEq.dec, 'normal');
+      return [
+        { n: "Sole", s: "☀️", color: "#ffcc00", ra: sunEq.ra * 15,  dec: sunEq.dec,  alt: sunHor.altitude,  az: sunHor.azimuth,  isSun: true },
+        { n: "Luna", s: "🌙", color: "#f3e5ab", ra: moonEq.ra * 15, dec: moonEq.dec, alt: moonHor.altitude, az: moonHor.azimuth, isMoon: true }
+      ];
+    } catch (e) { console.warn('Astronomy Sun/Moon error:', e); }
+  }
+  const sp = getSunPositionPure(date);
+  const mp = getMoonPositionPure(date);
+  const sunP  = getAltAz(sp.ra, sp.dec, date);
+  const moonP = getAltAz(mp.ra, mp.dec, date);
+  return [
+    { n: "Sole", s: "☀️", color: "#ffcc00", ra: sp.ra, dec: sp.dec, alt: sunP.alt,  az: sunP.az,  isSun: true },
+    { n: "Luna", s: "🌙", color: "#f3e5ab", ra: mp.ra, dec: mp.dec, alt: moonP.alt, az: moonP.az, isMoon: true }
+  ];
+}
+
 function calcPlanetsPrecise(date) {
-  if (typeof Astronomy === 'undefined') return calcPlanetsFallback(date);
+  const key = date.getTime() + '|' + state.lat.toFixed(3) + '|' + state.lon.toFixed(3);
+  if (_planetCache.key === key) return _planetCache.data;
+  const result = [];
+  if (typeof Astronomy === 'undefined') {
+    result.push(...calcSunMoonPrecise(date));
+    result.push(...calcPlanetsFallback(date));
+    _planetCache.key = key; _planetCache.data = result;
+    return result;
+  }
+  result.push(...calcSunMoonPrecise(date));
   const obs = new Astronomy.Observer(state.lat, state.lon, 0);
   const time = new Astronomy.AstroTime(date);
-  const result = [];
   PLANET_NAMES.forEach(name => {
     try {
       const body = Astronomy.Body[name];
@@ -846,10 +947,12 @@ function calcPlanetsPrecise(date) {
       const eq = Astronomy.Equator(body, time, obs, true, true);
       const hor = Astronomy.Horizon(time, obs, eq.ra, eq.dec, 'normal');
       result.push({ n: PLANET_IT[name] || name, s: PLANET_SYMBOLS[name], color: PLANET_COLORS[name], ra: eq.ra * 15, dec: eq.dec, alt: hor.altitude, az: hor.azimuth });
-    } catch(e) {}
+    } catch (e) {}
   });
+  _planetCache.key = key; _planetCache.data = result;
   return result;
 }
+
 function calcPlanetsFallback(date) {
   const d = getDays(date);
   const PLANETS = [
@@ -869,6 +972,7 @@ function calcPlanetsFallback(date) {
     return { ...p, ra: norm360(ra), dec };
   });
 }
+
 function estimateSQM(lat, lon) {
   const urbanCenters = [
     {lat: 41.9028, lon: 12.4964, w: 1.0}, {lat: 45.4642, lon: 9.1900, w: 1.0},
@@ -886,6 +990,7 @@ function estimateSQM(lat, lon) {
   let sqm = 22.0 - influence * 2.5;
   return Math.round(Math.max(17.5, Math.min(22.0, sqm)) * 100) / 100;
 }
+
 function sqmToDesc(sqm) {
   if (sqm >= 21.8) return { label: "Eccellente", badge: "ok" };
   if (sqm >= 21.0) return { label: "Buona", badge: "ok" };
@@ -893,6 +998,7 @@ function sqmToDesc(sqm) {
   if (sqm >= 19.0) return { label: "Mediocre", badge: "warn" };
   return { label: "Scarsa", badge: "bad" };
 }
+
 function getMoonDataPure(lat, lon, date) {
   const d = getDays(date);
   let L = norm360(218.32 + 13.176396 * d);
@@ -914,6 +1020,7 @@ function getMoonDataPure(lat, lon, date) {
   else phaseName = "Luna Piena";
   return { illum, illumPct, name: phaseName, elong, isWaxing };
 }
+
 function getMoonPathSVG(illumPct, isWaxing) {
   const r = 30, cx = 50, cy = 50;
   if (illumPct < 2) return "";
@@ -926,6 +1033,7 @@ function getMoonPathSVG(illumPct, isWaxing) {
   if (isWaxing) return `M ${cx} ${cy-r} A ${r} ${r} 0 0 1 ${cx} ${cy+r} A ${rx} ${r} 0 0 1 ${cx} ${cy-r} Z`;
   return `M ${cx} ${cy-r} A ${r} ${r} 0 0 0 ${cx} ${cy+r} A ${rx} ${r} 0 0 0 ${cx} ${cy-r} Z`;
 }
+
 function getSunTimesPure(lat, lon, date, alt) {
   try {
     const jd = date.getTime() / 86400000 + 2440587.5;
@@ -988,6 +1096,7 @@ function toggleNightMode() {
 
 function updateAll() {
   readInputs();
+  _planetCache.key = null;
   state.planets = calcPlanetsPrecise(state.currentTime);
   renderSunMoon(); renderQuality(); renderSkyQuality();
   if (document.getElementById('tab-sky').classList.contains('active')) { document.getElementById('timeSlider').value = 0; onSliderChange(); }
@@ -1007,16 +1116,13 @@ function loadCity() {
   updateAll();
 }
 
+/* ===== GPS ROBUSTO ===== */
 function checkGPSAvailability() {
-  const banner = document.getElementById('gpsBanner');
-  const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-  const hasGeo = !!navigator.geolocation;
-  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-  if (hasGeo && (isSecure || !isMobile)) {
-    banner.style.display = 'flex';
-  }
+  document.getElementById('gpsBanner').style.display = 'flex';
 }
-function activateGPS() { document.getElementById('gpsBanner').style.display = 'none'; getLocation(); }
+
+function activateGPS() { document.getElementById('gpsBanner').style.display = 'flex'; getLocation(); }
+
 function applyCoordinates(lat, lon, city, accuracy) {
   const latStr = parseFloat(lat).toFixed(4), lonStr = parseFloat(lon).toFixed(4);
   document.getElementById('lat').value = latStr; document.getElementById('lon').value = lonStr;
@@ -1026,28 +1132,80 @@ function applyCoordinates(lat, lon, city, accuracy) {
   const accStr = accuracy ? ` ±${Math.round(accuracy)}m` : '';
   msg.innerHTML = `📍 Posizione (${city || 'GPS'})${accStr} — <a href="https://www.google.com/maps?q=${latStr},${lonStr}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:underline;">Apri in Google Maps</a>`;
   msg.className = "msg success"; msg.style.color = "";
+  _planetCache.key = null;
   state.planets = calcPlanetsPrecise(state.currentTime);
   state.sqm = estimateSQM(state.lat, state.lon);
   renderSunMoon(); renderQuality(); renderSkyQuality();
   if (document.getElementById('tab-sky').classList.contains('active')) { document.getElementById('timeSlider').value = 0; onSliderChange(); }
   if (document.getElementById('tab-tonight').classList.contains('active')) renderTonight();
 }
-function getLocation() {
-  const msg = document.getElementById('msg-coord');
-  msg.innerText = "Richiesta posizione GPS...";
-  msg.className = "msg"; msg.style.color = "";
-  if (!navigator.geolocation) { msg.innerText = "❌ Geolocalizzazione non supportata."; msg.style.color = "var(--warn)"; return; }
-  let resolved = false;
-  navigator.geolocation.getCurrentPosition(
-    (pos) => { if (resolved) return; resolved = true; applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS', pos.coords.accuracy); fetchWeather(); },
-    (err) => {
-      if (err.code === 1) { msg.innerText = "❌ Permesso GPS negato."; msg.style.color = "var(--warn)"; }
-      else if (err.code === 3) { msg.innerText = "⚠️ Timeout GPS."; msg.style.color = "var(--warn)"; }
-      else { msg.innerText = "⚠️ Errore GPS."; msg.style.color = "var(--warn)"; }
+
+async function getIPLocation() {
+  const services = [
+    async () => {
+      const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(6000) });
+      const d = await r.json();
+      return { lat: parseFloat(d.latitude), lon: parseFloat(d.longitude), city: d.city, country: d.country_name };
     },
-    { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-  );
+    async () => {
+      const r = await fetch('https://ipinfo.io/json', { signal: AbortSignal.timeout(6000) });
+      const d = await r.json();
+      const [lat, lon] = (d.loc || ',').split(',').map(Number);
+      return { lat, lon, city: d.city, country: d.country };
+    },
+    async () => {
+      const r = await fetch('https://ipwho.is/', { signal: AbortSignal.timeout(6000) });
+      const d = await r.json();
+      if (!d.success) throw new Error('ipwho');
+      return { lat: d.latitude, lon: d.longitude, city: d.city, country: d.country };
+    }
+  ];
+  for (const svc of services) {
+    try {
+      const r = await svc();
+      if (r && isFinite(r.lat) && isFinite(r.lon)) return r;
+    } catch (e) { continue; }
+  }
+  throw new Error('Tutti i servizi IP hanno fallito');
 }
+
+async function getLocation() {
+  const msg = document.getElementById('msg-coord');
+  msg.innerText = "📡 Rilevamento posizione...";
+  msg.className = "msg"; msg.style.color = "var(--accent)";
+
+  if (navigator.geolocation) {
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true, timeout: 12000, maximumAge: 0
+        });
+      });
+      applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS', pos.coords.accuracy);
+      fetchWeather();
+      return;
+    } catch (err) {
+      console.warn('GPS browser fallito:', err);
+      msg.innerText = "⚠️ GPS browser non disponibile, provo via IP...";
+    }
+  }
+
+  try {
+    const loc = await getIPLocation();
+    if (loc && isFinite(loc.lat) && isFinite(loc.lon)) {
+      applyCoordinates(loc.lat, loc.lon, loc.city || 'IP', null);
+      const m = document.getElementById('msg-coord');
+      m.innerHTML = `📍 Posizione (${loc.city || 'IP'}${loc.country ? ', ' + loc.country : ''}) — <a href="https://www.google.com/maps?q=${loc.lat},${loc.lon}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:underline;">Mappa</a>`;
+      m.className = "msg success";
+      fetchWeather();
+      return;
+    }
+  } catch (e) { console.warn('IP geolocation fallita:', e); }
+
+  msg.innerHTML = "⚠️ Impossibile rilevare automaticamente. Inserisci coordinate o scegli una città.";
+  msg.style.color = "var(--warn)";
+}
+
 function toggleGPSLive() {
   const btn = document.getElementById('gpsLiveBtn');
   const msg = document.getElementById('msg-coord');
@@ -1080,6 +1238,7 @@ function renderSkyQuality() {
     ${gpsInfo}
   `;
 }
+
 function renderSunMoon() {
   const m = getMoonDataPure(state.lat, state.lon, state.currentTime);
   const tStd = getSunTimesPure(state.lat, state.lon, state.currentTime, -0.833);
@@ -1105,7 +1264,7 @@ function renderTonight() {
   document.getElementById('tonight-time').innerText = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
   document.getElementById('tonight-location').innerText = `${state.lat.toFixed(2)}°, ${state.lon.toFixed(2)}° — ${now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}`;
   const planets = state.planets.length > 0 ? state.planets : calcPlanetsPrecise(now);
-  const planetRows = planets.map(p => p.alt !== undefined ? p : { ...p, ...getAltAz(p.ra, p.dec, now) }).filter(p => p.alt > 0);
+  const planetRows = planets.map(p => p.alt !== undefined ? p : { ...p, ...getAltAz(p.ra, p.dec, now) }).filter(p => p.alt > 0 && !p.isSun);
   document.getElementById('tonight-planets').innerHTML = planetRows.length === 0
     ? '<div style="color:var(--muted); padding:10px;">Nessun pianeta sopra l\'orizzonte.</div>'
     : planetRows.sort((a, b) => b.alt - a.alt).map(p => `<div class="object-row" onclick="tonightClick('${encodeURIComponent(JSON.stringify({n:p.n,ra:p.ra,dec:p.dec,s:p.s}))}')"><div><span class="object-name">${p.s} ${p.n}</span></div><div><span class="object-alt ${p.alt < 20 ? 'low' : ''}">${p.alt.toFixed(1)}°</span></div></div>`).join('');
@@ -1140,6 +1299,7 @@ function renderTonight() {
         return `<div class="object-row" onclick="tonightClick('${payload}')"><div><span class="object-name">${c.name}</span></div><div><span class="object-alt ${c.alt < 30 ? 'low' : ''}">${c.alt.toFixed(1)}°</span></div></div>`;
       }).join('');
 }
+
 function tonightClick(payloadEncoded) {
   try {
     const obj = JSON.parse(decodeURIComponent(payloadEncoded));
@@ -1152,7 +1312,11 @@ function searchObjects() {
   const resultsDiv = document.getElementById('searchResults');
   if (!q || q.length < 1) { resultsDiv.style.display = 'none'; resultsDiv.innerHTML = ''; return; }
   const planets = calcPlanetsPrecise(state.currentTime);
-  const allObjs = [...ALL_OBJECTS, ...planets.map(p => ({...p, cat:"Pianeta", type:"Pianeta"}))];
+  const allObjs = [...ALL_OBJECTS, ...planets.map(p => ({
+    ...p,
+    cat:  p.isSun  ? "Sole"   : p.isMoon ? "Luna"       : "Pianeta",
+    type: p.isSun  ? "Stella" : p.isMoon ? "Satellite"  : "Pianeta"
+  }))];
   const matches = allObjs.filter(o =>
     o.n.toLowerCase().includes(q) || (o.cat && o.cat.toLowerCase().includes(q)) || (o.type && o.type.toLowerCase().includes(q))
   ).slice(0, 20);
@@ -1166,6 +1330,7 @@ function searchObjects() {
   resultsDiv.style.display = 'block';
   window._searchMatches = matches;
 }
+
 function gotoObject(idx) {
   const obj = window._searchMatches[idx];
   if (!obj) return;
@@ -1173,7 +1338,7 @@ function gotoObject(idx) {
   document.getElementById('searchResults').style.display = 'none';
   const navBtns = document.querySelectorAll('nav button');
   switchTab('tab-sky', navBtns[1]);
-  readInputs(); state.planets = calcPlanetsPrecise(state.currentTime);
+  readInputs(); _planetCache.key = null; state.planets = calcPlanetsPrecise(state.currentTime);
   const pos = getAltAz(obj.ra, obj.dec, state.currentTime);
   state.camAlt = clamp(pos.alt, 0, 89); state.camAz = pos.az;
   drawMap(); showInfo(obj);
@@ -1191,18 +1356,21 @@ const BG_STARS = [];
     BG_STARS.push({ ra: rand() * 360, dec: Math.asin(rand() * 2 - 1) * 180 / Math.PI, mag: rand() * 4.5 + 1.0, alpha: rand() * 0.6 + 0.15 });
   }
 })();
+
 function getStarColor(mag) {
   if (mag < 0.5) return '#ffffff';
   if (mag < 1.5) return '#ffffcc';
   if (mag < 2.5) return '#ffeedd';
   return '#ffddcc';
 }
+
 function getLST(date) {
   const jd = date.getTime() / 86400000 + 2440587.5;
   const T = (jd - 2451545.0) / 36525.0;
   let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T - T * T * T / 38710000;
   return norm360(gmst + state.lon);
 }
+
 function getAltAz(ra, dec, date) {
   const lst = rad(getLST(date));
   const ha = lst - rad(ra);
@@ -1212,6 +1380,7 @@ function getAltAz(ra, dec, date) {
   const az = Math.atan2(-Math.cos(decR) * Math.sin(ha), Math.sin(decR) * Math.cos(lat) - Math.cos(decR) * Math.sin(lat) * Math.cos(ha));
   return { alt: deg(alt), az: norm360(deg(az)) };
 }
+
 function project(alt, az) {
   const cx = SIZE / 2, cy = SIZE / 2;
   const altR = rad(alt), azR = rad(az);
@@ -1232,7 +1401,9 @@ function project(alt, az) {
   const visible = x >= -50 && x <= SIZE + 50 && y >= -50 && y <= SIZE + 50;
   return { x, y, visible, zView };
 }
+
 function isAboveHorizon(alt) { return alt > -5; }
+
 function drawMilkyWay(cx, cy, isNight) {
   ctx.save();
   let seed = 777;
@@ -1256,6 +1427,26 @@ function drawMilkyWay(cx, cy, isNight) {
   }
   ctx.restore();
 }
+
+function drawMoonPhase(ctx, cx, cy, r, illumPct, isWaxing, isNight) {
+  const pathStr = getMoonPathSVG(illumPct, isWaxing);
+  if (!pathStr) {
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = isNight ? '#ff6666' : '#f3e5ab'; ctx.lineWidth = 1.5; ctx.stroke();
+    return;
+  }
+  const scale = r / 30;
+  ctx.save();
+  ctx.translate(cx - 50 * scale, cy - 50 * scale);
+  ctx.scale(scale, scale);
+  const path = new Path2D(pathStr);
+  ctx.fillStyle = isNight ? '#ff5555' : '#f3e5ab';
+  ctx.fill(path);
+  ctx.restore();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.strokeStyle = isNight ? '#ff6666' : '#f3e5ab'; ctx.lineWidth = 1.2; ctx.stroke();
+}
+
 function drawMap() {
   const cx = SIZE / 2, cy = SIZE / 2;
   ctx.clearRect(0, 0, SIZE, SIZE);
@@ -1360,15 +1551,48 @@ function drawMap() {
       if (!isAboveHorizon(pos.alt)) return;
       const pt = project(pos.alt, pos.az);
       if (!pt.visible) return;
-      const planetColor = isNight ? '#ff0000' : (p.color || '#d4af37');
-      const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, 22);
-      glow.addColorStop(0, planetColor); glow.addColorStop(0.4, planetColor + '99'); glow.addColorStop(1, 'transparent');
-      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(pt.x, pt.y, 22, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(pt.x, pt.y, 7, 0, Math.PI * 2); ctx.fillStyle = planetColor; ctx.fill();
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.fillStyle = isNight ? '#ff3333' : '#f3e5ab'; ctx.font = 'bold 14px Inter'; ctx.textAlign = 'left';
-      ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 3;
-      ctx.fillText(p.s + ' ' + p.n, pt.x + 12, pt.y + 4); ctx.shadowBlur = 0;
+
+      if (p.isSun) {
+        const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, 42);
+        glow.addColorStop(0, 'rgba(255,230,0,0.95)');
+        glow.addColorStop(0.35, 'rgba(255,200,0,0.45)');
+        glow.addColorStop(1, 'transparent');
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 42, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 11, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffe600'; ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = isNight ? '#ff3333' : '#ffcc00';
+        ctx.font = 'bold 15px Inter'; ctx.textAlign = 'left';
+        ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 4;
+        ctx.fillText('☀️ Sole', pt.x + 16, pt.y + 5);
+        ctx.shadowBlur = 0;
+
+      } else if (p.isMoon) {
+        const moonData = getMoonDataPure(state.lat, state.lon, state.currentTime);
+        const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, 32);
+        glow.addColorStop(0, 'rgba(243,229,171,0.6)');
+        glow.addColorStop(1, 'transparent');
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 32, 0, Math.PI * 2); ctx.fill();
+        drawMoonPhase(ctx, pt.x, pt.y, 10, moonData.illumPct, moonData.isWaxing, isNight);
+        ctx.fillStyle = isNight ? '#ff6666' : '#f3e5ab';
+        ctx.font = 'bold 13px Inter'; ctx.textAlign = 'left';
+        ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 3;
+        ctx.fillText('🌙 Luna (' + moonData.illumPct.toFixed(0) + '%)', pt.x + 16, pt.y + 5);
+        ctx.shadowBlur = 0;
+
+      } else {
+        const planetColor = isNight ? '#ff0000' : (p.color || '#d4af37');
+        const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, 22);
+        glow.addColorStop(0, planetColor); glow.addColorStop(0.4, planetColor + '99'); glow.addColorStop(1, 'transparent');
+        ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(pt.x, pt.y, 22, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 7, 0, Math.PI * 2); ctx.fillStyle = planetColor; ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = isNight ? '#ff3333' : '#f3e5ab'; ctx.font = 'bold 14px Inter'; ctx.textAlign = 'left';
+        ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 3;
+        ctx.fillText(p.s + ' ' + p.n, pt.x + 12, pt.y + 4); ctx.shadowBlur = 0;
+      }
     });
   }
   const showNeb = document.getElementById('filtroNebulose').checked;
@@ -1419,6 +1643,7 @@ function drawMap() {
     el.classList.toggle('active', diff < 22.5);
   });
 }
+
 function resetView() { state.camAlt = 45; state.camAz = 180; state.fov = 120; state.autoRotate = false; document.getElementById('autoRotBtn').textContent = '🔄 Auto-ruota'; drawMap(); }
 function zoomIn() { state.fov = Math.max(10, state.fov - 15); drawMap(); }
 function zoomOut() { state.fov = Math.min(180, state.fov + 15); drawMap(); }
@@ -1527,6 +1752,7 @@ function onSliderChange() {
   const dh = Math.floor(absOff / 60), dm = absOff % 60;
   const offStr = (offsetMinutes === 0) ? 'Ora attuale' : `${sign}${dh}h${dm.toString().padStart(2,'0')}m`;
   document.getElementById('sliderTimeDisplay').innerText = `${h}:${min} (${day}) · ${offStr}`;
+  _planetCache.key = null;
   state.planets = calcPlanetsPrecise(state.currentTime);
   if (document.getElementById('tab-sky').classList.contains('active')) { drawMap(); if (state.target) showInfo(state.target); }
   if (document.getElementById('tab-tonight').classList.contains('active')) renderTonight();
@@ -1572,6 +1798,7 @@ async function fetchWeather() {
     msg.innerText = "❌ Errore meteo: " + e.message; msg.className = "msg"; msg.style.color = "var(--bad)";
   }
 }
+
 function renderQuality() {
   const m = getMoonDataPure(state.lat, state.lon, state.currentTime);
   const sqmScore = Math.max(0, Math.min(10, (state.sqm - 17) / 0.5));
@@ -1684,10 +1911,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePrevi
 /* ============================================================
    FINESTRA DI OSSERVAZIONE — GRAFICO ASTROFOTOGRAFICO
    ============================================================ */
-
-// Calcola l'altitudine del Sole a una data (per le fasce di penombra)
 function getSunAltitude(date) {
-  // Uso la stessa logica di getSunTimesPure per coerenza
   const jd = date.getTime() / 86400000 + 2440587.5;
   const n = jd - 2451545.0 + 0.0008;
   const Jstar = n - state.lon / 360;
@@ -1697,7 +1921,6 @@ function getSunAltitude(date) {
   const sinDec = Math.sin(rad(lambda)) * Math.sin(rad(23.44));
   const dec = Math.asin(sinDec);
   const ra = Math.atan2(Math.cos(rad(23.44)) * Math.sin(rad(lambda)), Math.cos(rad(lambda)));
-  // angolo orario
   const T = (jd - 2451545.0) / 36525.0;
   const gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T - T * T * T / 38710000;
   const lst = rad(norm360(gmst + state.lon));
@@ -1707,32 +1930,23 @@ function getSunAltitude(date) {
   return deg(alt);
 }
 
-// Restituisce la categoria di luminosità del cielo in base all'altitudine del Sole
 function skyPhaseCategory(sunAlt) {
-  if (sunAlt > -0.833) return 'day';       // giorno
-  if (sunAlt > -6) return 'civil';          // crepuscolo civile
-  if (sunAlt > -12) return 'nautical';      // crepuscolo nautico
-  if (sunAlt > -18) return 'astronomical';  // crepuscolo astronomico
-  return 'night';                           // notte astronomica
+  if (sunAlt > -0.833) return 'day';
+  if (sunAlt > -6) return 'civil';
+  if (sunAlt > -12) return 'nautical';
+  if (sunAlt > -18) return 'astronomical';
+  return 'night';
 }
 
-// Ottiene RA/Dec di un oggetto a una data specifica (per i pianeti ricalcola)
-function getObjectRaDecAt(obj, date) {
-  if (obj.cat === 'planet' || obj.type === 'Pianeta') {
-    const planets = calcPlanetsPrecise(date);
-    const p = planets.find(x => x.n === obj.name || x.n === obj.n);
-    if (p) return { ra: p.ra, dec: p.dec };
-    return null;
-  }
-  return { ra: obj.ra, dec: obj.dec };
-}
-
-// Costruisce il grafico della finestra di osservazione
 function buildObservationChart(objName, objRa, objDec, objCat, objType) {
   const container = document.getElementById('obs-chart-container');
   if (!container) return;
 
-  // Determina la data di riferimento: la notte che inizia al tramonto di oggi
+  if (objName === 'Sole') {
+    container.innerHTML = '<div style="color:var(--muted); text-align:center; padding:20px; font-size:13px;">☀️ Il Sole è visibile solo di giorno e non è un oggetto per l\'astrofotografia notturna.<br>Usa la tab <strong>Coordinate</strong> per gli orari di alba/tramonto.</div>';
+    return;
+  }
+
   const refDate = new Date(state.currentTime);
   const todayNoon = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate(), 12, 0, 0);
   const sunSet = getSunTimesPure(state.lat, state.lon, todayNoon, -0.833);
@@ -1740,11 +1954,10 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
   const sunRise = getSunTimesPure(state.lat, state.lon, nextNoon, -0.833);
 
   if (!sunSet || !sunRise) {
-    container.innerHTML = '<div style="color:var(--muted); text-align:center; padding:20px;">Grafico non disponibile (sole sotto l\'orizzonte per tutta la notte o dati mancanti).</div>';
+    container.innerHTML = '<div style="color:var(--muted); text-align:center; padding:20px;">Grafico non disponibile.</div>';
     return;
   }
 
-  // Margine: 30 minuti prima del tramonto e dopo l'alba
   const MARGIN_MS = 30 * 60 * 1000;
   const tStart = new Date(sunSet.set.getTime() - MARGIN_MS);
   const tEnd = new Date(sunRise.rise.getTime() + MARGIN_MS);
@@ -1755,7 +1968,6 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
     return;
   }
 
-  // Campionamento: ogni 10 minuti
   const STEP_MS = 10 * 60 * 1000;
   const samples = [];
   for (let t = tStart.getTime(); t <= tEnd.getTime(); t += STEP_MS) {
@@ -1763,7 +1975,7 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
     const sunAlt = getSunAltitude(d);
     const phase = skyPhaseCategory(sunAlt);
     let alt = null;
-    if (objCat === 'planet' || objType === 'Pianeta') {
+    if (objCat === 'planet' || objType === 'Pianeta' || objType === 'Stella (Sole)' || objType === 'Satellite naturale') {
       const p = calcPlanetsPrecise(d).find(x => x.n === objName);
       if (p) {
         const pos = getAltAz(p.ra, p.dec, d);
@@ -1776,7 +1988,6 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
     samples.push({ t, sunAlt, phase, alt });
   }
 
-  // Calcola la finestra utile: quando alt > 30° e phase !== 'day'
   let bestStart = null, bestEnd = null;
   samples.forEach(s => {
     if (s.alt !== null && s.alt > 30 && s.phase !== 'day') {
@@ -1795,7 +2006,6 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
     summaryHTML = `<div class="obs-chart-summary ok">✅ Finestra utile: ${fmtTime(bestStart)} → ${fmtTime(bestEnd)} (${hh}h ${mm.toString().padStart(2,'0')}m sopra 30°)</div>`;
   }
 
-  // Genera l'HTML con il canvas
   container.innerHTML = `
     <div class="obs-chart-wrap">
       <div class="obs-chart-title">
@@ -1817,7 +2027,6 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
     </div>
   `;
 
-  // Disegna il grafico
   const cv = document.getElementById('obsChartCanvas');
   if (!cv) return;
   const g = cv.getContext('2d');
@@ -1826,18 +2035,10 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
   const plotW = W - PAD_L - PAD_R;
   const plotH = H - PAD_T - PAD_B;
 
-  // Sfondo nero
   g.fillStyle = '#000';
   g.fillRect(0, 0, W, H);
 
-  // Fasce di sfondo per fase del cielo
-  const phaseColors = {
-    day:          '#f59e0b',
-    civil:        '#eab308',
-    nautical:     '#7c3aed',
-    astronomical: '#1e3a8a',
-    night:        '#000000'
-  };
+  const phaseColors = { day: '#f59e0b', civil: '#eab308', nautical: '#7c3aed', astronomical: '#1e3a8a', night: '#000000' };
   const phaseAlpha = { day: 0.35, civil: 0.30, nautical: 0.30, astronomical: 0.35, night: 0.9 };
   samples.forEach((s, i) => {
     if (i === 0) return;
@@ -1849,7 +2050,6 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
     g.globalAlpha = 1;
   });
 
-  // Griglia orizzontale (alt 0, 30, 60, 90)
   g.strokeStyle = 'rgba(255,255,255,0.10)';
   g.lineWidth = 1;
   [0, 30, 60, 90].forEach(a => {
@@ -1861,7 +2061,6 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
     g.fillText(a + '°', PAD_L - 4, y + 3);
   });
 
-  // Linea soglia 30° (gialla tratteggiata)
   const y30 = PAD_T + plotH - (30 / 90) * plotH;
   g.strokeStyle = '#facc15';
   g.lineWidth = 1.5;
@@ -1869,13 +2068,11 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
   g.beginPath(); g.moveTo(PAD_L, y30); g.lineTo(W - PAD_R, y30); g.stroke();
   g.setLineDash([]);
 
-  // Linea orizzonte 0° (rossa)
   const y0 = PAD_T + plotH;
   g.strokeStyle = '#ef4444';
   g.lineWidth = 2;
   g.beginPath(); g.moveTo(PAD_L, y0); g.lineTo(W - PAD_R, y0); g.stroke();
 
-  // Area e linea dell'altitudine oggetto
   g.beginPath();
   let started = false;
   samples.forEach(s => {
@@ -1889,7 +2086,6 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
   g.lineWidth = 2.2;
   g.stroke();
 
-  // Riempimento sotto la curva
   g.lineTo(PAD_L + plotW, PAD_T + plotH);
   g.lineTo(PAD_L, PAD_T + plotH);
   g.closePath();
@@ -1899,7 +2095,6 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
   g.fillStyle = grad;
   g.fill();
 
-  // Etichette orarie sull'asse X (ogni 2 ore circa)
   const stepHours = totalMs > 10 * 3600 * 1000 ? 2 : (totalMs > 5 * 3600 * 1000 ? 1 : 0.5);
   const stepMs = stepHours * 3600 * 1000;
   const firstHour = new Date(tStart); firstHour.setMinutes(0, 0, 0);
@@ -1912,7 +2107,6 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
     g.fillText(fmtTime(t), x, H - 6);
   }
 
-  // Marker "Ora attuale"
   const nowMs = state.currentTime.getTime();
   if (nowMs >= tStart.getTime() && nowMs <= tEnd.getTime()) {
     const xNow = PAD_L + ((nowMs - tStart.getTime()) / totalMs) * plotW;
@@ -1927,7 +2121,6 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
     g.fillText('ORA', xNow, PAD_T - 1);
   }
 
-  // Etichetta "Finestra utile" sul grafico (sfondo verde chiaro)
   if (bestStart !== null && bestEnd !== null) {
     const xA = PAD_L + ((bestStart - tStart.getTime()) / totalMs) * plotW;
     const xB = PAD_L + ((bestEnd - tStart.getTime()) / totalMs) * plotW;
@@ -1945,7 +2138,7 @@ function showObjectModal(name, ra, dec) {
   const neb = NEBULAE_EXTRA.find(n => n.n === name);
   const constell = CONSTELLATIONS.find(c => c.name === name);
   let type = 'Oggetto', desc = '', facts = {};
-  
+
   if (mess) { type = mess.type; facts = {'Catalogo':'Messier','Tipo':mess.type,'Magnitudine':mess.mag,'Distanza':mess.dist||'—'}; desc = mess.desc||''; }
   else if (neb) { type = 'Nebulosa'; facts = {'Tipo':'Nebulosa','Magnitudine':neb.mag,'Distanza':neb.dist||'—'}; desc = neb.desc||''; }
   else if (constell) { type = 'Costellazione'; facts = {'Area':constell.area||'—','Stagione':constell.season||'—','Stelle':constell.stars.length}; desc = constell.desc||''; }
@@ -1955,7 +2148,6 @@ function showObjectModal(name, ra, dec) {
     facts = {'Bayer':info.bayer||'—','Costellazione':info.constellation||'—','Distanza':info.dist||'—','Tipo spettrale':info.spec||'—','Temperatura':info.temp||'—','Luminosità':info.lum||'—','Raggio':info.radius||'—','Massa':info.mass||'—','Variabilità':info.var||'—'};
     desc = info.desc||'';
   } else {
-    // Potrebbe essere un pianeta (chiamato da renderTonight con p.n)
     const planetNames = Object.values(PLANET_IT);
     if (planetNames.includes(name)) {
       type = 'Pianeta';
@@ -1963,21 +2155,25 @@ function showObjectModal(name, ra, dec) {
       const pf = PLANET_FACTS[planetKey] || {};
       facts = {'Diametro':pf.diam||'—','Massa':pf.mass||'—','Distanza dal Sole':pf.dist||'—','Periodo orbitale':pf.period||'—','Temperatura':pf.temp||'—','Lune':pf.moons!==undefined?pf.moons:'—','Tipo':pf.type||'—'};
       desc = pf.desc||'';
+    } else if (name === 'Sole') {
+      type = 'Stella (Sole)'; facts = { ...SUN_FACTS }; desc = SUN_FACTS.desc;
+    } else if (name === 'Luna') {
+      type = 'Satellite naturale'; facts = { ...MOON_FACTS }; desc = MOON_FACTS.desc;
     }
   }
-  
+
   const pos = getAltAz(ra, dec, state.currentTime);
   facts['RA'] = ra.toFixed(2)+'°';
   facts['Dec'] = dec.toFixed(2)+'°';
   facts['Alt / Az'] = pos.alt.toFixed(1)+'° / '+pos.az.toFixed(1)+'°';
-  
+
   const isVisible = pos.alt > 0;
-  const visText = isVisible 
-    ? `<span style="color:var(--ok); font-weight:bold;">✅ Sopra l'orizzonte (${pos.alt.toFixed(1)}°)</span>` 
+  const visText = isVisible
+    ? `<span style="color:var(--ok); font-weight:bold;">✅ Sopra l'orizzonte (${pos.alt.toFixed(1)}°)</span>`
     : `<span style="color:var(--bad); font-weight:bold;">❌ Sotto l'orizzonte (${pos.alt.toFixed(1)}°)</span>`;
   facts['Visibilità / Orizzonte'] = visText;
 
-  state.catalogDetailObj = { name, ra, dec, type, facts, desc, isGeneric: true, cat: type === 'Pianeta' ? 'planet' : null };
+  state.catalogDetailObj = { name, ra, dec, type, facts, desc, isGeneric: true, cat: (type === 'Pianeta' || type === 'Stella (Sole)' || type === 'Satellite naturale') ? 'planet' : null };
   document.getElementById('cat-detail-title').innerText = name;
   document.getElementById('cat-detail-sub').innerText = type;
   const grid = document.getElementById('cat-detail-grid');
@@ -1987,12 +2183,17 @@ function showObjectModal(name, ra, dec) {
   grid.innerHTML = rows.join('');
   document.getElementById('cat-detail-modal').classList.add('open');
 
-  // Grafico finestra di osservazione
-  setTimeout(() => buildObservationChart(name, ra, dec, type === 'Pianeta' ? 'planet' : null, type), 30);
+  setTimeout(() => buildObservationChart(name, ra, dec, type === 'Pianeta' || type === 'Stella (Sole)' || type === 'Satellite naturale' ? 'planet' : null, type), 30);
 }
 
 function buildCatalog() {
   const items = [];
+  // ☀️ Sole e 🌙 Luna
+  items.push({ id: 'sun',  name: 'Sole', symbol: '☀️', cat: 'planet', type: 'Stella (Sole)', ra: null, dec: null,
+    facts: { ...SUN_FACTS },  desc: SUN_FACTS.desc,  tags: ['Sistema Solare', 'Stella', 'Sole'] });
+  items.push({ id: 'moon', name: 'Luna', symbol: '🌙', cat: 'planet', type: 'Satellite naturale', ra: null, dec: null,
+    facts: { ...MOON_FACTS }, desc: MOON_FACTS.desc, tags: ['Sistema Solare', 'Satellite', 'Luna'] });
+
   PLANET_NAMES.forEach(name => {
     const it = PLANET_IT[name];
     items.push({ id: 'planet-' + name, name: it, symbol: PLANET_SYMBOLS[name], cat: 'planet', type: 'Pianeta', ra: null, dec: null, facts: PLANET_FACTS[name] || {}, tags: ['Sistema Solare', 'Pianeta'] });
@@ -2065,14 +2266,14 @@ function openCatDetail(id) {
   const rows = [];
   if (it.desc) rows.push(`<div class="detail-row" style="grid-column:1/-1;"><div class="dl">Descrizione</div><div class="dv">${it.desc}</div></div>`);
   if (it.facts) Object.entries(it.facts).forEach(([k, v]) => rows.push(`<div class="detail-row"><div class="dl">${k}</div><div class="dv">${v}</div></div>`));
-  
+
   let effectiveRa = it.ra, effectiveDec = it.dec;
   if (it.ra !== null && it.ra !== undefined) {
     const pos = getAltAz(it.ra, it.dec, state.currentTime);
     rows.push(`<div class="detail-row"><div class="dl">Alt / Az (ora attuale)</div><div class="dv">${pos.alt.toFixed(1)}° / ${pos.az.toFixed(1)}°</div></div>`);
     const isVisible = pos.alt > 0;
-    const visText = isVisible 
-      ? `<span style="color:var(--ok); font-weight:bold;">✅ Sopra l'orizzonte</span>` 
+    const visText = isVisible
+      ? `<span style="color:var(--ok); font-weight:bold;">✅ Sopra l'orizzonte</span>`
       : `<span style="color:var(--bad); font-weight:bold;">❌ Sotto l'orizzonte</span>`;
     rows.push(`<div class="detail-row"><div class="dl">Visibilità</div><div class="dv">${visText}</div></div>`);
   } else if (it.cat === 'planet') {
@@ -2084,17 +2285,16 @@ function openCatDetail(id) {
       const pos = getAltAz(p.ra, p.dec, state.currentTime);
       rows.push(`<div class="detail-row"><div class="dl">Alt / Az (ora attuale)</div><div class="dv">${pos.alt.toFixed(1)}° / ${pos.az.toFixed(1)}°</div></div>`);
       const isVisible = pos.alt > 0;
-      const visText = isVisible 
-        ? `<span style="color:var(--ok); font-weight:bold;">✅ Sopra l'orizzonte (${pos.alt.toFixed(1)}°)</span>` 
+      const visText = isVisible
+        ? `<span style="color:var(--ok); font-weight:bold;">✅ Sopra l'orizzonte (${pos.alt.toFixed(1)}°)</span>`
         : `<span style="color:var(--bad); font-weight:bold;">❌ Sotto l'orizzonte (${pos.alt.toFixed(1)}°)</span>`;
       rows.push(`<div class="detail-row"><div class="dl">Visibilità</div><div class="dv">${visText}</div></div>`);
     }
   }
-  
+
   grid.innerHTML = rows.join('');
   document.getElementById('cat-detail-modal').classList.add('open');
 
-  // Grafico finestra di osservazione
   setTimeout(() => {
     buildObservationChart(it.name, effectiveRa, effectiveDec, it.cat === 'planet' ? 'planet' : null, it.type);
   }, 30);
@@ -2111,10 +2311,10 @@ function catDetailGoto() {
   const it = state.catalogDetailObj;
   if (!it) return;
   let ra = it.ra, dec = it.dec;
-  if (it.cat === 'planet' || it.type === 'Pianeta') {
+  if (it.cat === 'planet' || it.type === 'Pianeta' || it.type === 'Stella (Sole)' || it.type === 'Satellite naturale') {
     const planets = calcPlanetsPrecise(state.currentTime);
     const p = planets.find(x => x.n === it.name);
-    if (!p) { alert('Pianeta non disponibile.'); return; }
+    if (!p) { alert('Oggetto non disponibile.'); return; }
     ra = p.ra; dec = p.dec;
   }
   if (ra === null || ra === undefined) { alert('Questo oggetto non ha coordinate.'); return; }
@@ -2122,7 +2322,7 @@ function catDetailGoto() {
   state.target = { n: it.name, ra, dec };
   const navBtns = document.querySelectorAll('nav button');
   switchTab('tab-sky', navBtns[1]);
-  readInputs(); state.planets = calcPlanetsPrecise(state.currentTime);
+  readInputs(); _planetCache.key = null; state.planets = calcPlanetsPrecise(state.currentTime);
   const pos = getAltAz(ra, dec, state.currentTime);
   state.camAlt = clamp(pos.alt, 0, 89); state.camAz = pos.az;
   drawMap(); showInfo(state.target);
