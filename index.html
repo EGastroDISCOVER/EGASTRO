@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#d4af37">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.json">
 <title>EGastro DISCOVER</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -213,60 +217,14 @@
   #cat-detail-modal .detail-row .dv { color: var(--text); font-weight: 600; margin-top: 2px; }
   #cat-detail-modal .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
 
-  /* ===== GRAFICO FINESTRA DI OSSERVAZIONE ===== */
-  .obs-chart-wrap {
-    margin-top: 20px;
-    background: #05070c;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 14px 14px 10px;
-  }
-  .obs-chart-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
+  .obs-chart-wrap { margin-top: 20px; background: #05070c; border: 1px solid var(--line); border-radius: 12px; padding: 14px 14px 10px; }
+  .obs-chart-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
   .obs-chart-title .sub { font-family: 'Inter', sans-serif; font-size: 10px; color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 500; }
-  #obsChartCanvas {
-    width: 100%;
-    height: 180px;
-    display: block;
-    border-radius: 8px;
-    background: #000;
-  }
-  .obs-chart-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    font-size: 10px;
-    color: var(--muted);
-    margin-top: 8px;
-    font-weight: 600;
-  }
+  #obsChartCanvas { width: 100%; height: 180px; display: block; border-radius: 8px; background: #000; }
+  .obs-chart-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10px; color: var(--muted); margin-top: 8px; font-weight: 600; }
   .obs-chart-legend span { display: inline-flex; align-items: center; gap: 4px; }
-  .obs-chart-legend i {
-    width: 12px; height: 10px; display: inline-block; border-radius: 2px;
-    border: 1px solid rgba(255,255,255,0.15);
-  }
-  .obs-chart-summary {
-    margin-top: 10px;
-    font-size: 12px;
-    color: var(--text);
-    font-weight: 600;
-    text-align: center;
-    padding: 8px;
-    background: rgba(212,175,55,0.08);
-    border-radius: 8px;
-    border: 1px solid rgba(212,175,55,0.25);
-  }
+  .obs-chart-legend i { width: 12px; height: 10px; display: inline-block; border-radius: 2px; border: 1px solid rgba(255,255,255,0.15); }
+  .obs-chart-summary { margin-top: 10px; font-size: 12px; color: var(--text); font-weight: 600; text-align: center; padding: 8px; background: rgba(212,175,55,0.08); border-radius: 8px; border: 1px solid rgba(212,175,55,0.25); }
   .obs-chart-summary.ok { color: var(--ok); background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.25); }
   .obs-chart-summary.bad { color: var(--bad); background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.25); }
 
@@ -1053,6 +1011,19 @@ function getSunTimesPure(lat, lon, date, alt) {
   } catch(e) { return null; }
 }
 
+function getMoonRiseSet(lat, lon, date) {
+  try {
+    if (typeof Astronomy !== 'undefined') {
+      const obs = new Astronomy.Observer(lat, lon, 0);
+      const now = new Astronomy.AstroTime(date);
+      const rise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, +1, now, 2);
+      const set  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, -1, now, 2);
+      return { rise: rise ? rise.date : null, set: set ? set.date : null };
+    }
+  } catch (e) { console.warn('Moon rise/set error', e); }
+  return { rise: null, set: null };
+}
+
 function readInputs() {
   state.lat = parseFloat(document.getElementById('lat').value) || 0;
   state.lon = parseFloat(document.getElementById('lon').value) || 0;
@@ -1067,6 +1038,7 @@ function readInputs() {
   }
   state.currentTime = new Date(state.baseTime);
   state.sqm = estimateSQM(state.lat, state.lon);
+  _planetCache.key = null;
 }
 
 function switchTab(id, btn) {
@@ -1077,9 +1049,13 @@ function switchTab(id, btn) {
   if (id === 'tab-sky') {
     readInputs(); state.planets = calcPlanetsPrecise(state.currentTime);
     document.getElementById('timeSlider').value = 0; onSliderChange();
-    resetView();   // ← forza la vista Nord all'apertura della mappa
+    resetView();
   }
-  if (id === 'tab-tonight') { readInputs(); state.planets = calcPlanetsPrecise(state.currentTime); renderTonight(); }
+  if (id === 'tab-tonight') {
+    readInputs(); _planetCache.key = null;
+    state.planets = calcPlanetsPrecise(state.currentTime);
+    renderTonight();
+  }
   if (id === 'tab-catalog') renderCatalog();
 }
 
@@ -1124,7 +1100,6 @@ function checkGPSAvailability() {
 
 function activateGPS() { document.getElementById('gpsBanner').style.display = 'flex'; getLocation(); }
 
-// Permesso nativo per WebIntoApp / wrapper Android
 async function ensureLocationPermission() {
   if (window.Native && typeof window.Native.call === "function") {
     return new Promise((resolve) => {
@@ -1206,15 +1181,13 @@ async function getLocation() {
   msg.className = "msg";
   msg.style.color = "var(--accent)";
 
-  // 0) Permesso nativo (WebIntoApp / APK)
   await ensureLocationPermission();
 
-  // 1) GPS browser
   if (navigator.geolocation) {
     try {
       const pos = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true, timeout: 15000, maximumAge: 0
+          enableHighAccuracy: false, timeout: 15000, maximumAge: 0
         });
       });
       applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS', pos.coords.accuracy);
@@ -1226,7 +1199,6 @@ async function getLocation() {
     }
   }
 
-  // 2) IP
   try {
     const loc = await getIPLocation();
     if (loc && isFinite(loc.lat) && isFinite(loc.lon)) {
@@ -1258,7 +1230,7 @@ function toggleGPSLive() {
   state.gpsLiveWatchId = navigator.geolocation.watchPosition(
     (pos) => applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS Live', pos.coords.accuracy),
     (err) => { const m = document.getElementById('msg-coord'); if (err.code === 1) { m.innerText = "❌ GPS Live: permesso negato."; m.style.color = "var(--bad)"; toggleGPSLive(); } },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
+    { enableHighAccuracy: false, timeout: 15000, maximumAge: 5000 }
   );
 }
 
@@ -1280,31 +1252,41 @@ function renderSunMoon() {
   const m = getMoonDataPure(state.lat, state.lon, state.currentTime);
   const tStd = getSunTimesPure(state.lat, state.lon, state.currentTime, -0.833);
   const tNaut = getSunTimesPure(state.lat, state.lon, state.currentTime, -12);
+  const moonTimes = getMoonRiseSet(state.lat, state.lon, state.currentTime);
   const fmt = d => d ? d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '—';
+  
   document.getElementById('table-sun').innerHTML = `
     <tr><td>Alba</td><td>${fmt(tStd?.rise)}</td></tr>
     <tr><td>Tramonto</td><td>${fmt(tStd?.set)}</td></tr>
     <tr><td>Alba Nautica</td><td>${fmt(tNaut?.rise)}</td></tr>
     <tr><td>Tramonto Nautico</td><td>${fmt(tNaut?.set)}</td></tr>
   `;
+  
   document.getElementById('table-moon').innerHTML = `
     <tr><td>Fase</td><td>${m.name}</td></tr>
     <tr><td>Illuminazione</td><td>${m.illumPct.toFixed(0)}%</td></tr>
+    <tr><td>Sorge (prossimo)</td><td>${fmt(moonTimes.rise)}</td></tr>
+    <tr><td>Tramonta (prossimo)</td><td>${fmt(moonTimes.set)}</td></tr>
   `;
+  
   document.getElementById('moon-phase-path').setAttribute('d', getMoonPathSVG(m.illumPct, m.isWaxing));
   document.getElementById('moon-phase-name').innerText = m.name;
 }
 
 function renderTonight() {
-  readInputs();
   const now = state.currentTime;
   document.getElementById('tonight-time').innerText = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
   document.getElementById('tonight-location').innerText = `${state.lat.toFixed(2)}°, ${state.lon.toFixed(2)}° — ${now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}`;
-  const planets = state.planets.length > 0 ? state.planets : calcPlanetsPrecise(now);
-  const planetRows = planets.map(p => p.alt !== undefined ? p : { ...p, ...getAltAz(p.ra, p.dec, now) }).filter(p => p.alt > 0 && !p.isSun);
+  
+  // FIX: Usa sempre i pianeti calcolati all'orario corrente, non quelli vecchi
+  const planets = calcPlanetsPrecise(now);
+  state.planets = planets;
+  
+  const planetRows = planets.filter(p => p.alt > 0 && !p.isSun);
   document.getElementById('tonight-planets').innerHTML = planetRows.length === 0
     ? '<div style="color:var(--muted); padding:10px;">Nessun pianeta sopra l\'orizzonte.</div>'
     : planetRows.sort((a, b) => b.alt - a.alt).map(p => `<div class="object-row" onclick="tonightClick('${encodeURIComponent(JSON.stringify({n:p.n,ra:p.ra,dec:p.dec,s:p.s}))}')"><div><span class="object-name">${p.s} ${p.n}</span></div><div><span class="object-alt ${p.alt < 20 ? 'low' : ''}">${p.alt.toFixed(1)}°</span></div></div>`).join('');
+  
   const messierRows = Object.values(MESSIER).map(m => ({ ...m, ...getAltAz(m.ra, m.dec, now) })).filter(m => m.alt > 10);
   document.getElementById('tonight-messier').innerHTML = messierRows.length === 0
     ? '<div style="color:var(--muted); padding:10px;">Nessun oggetto Messier ben posizionato.</div>'
@@ -1316,6 +1298,7 @@ function renderTonight() {
         const payload = encodeURIComponent(JSON.stringify({n:m.n,ra:m.ra,dec:m.dec}));
         return `<div class="object-row" onclick="tonightClick('${payload}')"><div><span class="object-name">${m.n}</span><span class="object-type">${m.type}</span>${badge}</div><div><span class="object-alt ${m.alt < 30 ? 'low' : ''}">${m.alt.toFixed(1)}°</span></div></div>`;
       }).join('');
+  
   const nebRows = NEBULAE_EXTRA.map(n => ({ ...n, ...getAltAz(n.ra, n.dec, now) })).filter(n => n.alt > 10);
   document.getElementById('tonight-nebulae').innerHTML = nebRows.length === 0
     ? '<div style="color:var(--muted); padding:10px;">Nessuna nebulosa ben posizionata.</div>'
@@ -1327,12 +1310,12 @@ function renderTonight() {
         const payload = encodeURIComponent(JSON.stringify({n:n.n,ra:n.ra,dec:n.dec}));
         return `<div class="object-row" onclick="tonightClick('${payload}')"><div><span class="object-name">${n.n}</span>${badge}</div><div><span class="object-alt ${n.alt < 30 ? 'low' : ''}">${n.alt.toFixed(1)}°</span></div></div>`;
       }).join('');
-  const constRows = CONSTELLATIONS.map(c => { const mid = c.stars[Math.floor(c.stars.length / 2)]; const pos = getAltAz(mid.ra, mid.dec, now); return { ...c, alt: pos.alt }; }).filter(c => c.alt > 15);
+  
+  const constRows = CONSTELLATIONS.map(c => { const mid = c.stars[Math.floor(c.stars.length / 2)]; const pos = getAltAz(mid.ra, mid.dec, now); return { ...c, alt: pos.alt, midRa: mid.ra, midDec: mid.dec }; }).filter(c => c.alt > 15);
   document.getElementById('tonight-constellations').innerHTML = constRows.length === 0
     ? '<div style="color:var(--muted); padding:10px;">Nessuna costellazione ben visibile.</div>'
     : constRows.sort((a, b) => b.alt - a.alt).map(c => {
-        const mid = c.stars[Math.floor(c.stars.length / 2)];
-        const payload = encodeURIComponent(JSON.stringify({n:c.name,ra:mid.ra,dec:mid.dec}));
+        const payload = encodeURIComponent(JSON.stringify({n:c.name,ra:c.midRa,dec:c.midDec}));
         return `<div class="object-row" onclick="tonightClick('${payload}')"><div><span class="object-name">${c.name}</span></div><div><span class="object-alt ${c.alt < 30 ? 'low' : ''}">${c.alt.toFixed(1)}°</span></div></div>`;
       }).join('');
 }
@@ -1582,7 +1565,8 @@ function drawMap() {
     });
   }
   if (document.getElementById('filtroPianeti').checked) {
-    const planets = state.planets.length > 0 ? state.planets : calcPlanetsPrecise(state.currentTime);
+    // FIX: Usa sempre i dati correnti, non state.planets che potrebbe essere vecchio
+    const planets = calcPlanetsPrecise(state.currentTime);
     planets.forEach(p => {
       const pos = p.alt !== undefined ? p : getAltAz(p.ra, p.dec, state.currentTime);
       if (!isAboveHorizon(pos.alt)) return;
@@ -1767,7 +1751,7 @@ canvas.addEventListener('click', e => {
     if (pt.visible) { const dist = Math.hypot(clickX - pt.x, clickY - pt.y); if (dist < minDist) { minDist = dist; closest = obj; } }
   };
   if (document.getElementById('filtroStelle').checked) STARS.forEach(checkObj);
-  const planets = state.planets.length > 0 ? state.planets : calcPlanetsPrecise(state.currentTime);
+  const planets = calcPlanetsPrecise(state.currentTime); // FIX: usa sempre dati correnti
   if (document.getElementById('filtroPianeti').checked) planets.forEach(checkObj);
   const showNeb = document.getElementById('filtroNebulose').checked;
   const showGal = document.getElementById('filtroGalassie').checked;
@@ -2023,10 +2007,7 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
     let alt = null;
     if (objCat === 'planet' || objType === 'Pianeta' || objType === 'Stella (Sole)' || objType === 'Satellite naturale') {
       const p = calcPlanetsPrecise(d).find(x => x.n === objName);
-      if (p) {
-        const pos = getAltAz(p.ra, p.dec, d);
-        alt = pos.alt;
-      }
+      if (p) alt = p.alt;
     } else {
       const pos = getAltAz(objRa, objDec, d);
       alt = pos.alt;
@@ -2234,7 +2215,6 @@ function showObjectModal(name, ra, dec) {
 
 function buildCatalog() {
   const items = [];
-  // ☀️ Sole e 🌙 Luna
   items.push({ id: 'sun',  name: 'Sole', symbol: '☀️', cat: 'planet', type: 'Stella (Sole)', ra: null, dec: null,
     facts: { ...SUN_FACTS },  desc: SUN_FACTS.desc,  tags: ['Sistema Solare', 'Stella', 'Sole'] });
   items.push({ id: 'moon', name: 'Luna', symbol: '🌙', cat: 'planet', type: 'Satellite naturale', ra: null, dec: null,
@@ -2372,6 +2352,15 @@ function catDetailGoto() {
   const pos = getAltAz(ra, dec, state.currentTime);
   state.camAlt = clamp(pos.alt, 0, 89); state.camAz = pos.az;
   drawMap(); showInfo(state.target);
+}
+
+/* ===== PWA: Registrazione Service Worker ===== */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+      .then(r => console.log('✅ SW registrato:', r.scope))
+      .catch(e => console.warn('⚠️ SW errore:', e));
+  });
 }
 
 window.onload = () => {
