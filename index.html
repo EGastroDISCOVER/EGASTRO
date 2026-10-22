@@ -40,14 +40,15 @@
   }
   .header-buttons {
     position: absolute; top: 20px; right: 20px;
-    display: flex; gap: 10px; z-index: 101;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 101;
   }
   .btn-night {
     background: var(--card); color: var(--accent); border: 1px solid var(--accent);
     padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;
-    cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;
     box-shadow: 0 0 10px var(--glow);
   }
+  .btn-night svg { width: 16px; height: 16px; }
   .btn-night:hover { background: var(--accent); color: var(--bg); }
   .btn-preview { border-color: #8bd3ff; color: #8bd3ff; }
   .btn-preview:hover { background: #8bd3ff; color: #000; }
@@ -139,23 +140,72 @@
   .filters { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; font-size: 13px; }
   .filters label { display: flex; align-items: center; gap: 5px; text-transform: none; font-weight: normal; cursor: pointer; margin: 0; color: var(--text); }
   .filters input { width: auto; }
-  .time-slider-inline { display: flex; align-items: center; gap: 12px; padding: 10px 15px; background: rgba(0,0,0,0.6); border-top: 1px solid var(--line); flex-wrap: wrap; }
-  .time-slider-inline input[type="range"] { flex: 1; min-width: 200px; -webkit-appearance: none; height: 6px; background: var(--line); border-radius: 3px; outline: none; }
-  .time-slider-inline input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 8px var(--glow); }
-  .time-display-inline { font-family: 'Orbitron', sans-serif; color: var(--accent2); font-size: 13px; font-weight: bold; white-space: nowrap; min-width: 140px; text-align: right; }
+  
+  /* FIX LARGHEZZA CURSORE E ALLINEAMENTO */
+  .time-slider-inline { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    padding: 10px 15px; 
+    background: rgba(0,0,0,0.6); 
+    border-top: 1px solid var(--line); 
+    flex-wrap: nowrap; /* Impedisce a testo e cursore di andare a capo */
+  }
+  .time-slider-inline input[type="range"] { 
+    flex: 1; 
+    min-width: 120px; 
+    -webkit-appearance: none; 
+    height: 6px; 
+    background: var(--line); 
+    border-radius: 3px; 
+    outline: none; 
+  }
+  .time-slider-inline input[type="range"]::-webkit-slider-thumb { 
+    -webkit-appearance: none; 
+    width: 18px; 
+    height: 18px; 
+    border-radius: 50%; 
+    background: var(--accent); 
+    cursor: pointer; 
+    box-shadow: 0 0 8px var(--glow); 
+  }
+  .time-display-inline { 
+    font-family: 'Orbitron', sans-serif; 
+    color: var(--accent2); 
+    font-size: 13px; 
+    font-weight: bold; 
+    width: 190px; /* Larghezza fissa per evitare rimbalzi */
+    flex-shrink: 0; 
+    white-space: nowrap; 
+    text-align: right; 
+    font-variant-numeric: tabular-nums; /* Numeri a larghezza fissa */
+    padding-right: 5px; 
+  }
+  
   .time-quick-btns { display: flex; gap: 6px; flex-wrap: wrap; }
   .time-quick-btns button { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg2); color: var(--accent); font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
   .time-quick-btns button:hover { background: var(--accent); color: #000; }
-  #preview-modal { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.92); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px; }
-  #preview-modal.open { display: flex; }
-  #preview-modal .preview-box { position: relative; width: min(90vw, 900px); background: var(--card); border: 2px solid var(--accent); border-radius: 16px; padding: 20px; box-shadow: 0 0 60px var(--glow); }
-  #preview-modal img { width: auto; height: auto; max-width: 100%; max-height: 75vh; object-fit: contain; display: block; margin: 0 auto; border-radius: 10px; background: #000; }
-  #preview-modal .close-btn { position: absolute; top: -14px; right: -14px; width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #000; border: none; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px var(--glow); }
+  
+  #preview-modal, #cat-detail-modal, #solar-modal { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.92); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px; }
+  #preview-modal.open, #cat-detail-modal.open, #solar-modal.open { display: flex; }
+  .preview-box, .detail-box { position: relative; width: min(92vw, 720px); max-height: 88vh; overflow-y: auto; background: var(--card); border: 2px solid var(--accent); border-radius: 16px; padding: 24px; box-shadow: 0 0 60px var(--glow); }
+  .close-btn { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #000; border: none; font-size: 22px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px var(--glow); line-height: 1; z-index: 10; display: flex; align-items: center; justify-content: center; }
+  
   #preview-modal .preview-title { font-family: 'Orbitron', sans-serif; color: var(--accent); margin-bottom: 12px; font-size: 16px; }
+  #preview-modal img { width: auto; height: auto; max-width: 100%; max-height: 75vh; object-fit: contain; display: block; margin: 0 auto; border-radius: 10px; background: #000; }
   #preview-modal .preview-empty { color: var(--muted); text-align: center; padding: 40px; font-size: 14px; }
   .preview-quickbar { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
   .preview-quickbar input { flex: 1; min-width: 200px; padding: 10px; }
   .preview-quickbar .btn { padding: 10px 18px; }
+
+  #cat-detail-modal h3, #solar-modal h3 { font-family: 'Orbitron', sans-serif; color: var(--accent2); font-size: 20px; margin-bottom: 6px; padding-right: 40px; }
+  #cat-detail-modal .detail-sub, #solar-modal .detail-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  #cat-detail-modal .detail-grid, #solar-modal .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  #cat-detail-modal .detail-row, #solar-modal .detail-row { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+  #cat-detail-modal .detail-row .dl, #solar-modal .detail-row .dl { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  #cat-detail-modal .detail-row .dv, #solar-modal .detail-row .dv { color: var(--text); font-weight: 600; margin-top: 2px; }
+  #cat-detail-modal .detail-actions, #solar-modal .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+
   .tonight-summary { background: var(--bg2); border: 1px solid var(--accent); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; }
   .tonight-summary .big-time { font-family: 'Orbitron', sans-serif; font-size: 28px; color: var(--accent2); font-weight: 900; text-shadow: 0 0 15px var(--glow); }
   .tonight-summary .location { font-size: 13px; color: var(--muted); margin-top: 5px; }
@@ -205,17 +255,6 @@
   .cat-tag.galaxy { background: rgba(168,139,250,0.2); color: #a88bfa; }
   .cat-tag.cluster { background: rgba(244,164,96,0.2); color: #f4a460; }
   .cat-tag.ncg { background: rgba(135,206,235,0.2); color: #87ceeb; }
-  #cat-detail-modal { display: none; position: fixed; inset: 0; z-index: 9998; background: rgba(0,0,0,0.92); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px; }
-  #cat-detail-modal.open { display: flex; }
-  #cat-detail-modal .detail-box { position: relative; width: min(92vw, 720px); max-height: 88vh; overflow-y: auto; background: var(--card); border: 2px solid var(--accent); border-radius: 16px; padding: 24px; box-shadow: 0 0 60px var(--glow); }
-  #cat-detail-modal .close-btn { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #000; border: none; font-size: 22px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px var(--glow); line-height: 1; z-index: 10; display: flex; align-items: center; justify-content: center; }
-  #cat-detail-modal h3 { font-family: 'Orbitron', sans-serif; color: var(--accent2); font-size: 20px; margin-bottom: 6px; padding-right: 40px; }
-  #cat-detail-modal .detail-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-  #cat-detail-modal .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-  #cat-detail-modal .detail-row { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
-  #cat-detail-modal .detail-row .dl { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-  #cat-detail-modal .detail-row .dv { color: var(--text); font-weight: 600; margin-top: 2px; }
-  #cat-detail-modal .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
 
   .obs-chart-wrap { margin-top: 20px; background: #05070c; border: 1px solid var(--line); border-radius: 12px; padding: 14px 14px 10px; }
   .obs-chart-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
@@ -229,8 +268,10 @@
   .obs-chart-summary.bad { color: var(--bad); background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.25); }
 
   @media (max-width: 600px) {
-    #cat-detail-modal .detail-grid { grid-template-columns: 1fr; }
+    #cat-detail-modal .detail-grid, #solar-modal .detail-grid { grid-template-columns: 1fr; }
     #obsChartCanvas { height: 150px; }
+    .time-slider-inline { flex-wrap: wrap; }
+    .time-display-inline { width: 100%; text-align: center; margin-top: 5px; }
   }
 </style>
 </head>
@@ -238,9 +279,16 @@
 
 <header>
   <div class="header-buttons">
-    <button class="btn-night" id="nightBtn" onclick="toggleNightMode()"><span>🔴</span> Visione Notturna</button>
-    <button class="btn-night btn-preview" onclick="openPreview()"><span>📷</span> Anteprima</button>
+    <button class="btn-night" id="nightBtn" onclick="toggleNightMode()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      <span id="nightBtnText">Notturna</span>
+    </button>
+    <button class="btn-night btn-preview" onclick="openPreview()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+      <span>Anteprima</span>
+    </button>
   </div>
+  
   <div class="logo-container" onclick="document.getElementById('logoInput').click()" title="Clicca per caricare il tuo logo">
     <img id="logoImg" src="" alt="Logo">
     <div class="logo-text" id="logoFallback"><span>EG</span><span>ASTRO</span></div>
@@ -269,7 +317,7 @@
       <h2>📍 Coordinate e Data</h2>
       <div class="grid">
         <div>
-          <label>Città (opzionale)</label>
+          <label>Città (Capoluoghi)</label>
           <select id="citySelect" onchange="loadCity()">
             <option value="">-- Seleziona una città --</option>
             <optgroup label="Italia">
@@ -285,6 +333,75 @@
               <option value="45.4408,12.3155,Venezia">Venezia</option>
               <option value="44.4056,8.9463,Genova">Genova</option>
               <option value="39.2238,9.1217,Cagliari">Cagliari</option>
+              <option value="45.4384,10.9916,Verona">Verona</option>
+              <option value="38.1938,15.5540,Messina">Messina</option>
+              <option value="45.4064,11.8768,Padova">Padova</option>
+              <option value="45.6495,13.7768,Trieste">Trieste</option>
+              <option value="40.4644,17.2470,Taranto">Taranto</option>
+              <option value="45.5416,10.2118,Brescia">Brescia</option>
+              <option value="44.8015,10.3279,Parma">Parma</option>
+              <option value="43.8777,11.1023,Prato">Prato</option>
+              <option value="44.6471,10.9252,Modena">Modena</option>
+              <option value="38.1113,15.6619,Reggio Calabria">Reggio Calabria</option>
+              <option value="44.6989,10.6312,Reggio Emilia">Reggio Emilia</option>
+              <option value="43.1107,12.3908,Perugia">Perugia</option>
+              <option value="44.4184,12.2035,Ravenna">Ravenna</option>
+              <option value="43.5485,10.3106,Livorno">Livorno</option>
+              <option value="41.4622,15.5446,Foggia">Foggia</option>
+              <option value="44.0678,12.5695,Rimini">Rimini</option>
+              <option value="40.6824,14.7681,Salerno">Salerno</option>
+              <option value="44.8381,11.6198,Ferrara">Ferrara</option>
+              <option value="40.7259,8.5557,Sassari">Sassari</option>
+              <option value="41.4676,12.9037,Latina">Latina</option>
+              <option value="45.5845,9.2744,Monza">Monza</option>
+              <option value="37.0755,15.2866,Siracusa">Siracusa</option>
+              <option value="42.4618,14.2161,Pescara">Pescara</option>
+              <option value="45.6983,9.6773,Bergamo">Bergamo</option>
+              <option value="44.2227,12.0418,Forlì">Forlì</option>
+              <option value="46.0679,11.1211,Trento">Trento</option>
+              <option value="45.5455,11.5354,Vicenza">Vicenza</option>
+              <option value="42.5636,12.6427,Terni">Terni</option>
+              <option value="46.4983,11.3548,Bolzano">Bolzano</option>
+              <option value="45.4469,8.6222,Novara">Novara</option>
+              <option value="45.0526,9.6930,Piacenza">Piacenza</option>
+              <option value="43.6158,13.5189,Ancona">Ancona</option>
+              <option value="41.2317,16.2907,Andria">Andria</option>
+              <option value="43.4633,11.8796,Arezzo">Arezzo</option>
+              <option value="46.0711,13.2346,Udine">Udine</option>
+              <option value="44.1391,12.2431,Cesena">Cesena</option>
+              <option value="40.3515,18.1750,Lecce">Lecce</option>
+              <option value="43.9102,12.9132,Pesaro">Pesaro</option>
+              <option value="41.3198,16.2719,Barletta">Barletta</option>
+              <option value="44.9129,8.6153,Alessandria">Alessandria</option>
+              <option value="44.1024,9.8241,La Spezia">La Spezia</option>
+              <option value="43.7161,10.3966,Pisa">Pisa</option>
+              <option value="38.9098,16.5877,Catanzaro">Catanzaro</option>
+              <option value="43.9333,10.9167,Pistoia">Pistoia</option>
+              <option value="43.8430,10.5034,Lucca">Lucca</option>
+              <option value="40.6327,17.9418,Brindisi">Brindisi</option>
+              <option value="45.6667,12.2500,Treviso">Treviso</option>
+              <option value="45.8090,8.8510,Como">Como</option>
+              <option value="42.7667,11.1167,Grosseto">Grosseto</option>
+              <option value="45.8206,8.8251,Varese">Varese</option>
+              <option value="44.9000,8.2000,Asti">Asti</option>
+              <option value="41.0747,14.3328,Caserta">Caserta</option>
+              <option value="45.1850,9.1550,Pavia">Pavia</option>
+              <option value="45.1333,10.0333,Cremona">Cremona</option>
+              <option value="42.3500,13.4000,L'Aquila">L'Aquila</option>
+              <option value="38.0167,12.5333,Trapani">Trapani</option>
+              <option value="42.4167,12.1000,Viterbo">Viterbo</option>
+              <option value="39.3000,16.2500,Cosenza">Cosenza</option>
+              <option value="40.6333,15.8000,Potenza">Potenza</option>
+              <option value="39.0833,17.1333,Crotone">Crotone</option>
+              <option value="40.6667,16.6000,Matera">Matera</option>
+              <option value="41.1333,14.7833,Benevento">Benevento</option>
+              <option value="37.3167,13.5833,Agrigento">Agrigento</option>
+              <option value="44.3833,7.5333,Cuneo">Cuneo</option>
+              <option value="45.0667,11.7833,Rovigo">Rovigo</option>
+              <option value="46.1333,12.2167,Belluno">Belluno</option>
+              <option value="45.7333,7.3167,Aosta">Aosta</option>
+              <option value="41.5667,14.6667,Campobasso">Campobasso</option>
+              <option value="41.6000,14.2333,Isernia">Isernia</option>
             </optgroup>
           </select>
         </div>
@@ -302,7 +419,10 @@
       <div class="grid" id="sky-quality-grid" style="margin-top:20px;"></div>
     </div>
     <div class="card">
-      <h2>☀️ Dati Solari e Lunari</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid var(--line);">
+        <h2 style="margin:0; padding:0; border:none;">☀️ Dati Solari e Lunari</h2>
+        <button class="btn btn-ghost" onclick="openSolarModal()" style="padding:8px 16px; font-size:13px;">Attività Solare</button>
+      </div>
       <div class="astro-icons">
         <div class="astro-icon-box">
           <svg id="icon-sun" viewBox="0 0 100 100" fill="none">
@@ -413,7 +533,7 @@
         <button class="btn btn-ghost" onclick="clearSearch()">✕</button>
       </div>
       <div class="search-results" id="searchResults" style="display:none;"></div>
-      <div class="section-divider">🪐 Pianeti</div>
+      <div class="section-divider">🌙 Luna e Pianeti</div>
       <div id="tonight-planets"></div>
       <div class="section-divider">✨ Oggetti del cielo profondo</div>
       <div id="tonight-messier"></div>
@@ -519,15 +639,25 @@
   </div>
 </div>
 
+<div id="solar-modal" onclick="if(event.target===this)closeSolarModal()">
+  <div class="detail-box">
+    <button class="close-btn" onclick="closeSolarModal()">×</button>
+    <h3>☀️ Attività Solare</h3>
+    <div class="detail-sub">Dati calcolati e link ufficiali</div>
+    <div class="detail-grid" id="solar-detail-grid"></div>
+    <div class="detail-actions">
+      <a href="https://www.swpc.noaa.gov/" target="_blank" class="btn" style="text-decoration:none; text-align:center;">NOAA SWPC (Meteo Spaziale)</a>
+      <a href="https://sohowww.nascom.nasa.gov/data/realtime-images.html" target="_blank" class="btn btn-ghost" style="text-decoration:none; text-align:center;">Immagini SOHO</a>
+    </div>
+  </div>
+</div>
+
 <script>
-/* ============================================================
-   STATO GLOBALE
-   ============================================================ */
 const state = {
   lat: 41.9028, lon: 12.4964,
   baseTime: new Date(), currentTime: new Date(),
   planets: [],
-  camAlt: 45, camAz: 0, fov: 80,   // ← vista iniziale: Nord, FOV 80° (come "Punta Nord")
+  camAlt: 45, camAz: 0, fov: 80,
   clouds: 0, target: null,
   sqm: 21.0,
   autoRotate: false,
@@ -957,6 +1087,37 @@ function sqmToDesc(sqm) {
   return { label: "Scarsa", badge: "bad" };
 }
 
+function getExactMoonData(date) {
+  if (typeof Astronomy !== 'undefined') {
+    try {
+      const time = new Astronomy.AstroTime(date);
+      const illum = Astronomy.Illumination(Astronomy.Body.Moon, time);
+      const illumPct = illum.phase_fraction * 100;
+      
+      const vecSun = Astronomy.GeoVector(Astronomy.Body.Sun, time, false);
+      const vecMoon = Astronomy.GeoVector(Astronomy.Body.Moon, time, false);
+      const eclSun = Astronomy.Ecliptic(vecSun);
+      const eclMoon = Astronomy.Ecliptic(vecMoon);
+      
+      let elong = eclMoon.elon - eclSun.elon;
+      while (elong < 0) elong += 360;
+      while (elong >= 360) elong -= 360;
+      
+      const isWaxing = elong < 180;
+      
+      let phaseName = "";
+      if (illumPct < 1) phaseName = "Luna Nuova";
+      else if (illumPct < 45) phaseName = isWaxing ? "Luna Crescente" : "Luna Calante";
+      else if (illumPct < 55) phaseName = isWaxing ? "Primo Quarto" : "Ultimo Quarto";
+      else if (illumPct < 99) phaseName = isWaxing ? "Gibbosa Crescente" : "Gibbosa Calante";
+      else phaseName = "Luna Piena";
+      
+      return { illumPct, isWaxing, name: phaseName };
+    } catch(e) { console.warn('Astronomy illumination error:', e); }
+  }
+  return getMoonDataPure(state.lat, state.lon, date);
+}
+
 function getMoonDataPure(lat, lon, date) {
   const d = getDays(date);
   let L = norm360(218.32 + 13.176396 * d);
@@ -977,6 +1138,15 @@ function getMoonDataPure(lat, lon, date) {
   else if (illumPct < 99) phaseName = isWaxing ? "Gibbosa Crescente" : "Gibbosa Calante";
   else phaseName = "Luna Piena";
   return { illum, illumPct, name: phaseName, elong, isWaxing };
+}
+
+function getMoonObservationTips(illumPct, isWaxing) {
+  if (illumPct < 2) return "Luna Nuova: Non osservabile (troppo vicina al Sole).";
+  if (illumPct < 25) return "Sottile falce. Cerca la 'Luce Cinerea' (Earthshine) sul lato in ombra. Ottimo per osservare i crateri vicino al terminatore.";
+  if (illumPct < 45) return "Falce. Il terminatore offre ombre spettacolari sui crateri e sui mari. Ottimo contrasto.";
+  if (illumPct < 55) return "Quarto. Il terminatore taglia a metà la Luna. Ombre profonde sui crateri centrali (Copernico, Tycho, Plato).";
+  if (illumPct < 95) return "Gibbosa. Molto luminosa. Il terminatore è sui bordi, ideale per osservare i raggi dei crateri (es. Tycho) e i mari.";
+  return "Luna Piena. Luce piatta, niente ombre. Osserva i contrasti di albedo (mari scuri vs altopiani chiari) e i raggi luminosi (Tycho, Copernico).";
 }
 
 function getMoonPathSVG(illumPct, isWaxing) {
@@ -1011,17 +1181,54 @@ function getSunTimesPure(lat, lon, date, alt) {
   } catch(e) { return null; }
 }
 
+function getNightWindow(date) {
+  const todayNoon = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+  const sunRiseToday = getSunTimesPure(state.lat, state.lon, todayNoon, -0.833);
+  
+  let baseNoon;
+  if (sunRiseToday && sunRiseToday.rise && date < sunRiseToday.rise) {
+    baseNoon = new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1, 12, 0, 0);
+  } else {
+    baseNoon = todayNoon;
+  }
+  
+  const sunSet = getSunTimesPure(state.lat, state.lon, baseNoon, -0.833);
+  const nextNoon = new Date(baseNoon); nextNoon.setDate(nextNoon.getDate() + 1);
+  const sunRise = getSunTimesPure(state.lat, state.lon, nextNoon, -0.833);
+  
+  if (sunSet && sunRise) return { start: sunSet.set, end: sunRise.rise };
+  return null;
+}
+
 function getMoonRiseSet(lat, lon, date) {
   try {
     if (typeof Astronomy !== 'undefined') {
       const obs = new Astronomy.Observer(lat, lon, 0);
-      const now = new Astronomy.AstroTime(date);
-      const rise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, +1, now, 2);
-      const set  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, -1, now, 2);
+      const noon = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+      const timeNoon = new Astronomy.AstroTime(noon);
+      const rise = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, +1, timeNoon, 2);
+      const set  = Astronomy.SearchRiseSet(Astronomy.Body.Moon, obs, -1, timeNoon, 2);
       return { rise: rise ? rise.date : null, set: set ? set.date : null };
     }
   } catch (e) { console.warn('Moon rise/set error', e); }
   return { rise: null, set: null };
+}
+
+function getLST(date) {
+  const jd = date.getTime() / 86400000 + 2440587.5;
+  const T = (jd - 2451545.0) / 36525.0;
+  let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T - T * T * T / 38710000;
+  return norm360(gmst + state.lon);
+}
+
+function getAltAz(ra, dec, date) {
+  const lst = rad(getLST(date));
+  const ha = lst - rad(ra);
+  const lat = rad(state.lat);
+  const decR = rad(dec);
+  const alt = Math.asin(Math.sin(decR) * Math.sin(lat) + Math.cos(decR) * Math.cos(lat) * Math.cos(ha));
+  const az = Math.atan2(-Math.cos(decR) * Math.sin(ha), Math.sin(decR) * Math.cos(lat) - Math.cos(decR) * Math.sin(lat) * Math.cos(ha));
+  return { alt: deg(alt), az: norm360(deg(az)) };
 }
 
 function readInputs() {
@@ -1062,8 +1269,9 @@ function switchTab(id, btn) {
 function toggleNightMode() {
   document.body.classList.toggle('night-mode');
   const btn = document.getElementById('nightBtn');
+  const btnText = document.getElementById('nightBtnText');
   const isNight = document.body.classList.contains('night-mode');
-  btn.innerHTML = isNight ? '<span>🔴</span> Notturna ON' : '<span>⚪</span> Visione Notturna';
+  if(btnText) btnText.innerText = isNight ? 'Notturna ON' : 'Notturna';
   document.getElementById('moon-phase-path').setAttribute('fill', isNight ? '#ff3333' : '#f3e5ab');
   document.getElementById('icon-sun').querySelector('circle').setAttribute('fill', isNight ? '#ff0000' : '#ffcc00');
   document.getElementById('icon-sun').querySelector('path').setAttribute('stroke', isNight ? '#ff0000' : '#ffcc00');
@@ -1093,7 +1301,7 @@ function loadCity() {
   updateAll();
 }
 
-/* ===== GPS ROBUSTO (browser + WebIntoApp APK + IP fallback) ===== */
+/* ===== GPS ROBUSTO ===== */
 function checkGPSAvailability() {
   document.getElementById('gpsBanner').style.display = 'flex';
 }
@@ -1106,15 +1314,11 @@ async function ensureLocationPermission() {
       try {
         window.Native.call(
           "permissions",
-          {
-            action: "ASK_FOR_PERMISSION",
-            payload: { permission: "LOCATION" }
-          },
+          { action: "ASK_FOR_PERMISSION", payload: { permission: "LOCATION" } },
           (result) => {
             try {
               const res = typeof result === "string" ? JSON.parse(result) : result;
               const status = res?.params?.permissionStatus || res?.status;
-              console.log("WebIntoApp permission result:", res);
               resolve(status === "GRANTED" || status === true);
             } catch (e) { resolve(false); }
           }
@@ -1158,12 +1362,6 @@ async function getIPLocation() {
       const d = await r.json();
       const [lat, lon] = (d.loc || ',').split(',').map(Number);
       return { lat, lon, city: d.city, country: d.country };
-    },
-    async () => {
-      const r = await fetch('https://ipwho.is/', { signal: AbortSignal.timeout(6000) });
-      const d = await r.json();
-      if (!d.success) throw new Error('ipwho');
-      return { lat: d.latitude, lon: d.longitude, city: d.city, country: d.country };
     }
   ];
   for (const svc of services) {
@@ -1180,15 +1378,11 @@ async function getLocation() {
   msg.innerText = "📡 Rilevamento posizione...";
   msg.className = "msg";
   msg.style.color = "var(--accent)";
-
   await ensureLocationPermission();
-
   if (navigator.geolocation) {
     try {
       const pos = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: false, timeout: 15000, maximumAge: 0
-        });
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 });
       });
       applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS', pos.coords.accuracy);
       fetchWeather();
@@ -1198,7 +1392,6 @@ async function getLocation() {
       msg.innerText = "⚠️ GPS non disponibile, provo via IP...";
     }
   }
-
   try {
     const loc = await getIPLocation();
     if (loc && isFinite(loc.lat) && isFinite(loc.lon)) {
@@ -1210,7 +1403,6 @@ async function getLocation() {
       return;
     }
   } catch (e) { console.warn('IP geolocation fallita:', e); }
-
   msg.innerHTML = "⚠️ Impossibile rilevare automaticamente. Inserisci coordinate o scegli una città.";
   msg.style.color = "var(--warn)";
 }
@@ -1249,11 +1441,17 @@ function renderSkyQuality() {
 }
 
 function renderSunMoon() {
-  const m = getMoonDataPure(state.lat, state.lon, state.currentTime);
+  const m = getExactMoonData(state.currentTime);
   const tStd = getSunTimesPure(state.lat, state.lon, state.currentTime, -0.833);
   const tNaut = getSunTimesPure(state.lat, state.lon, state.currentTime, -12);
-  const moonTimes = getMoonRiseSet(state.lat, state.lon, state.currentTime);
-  const fmt = d => d ? d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '—';
+  const night = getNightWindow(state.currentTime);
+  const baseTime = night ? night.start : state.currentTime;
+  const moonTimes = getMoonRiseSet(state.lat, state.lon, baseTime);
+  
+  const fmt = d => {
+    if (!d) return '—';
+    return d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  };
   
   document.getElementById('table-sun').innerHTML = `
     <tr><td>Alba</td><td>${fmt(tStd?.rise)}</td></tr>
@@ -1265,8 +1463,8 @@ function renderSunMoon() {
   document.getElementById('table-moon').innerHTML = `
     <tr><td>Fase</td><td>${m.name}</td></tr>
     <tr><td>Illuminazione</td><td>${m.illumPct.toFixed(0)}%</td></tr>
-    <tr><td>Sorge (prossimo)</td><td>${fmt(moonTimes.rise)}</td></tr>
-    <tr><td>Tramonta (prossimo)</td><td>${fmt(moonTimes.set)}</td></tr>
+    <tr><td>Sorge (notte)</td><td>${fmt(moonTimes.rise)}</td></tr>
+    <tr><td>Tramonta (notte)</td><td>${fmt(moonTimes.set)}</td></tr>
   `;
   
   document.getElementById('moon-phase-path').setAttribute('d', getMoonPathSVG(m.illumPct, m.isWaxing));
@@ -1276,47 +1474,160 @@ function renderSunMoon() {
 function renderTonight() {
   const now = state.currentTime;
   document.getElementById('tonight-time').innerText = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-  document.getElementById('tonight-location').innerText = `${state.lat.toFixed(2)}°, ${state.lon.toFixed(2)}° — ${now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}`;
   
-  // FIX: Usa sempre i pianeti calcolati all'orario corrente, non quelli vecchi
-  const planets = calcPlanetsPrecise(now);
-  state.planets = planets;
+  const night = getNightWindow(now);
+  if (!night) {
+      document.getElementById('tonight-location').innerText = "Dati notturni non disponibili.";
+      return;
+  }
   
-  const planetRows = planets.filter(p => p.alt > 0 && !p.isSun);
-  document.getElementById('tonight-planets').innerHTML = planetRows.length === 0
-    ? '<div style="color:var(--muted); padding:10px;">Nessun pianeta sopra l\'orizzonte.</div>'
-    : planetRows.sort((a, b) => b.alt - a.alt).map(p => `<div class="object-row" onclick="tonightClick('${encodeURIComponent(JSON.stringify({n:p.n,ra:p.ra,dec:p.dec,s:p.s}))}')"><div><span class="object-name">${p.s} ${p.n}</span></div><div><span class="object-alt ${p.alt < 20 ? 'low' : ''}">${p.alt.toFixed(1)}°</span></div></div>`).join('');
+  const nightStart = night.start;
+  const nightEnd = night.end;
   
-  const messierRows = Object.values(MESSIER).map(m => ({ ...m, ...getAltAz(m.ra, m.dec, now) })).filter(m => m.alt > 10);
+  const dateStr = nightStart.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('tonight-location').innerText = `${state.lat.toFixed(2)}°, ${state.lon.toFixed(2)}° — Notte del ${dateStr}`;
+  
+  const step = 20 * 60000;
+  const samples = [];
+  for (let t = nightStart.getTime(); t <= nightEnd.getTime(); t += step) {
+      samples.push(new Date(t));
+  }
+  
+  const planetsData = samples.map(d => calcPlanetsPrecise(d));
+  
+  const moonObj = planetsData[0].find(p => p.isMoon);
+  let moonHTML = '';
+  
+  if (moonObj) {
+      let maxAlt = -90, maxTime = null;
+      planetsData.forEach((pArr, idx) => {
+          const m = pArr.find(p => p.isMoon);
+          if (m && m.alt > maxAlt) {
+              maxAlt = m.alt;
+              maxTime = samples[idx];
+          }
+      });
+      
+      if (maxAlt > 0) {
+          // FIX: Usa state.currentTime per avere l'illuminazione identica alla pagina Coordinate
+          const mData = getExactMoonData(state.currentTime);
+          const payload = encodeURIComponent(JSON.stringify({n: "Luna", ra: moonObj.ra, dec: moonObj.dec}));
+          
+          moonHTML = `
+          <div class="object-row" onclick="tonightClick('${payload}')" style="border-left: 3px solid var(--accent2); background: rgba(243,229,171,0.05); cursor: pointer;">
+            <div>
+              <span class="object-name">🌙 Luna</span>
+              <span class="object-type">Satellite</span>
+              <span class="visibility-badge ${mData.illumPct > 50 ? 'naked' : 'binocular'}">${mData.illumPct.toFixed(0)}% ill.</span>
+            </div>
+            <div style="text-align:right;">
+              <span class="object-alt ${maxAlt < 20 ? 'low' : ''}">${maxAlt.toFixed(1)}°</span>
+              <div style="font-size:10px; color:var(--muted);">max ${maxTime.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})}</div>
+            </div>
+          </div>`;
+      }
+  }
+
+  let planetRows = [];
+  PLANET_NAMES.forEach(name => {
+      let maxAlt = -90, maxTime = null;
+      const itName = PLANET_IT[name];
+      planetsData.forEach((pArr, idx) => {
+          const p = pArr.find(x => x.n === itName);
+          if (p && p.alt > maxAlt) {
+              maxAlt = p.alt;
+              maxTime = samples[idx];
+          }
+      });
+      if (maxAlt > 0) {
+          const pRef = planetsData[0].find(x => x.n === itName);
+          planetRows.push({ n: itName, s: pRef.s, maxAlt, maxTime, ra: pRef.ra, dec: pRef.dec });
+      }
+  });
+  
+  planetRows.sort((a,b) => b.maxAlt - a.maxAlt);
+  
+  const planetsHTML = planetRows.map(p => `
+    <div class="object-row" onclick="tonightClick('${encodeURIComponent(JSON.stringify({n:p.n,ra:p.ra,dec:p.dec,s:p.s}))}')">
+      <div><span class="object-name">${p.s} ${p.n}</span></div>
+      <div style="text-align:right;">
+        <span class="object-alt ${p.maxAlt < 20 ? 'low' : ''}">${p.maxAlt.toFixed(1)}°</span>
+        <div style="font-size:10px; color:var(--muted);">max ${p.maxTime.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('tonight-planets').innerHTML = moonHTML + (planetsHTML || (moonHTML === '' ? '<div style="color:var(--muted); padding:10px;">Nessun pianeta visibile stanotte.</div>' : ''));
+
+  const evaluateFixed = (objList) => {
+      return objList.map(obj => {
+          let maxAlt = -90, maxTime = null;
+          samples.forEach(d => {
+              const pos = getAltAz(obj.ra, obj.dec, d);
+              if (pos.alt > maxAlt) {
+                  maxAlt = pos.alt;
+                  maxTime = d;
+              }
+          });
+          return { ...obj, maxAlt, maxTime };
+      }).filter(o => o.maxAlt > 10).sort((a,b) => b.maxAlt - a.maxAlt);
+  };
+  
+  const messierRows = evaluateFixed(Object.values(MESSIER));
   document.getElementById('tonight-messier').innerHTML = messierRows.length === 0
     ? '<div style="color:var(--muted); padding:10px;">Nessun oggetto Messier ben posizionato.</div>'
-    : messierRows.sort((a, b) => b.alt - a.alt).map(m => {
+    : messierRows.map(m => {
         let badge = '';
         if (m.mag && m.mag <= 5) badge = '<span class="visibility-badge naked">occhio nudo</span>';
         else if (m.mag && m.mag <= 8) badge = '<span class="visibility-badge binocular">binocolo</span>';
         else badge = '<span class="visibility-badge telescope">telescopio</span>';
         const payload = encodeURIComponent(JSON.stringify({n:m.n,ra:m.ra,dec:m.dec}));
-        return `<div class="object-row" onclick="tonightClick('${payload}')"><div><span class="object-name">${m.n}</span><span class="object-type">${m.type}</span>${badge}</div><div><span class="object-alt ${m.alt < 30 ? 'low' : ''}">${m.alt.toFixed(1)}°</span></div></div>`;
+        return `
+        <div class="object-row" onclick="tonightClick('${payload}')">
+            <div><span class="object-name">${m.n}</span><span class="object-type">${m.type}</span>${badge}</div>
+            <div style="text-align:right;">
+                <span class="object-alt ${m.maxAlt < 30 ? 'low' : ''}">${m.maxAlt.toFixed(1)}°</span>
+                <div style="font-size:10px; color:var(--muted);">max ${m.maxTime.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})}</div>
+            </div>
+        </div>`;
       }).join('');
-  
-  const nebRows = NEBULAE_EXTRA.map(n => ({ ...n, ...getAltAz(n.ra, n.dec, now) })).filter(n => n.alt > 10);
+
+  const nebRows = evaluateFixed(NEBULAE_EXTRA);
   document.getElementById('tonight-nebulae').innerHTML = nebRows.length === 0
     ? '<div style="color:var(--muted); padding:10px;">Nessuna nebulosa ben posizionata.</div>'
-    : nebRows.sort((a, b) => b.alt - a.alt).map(n => {
+    : nebRows.map(n => {
         let badge = '';
         if (n.mag && n.mag <= 5) badge = '<span class="visibility-badge naked">occhio nudo</span>';
         else if (n.mag && n.mag <= 8) badge = '<span class="visibility-badge binocular">binocolo</span>';
         else badge = '<span class="visibility-badge telescope">telescopio</span>';
         const payload = encodeURIComponent(JSON.stringify({n:n.n,ra:n.ra,dec:n.dec}));
-        return `<div class="object-row" onclick="tonightClick('${payload}')"><div><span class="object-name">${n.n}</span>${badge}</div><div><span class="object-alt ${n.alt < 30 ? 'low' : ''}">${n.alt.toFixed(1)}°</span></div></div>`;
+        return `
+        <div class="object-row" onclick="tonightClick('${payload}')">
+            <div><span class="object-name">${n.n}</span>${badge}</div>
+            <div style="text-align:right;">
+                <span class="object-alt ${n.maxAlt < 30 ? 'low' : ''}">${n.maxAlt.toFixed(1)}°</span>
+                <div style="font-size:10px; color:var(--muted);">max ${n.maxTime.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})}</div>
+            </div>
+        </div>`;
       }).join('');
-  
-  const constRows = CONSTELLATIONS.map(c => { const mid = c.stars[Math.floor(c.stars.length / 2)]; const pos = getAltAz(mid.ra, mid.dec, now); return { ...c, alt: pos.alt, midRa: mid.ra, midDec: mid.dec }; }).filter(c => c.alt > 15);
+
+  const constList = CONSTELLATIONS.map(c => {
+    const mid = c.stars[Math.floor(c.stars.length / 2)];
+    return { name: c.name, ra: mid.ra, dec: mid.dec };
+  });
+  const constRows = evaluateFixed(constList);
   document.getElementById('tonight-constellations').innerHTML = constRows.length === 0
     ? '<div style="color:var(--muted); padding:10px;">Nessuna costellazione ben visibile.</div>'
-    : constRows.sort((a, b) => b.alt - a.alt).map(c => {
-        const payload = encodeURIComponent(JSON.stringify({n:c.name,ra:c.midRa,dec:c.midDec}));
-        return `<div class="object-row" onclick="tonightClick('${payload}')"><div><span class="object-name">${c.name}</span></div><div><span class="object-alt ${c.alt < 30 ? 'low' : ''}">${c.alt.toFixed(1)}°</span></div></div>`;
+    : constRows.map(c => {
+        const payload = encodeURIComponent(JSON.stringify({n:c.name,ra:c.ra,dec:c.dec}));
+        return `
+        <div class="object-row" onclick="tonightClick('${payload}')">
+            <div><span class="object-name">${c.name}</span></div>
+            <div style="text-align:right;">
+                <span class="object-alt ${c.maxAlt < 30 ? 'low' : ''}">${c.maxAlt.toFixed(1)}°</span>
+                <div style="font-size:10px; color:var(--muted);">max ${c.maxTime.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})}</div>
+            </div>
+        </div>`;
       }).join('');
 }
 
@@ -1565,7 +1876,6 @@ function drawMap() {
     });
   }
   if (document.getElementById('filtroPianeti').checked) {
-    // FIX: Usa sempre i dati correnti, non state.planets che potrebbe essere vecchio
     const planets = calcPlanetsPrecise(state.currentTime);
     planets.forEach(p => {
       const pos = p.alt !== undefined ? p : getAltAz(p.ra, p.dec, state.currentTime);
@@ -1590,7 +1900,7 @@ function drawMap() {
         ctx.shadowBlur = 0;
 
       } else if (p.isMoon) {
-        const moonData = getMoonDataPure(state.lat, state.lon, state.currentTime);
+        const moonData = getExactMoonData(state.currentTime);
         const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, 32);
         glow.addColorStop(0, 'rgba(243,229,171,0.6)');
         glow.addColorStop(1, 'transparent');
@@ -1667,8 +1977,8 @@ function drawMap() {
 
 function resetView() {
   state.camAlt = 45;
-  state.camAz = 0;         // Nord
-  state.fov = 80;          // stessa apertura di "Punta Nord"
+  state.camAz = 0;
+  state.fov = 80;
   state.autoRotate = false;
   const btn = document.getElementById('autoRotBtn');
   if (btn) btn.textContent = '🔄 Auto-ruota';
@@ -1751,7 +2061,7 @@ canvas.addEventListener('click', e => {
     if (pt.visible) { const dist = Math.hypot(clickX - pt.x, clickY - pt.y); if (dist < minDist) { minDist = dist; closest = obj; } }
   };
   if (document.getElementById('filtroStelle').checked) STARS.forEach(checkObj);
-  const planets = calcPlanetsPrecise(state.currentTime); // FIX: usa sempre dati correnti
+  const planets = calcPlanetsPrecise(state.currentTime);
   if (document.getElementById('filtroPianeti').checked) planets.forEach(checkObj);
   const showNeb = document.getElementById('filtroNebulose').checked;
   const showGal = document.getElementById('filtroGalassie').checked;
@@ -1830,7 +2140,7 @@ async function fetchWeather() {
 }
 
 function renderQuality() {
-  const m = getMoonDataPure(state.lat, state.lon, state.currentTime);
+  const m = getExactMoonData(state.currentTime);
   const sqmScore = Math.max(0, Math.min(10, (state.sqm - 17) / 0.5));
   const moonPenalty = m.illum > 0.5 ? 2 : (m.illum > 0.2 ? 1 : 0);
   const cloudPenalty = state.clouds > 70 ? 3 : (state.clouds > 30 ? 1 : 0);
@@ -1936,10 +2246,65 @@ function reloadPreview() {
   if (url) loadPreviewImage(url);
 }
 function closePreview() { document.getElementById('preview-modal').classList.remove('open'); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePreview(); closeCatDetail(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePreview(); closeCatDetail(); closeSolarModal(); } });
+
+/* ===== MODALE ATTIVITA' SOLARE ===== */
+function openSolarModal() {
+  const modal = document.getElementById('solar-modal');
+  const grid = document.getElementById('solar-detail-grid');
+  
+  let distAU = "—", raSun = "—", decSun = "—", altSun = "—", azSun = "—";
+  
+  if (typeof Astronomy !== 'undefined') {
+    try {
+      const obs = new Astronomy.Observer(state.lat, state.lon, 0);
+      const time = new Astronomy.AstroTime(state.currentTime);
+      const sunEq = Astronomy.Equator(Astronomy.Body.Sun, time, obs, true, true);
+      const sunHor = Astronomy.Horizon(time, obs, sunEq.ra, sunEq.dec, 'normal');
+      const vec = Astronomy.GeoVector(Astronomy.Body.Sun, time, false);
+      
+      distAU = vec.Length().toFixed(4) + " UA";
+      raSun = (sunEq.ra * 15).toFixed(2) + "°";
+      decSun = sunEq.dec.toFixed(2) + "°";
+      altSun = sunHor.altitude.toFixed(1) + "°";
+      azSun = sunHor.azimuth.toFixed(1) + "°";
+    } catch(e) { console.warn("Errore calcolo sole", e); }
+  }
+
+  const currentYear = state.currentTime.getFullYear();
+  const solarCyclePhase = (currentYear >= 2024 && currentYear <= 2026) ? "Massimo Solare (Ciclo 25)" : "Fase di transizione";
+
+  grid.innerHTML = `
+    <div class="detail-row">
+      <div class="dl">Distanza Terra-Sole</div>
+      <div class="dv">${distAU}</div>
+    </div>
+    <div class="detail-row">
+      <div class="dl">Fase Ciclo Solare</div>
+      <div class="dv" style="color:var(--warn);">${solarCyclePhase}</div>
+    </div>
+    <div class="detail-row">
+      <div class="dl">Coordinate (RA / Dec)</div>
+      <div class="dv">${raSun} / ${decSun}</div>
+    </div>
+    <div class="detail-row">
+      <div class="dl">Posizione (Alt / Az)</div>
+      <div class="dv">${altSun} / ${azSun}</div>
+    </div>
+    <div class="detail-row" style="grid-column:1/-1;">
+      <div class="dl">Informazioni</div>
+      <div class="dv" style="font-size:12px; font-weight:normal; color:var(--muted); line-height:1.4;">
+        L'attività solare è in forte aumento. Per monitorare in tempo reale macchie solari, brillamenti (flares) e tempeste geomagnetiche (Kp index), usa i pulsanti qui sotto per visitare i portali ufficiali della NASA e della NOAA.
+      </div>
+    </div>
+  `;
+  
+  modal.classList.add('open');
+}
+function closeSolarModal() { document.getElementById('solar-modal').classList.remove('open'); }
 
 /* ============================================================
-   FINESTRA DI OSSERVAZIONE — GRAFICO ASTROFOTOGRAFICO
+   FINESTRA DI OSSERVAZIONE
    ============================================================ */
 function getSunAltitude(date) {
   const jd = date.getTime() / 86400000 + 2440587.5;
@@ -1977,20 +2342,15 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType) {
     return;
   }
 
-  const refDate = new Date(state.currentTime);
-  const todayNoon = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate(), 12, 0, 0);
-  const sunSet = getSunTimesPure(state.lat, state.lon, todayNoon, -0.833);
-  const nextNoon = new Date(todayNoon); nextNoon.setDate(nextNoon.getDate() + 1);
-  const sunRise = getSunTimesPure(state.lat, state.lon, nextNoon, -0.833);
-
-  if (!sunSet || !sunRise) {
+  const night = getNightWindow(state.currentTime);
+  if (!night) {
     container.innerHTML = '<div style="color:var(--muted); text-align:center; padding:20px;">Grafico non disponibile.</div>';
     return;
   }
 
   const MARGIN_MS = 30 * 60 * 1000;
-  const tStart = new Date(sunSet.set.getTime() - MARGIN_MS);
-  const tEnd = new Date(sunRise.rise.getTime() + MARGIN_MS);
+  const tStart = new Date(night.start.getTime() - MARGIN_MS);
+  const tEnd = new Date(night.end.getTime() + MARGIN_MS);
   const totalMs = tEnd - tStart;
 
   if (totalMs <= 0) {
@@ -2186,6 +2546,11 @@ function showObjectModal(name, ra, dec) {
       type = 'Stella (Sole)'; facts = { ...SUN_FACTS }; desc = SUN_FACTS.desc;
     } else if (name === 'Luna') {
       type = 'Satellite naturale'; facts = { ...MOON_FACTS }; desc = MOON_FACTS.desc;
+      
+      const mData = getExactMoonData(state.currentTime);
+      facts['Illuminazione'] = mData.illumPct.toFixed(1) + '%';
+      facts['Fase'] = mData.name;
+      desc = `${MOON_FACTS.desc}<br><br><strong style="color:var(--accent);">💡 Cosa osservare stasera:</strong><br>${getMoonObservationTips(mData.illumPct, mData.isWaxing)}`;
     }
   }
 
@@ -2205,7 +2570,7 @@ function showObjectModal(name, ra, dec) {
   document.getElementById('cat-detail-sub').innerText = type;
   const grid = document.getElementById('cat-detail-grid');
   const rows = [];
-  if (desc) rows.push(`<div class="detail-row" style="grid-column:1/-1;"><div class="dl">Descrizione</div><div class="dv">${desc}</div></div>`);
+  if (desc) rows.push(`<div class="detail-row" style="grid-column:1/-1;"><div class="dl">Descrizione</div><div class="dv" style="line-height:1.5;">${desc}</div></div>`);
   Object.entries(facts).forEach(([k,v]) => rows.push(`<div class="detail-row"><div class="dl">${k}</div><div class="dv">${v}</div></div>`));
   grid.innerHTML = rows.join('');
   document.getElementById('cat-detail-modal').classList.add('open');
@@ -2290,8 +2655,19 @@ function openCatDetail(id) {
   document.getElementById('cat-detail-sub').innerText = `${it.type} · ${it.cat}`;
   const grid = document.getElementById('cat-detail-grid');
   const rows = [];
-  if (it.desc) rows.push(`<div class="detail-row" style="grid-column:1/-1;"><div class="dl">Descrizione</div><div class="dv">${it.desc}</div></div>`);
-  if (it.facts) Object.entries(it.facts).forEach(([k, v]) => rows.push(`<div class="detail-row"><div class="dl">${k}</div><div class="dv">${v}</div></div>`));
+  
+  let desc = it.desc || '';
+  let facts = { ...it.facts };
+  
+  if (it.name === 'Luna') {
+    const mData = getExactMoonData(state.currentTime);
+    facts['Illuminazione'] = mData.illumPct.toFixed(1) + '%';
+    facts['Fase'] = mData.name;
+    desc = `${MOON_FACTS.desc}<br><br><strong style="color:var(--accent);">💡 Cosa osservare stasera:</strong><br>${getMoonObservationTips(mData.illumPct, mData.isWaxing)}`;
+  }
+
+  if (desc) rows.push(`<div class="detail-row" style="grid-column:1/-1;"><div class="dl">Descrizione</div><div class="dv" style="line-height:1.5;">${desc}</div></div>`);
+  if (facts) Object.entries(facts).forEach(([k, v]) => rows.push(`<div class="detail-row"><div class="dl">${k}</div><div class="dv">${v}</div></div>`));
 
   let effectiveRa = it.ra, effectiveDec = it.dec;
   if (it.ra !== null && it.ra !== undefined) {
@@ -2354,7 +2730,6 @@ function catDetailGoto() {
   drawMap(); showInfo(state.target);
 }
 
-/* ===== PWA: Registrazione Service Worker ===== */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js', { scope: './' })
