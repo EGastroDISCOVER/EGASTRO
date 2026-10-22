@@ -5,22 +5,33 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "any",
   "background_color": "#03050a",
   "theme_color": "#d4af37",
   "lang": "it",
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%2303050a'/%3E%3Ccircle cx='96' cy='96' r='80' fill='none' stroke='%23d4af37' stroke-width='6'/%3E%3Ctext x='96' y='115' font-size='55' text-anchor='middle' fill='%23d4af37' font-family='Arial' font-weight='bold'%3EEG%3C/text%3E%3C/svg%3E",
+      "src": "https://egastrodiscover.github.io/EGASTRO/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%2303050a'/%3E%3Ccircle cx='256' cy='256' r='220' fill='none' stroke='%23d4af37' stroke-width='18'/%3E%3Ctext x='256' y='310' font-size='150' text-anchor='middle' fill='%23d4af37' font-family='Arial' font-weight='bold'%3EEG%3C/text%3E%3C/svg%3E",
+      "src": "https://egastrodiscover.github.io/EGASTRO/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "https://egastrodiscover.github.io/EGASTRO/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://egastrodiscover.github.io/EGASTRO/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
