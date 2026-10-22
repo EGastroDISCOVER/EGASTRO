@@ -6,8 +6,10 @@
 <meta name="theme-color" content="#d4af37">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="app-version" content="8.0.0">
+<meta name="app-name" content="EGastro DISCOVER">
 <link rel="manifest" href="./manifest.json">
-<title>EGastro DISCOVER</title>
+<title>EGastro DISCOVER v8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -45,6 +47,12 @@
   .logo-text span:last-child { font-size: 9px; letter-spacing: 2px; color: var(--accent2); }
   header h1 { font-family: 'Orbitron', sans-serif; font-size: 26px; color: var(--accent2); letter-spacing: 2px; text-shadow: 0 0 15px var(--glow); font-weight: 900; }
   header h1 span { color: var(--accent); font-weight: 500; font-size: 20px; }
+  .version-badge {
+    display: inline-block; margin-left: 10px; padding: 2px 8px;
+    font-size: 11px; font-weight: 700; font-family: 'Orbitron', sans-serif;
+    color: #000; background: var(--accent); border-radius: 10px;
+    box-shadow: 0 0 10px var(--glow); vertical-align: middle; letter-spacing: 1px;
+  }
   nav { display: flex; overflow-x: auto; background: var(--bg2); border-bottom: 1px solid var(--line); padding: 5px; }
   nav button { flex: 1; padding: 15px 10px; background: none; border: none; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; border-radius: 10px; transition: all 0.2s; margin: 0 2px; }
   nav button:hover { color: var(--text); background: rgba(255,255,255,0.03); }
@@ -176,7 +184,16 @@
   .obs-chart-wrap { margin-top: 20px; background: #05070c; border: 1px solid var(--line); border-radius: 12px; padding: 14px 14px 10px; }
   .obs-chart-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
   .obs-chart-title .sub { font-family: 'Inter', sans-serif; font-size: 10px; color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 500; }
-  #obsChartCanvas { width: 100%; height: 180px; display: block; border-radius: 8px; background: #000; }
+  /* FIX: regola generica per QUALSIASI canvas dentro .obs-chart-wrap, non solo #obsChartCanvas */
+  .obs-chart-wrap canvas, #obsChartCanvas {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 800 / 180;
+    max-height: 220px;
+    display: block;
+    border-radius: 8px;
+    background: #000;
+  }
   .obs-chart-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10px; color: var(--muted); margin-top: 8px; font-weight: 600; }
   .obs-chart-legend span { display: inline-flex; align-items: center; gap: 4px; }
   .obs-chart-legend i { width: 12px; height: 10px; display: inline-block; border-radius: 2px; border: 1px solid rgba(255,255,255,0.15); }
@@ -187,21 +204,43 @@
   /* ============ TELESCOPIO UI ============ */
   .scope-layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 15px; align-items: start; }
   .scope-left-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  /* HUD spostato FUORI dal riquadro mappa */
+  .scope-hud-outside {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-family: 'Orbitron', sans-serif;
+    color: var(--accent2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    order: -1;
+  }
+  .scope-hud-outside span { white-space: nowrap; }
+  .scope-hud-outside b { color: var(--accent); }
+
   .scope-map-wrap { position: relative; background: #000; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); height: 620px; }
   #scopeCanvas, #scopeOverlayCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   #scopeCanvas { cursor: grab; touch-action: none; background: #000; }
   #scopeCanvas:active { cursor: grabbing; }
   #scopeOverlayCanvas { pointer-events: none; }
+  /* Vecchio .scope-hud mantenuto in CSS per sicurezza, non più usato in HTML */
   .scope-hud { position: absolute; top: 10px; left: 10px; background: rgba(4,6,11,.8); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 11px; font-family: 'Orbitron'; color: var(--accent2); display: flex; gap: 12px; pointer-events: none; backdrop-filter: blur(4px); z-index: 5; flex-wrap: wrap; max-width: calc(100% - 20px); }
   .scope-hud b { color: var(--accent); }
-  .edge-arrow { position: absolute; width: 42px; height: 42px; background: rgba(13,18,28,.85); border: 1px solid var(--accent); border-radius: 50%; color: var(--accent); font-size: 18px; display: grid; place-items: center; cursor: pointer; pointer-events: auto; z-index: 15; transition: .1s; backdrop-filter: blur(4px); user-select: none; }
+
+  /* MODIFICA: frecce direzionali più grandi (54px invece di 42px) per area di touch più ampia */
+  .edge-arrow { position: absolute; width: 54px; height: 54px; background: rgba(13,18,28,.88); border: 1.5px solid var(--accent); border-radius: 50%; color: var(--accent); font-size: 22px; display: grid; place-items: center; cursor: pointer; pointer-events: auto; z-index: 15; transition: .1s; backdrop-filter: blur(4px); user-select: none; box-shadow: 0 0 12px rgba(212,175,55,0.35); }
   .edge-arrow:active { background: var(--accent); color: #000; transform: scale(.92); }
   .edge-n { top: 8px; left: 50%; transform: translateX(-50%); }
   .edge-s { bottom: 8px; left: 50%; transform: translateX(-50%); }
   .edge-e { top: 50%; right: 8px; transform: translateY(-50%); }
   .edge-o { top: 50%; left: 8px; transform: translateY(-50%); }
 
-  /* ============ POPUP TARGET SOTTO LA MAPPA ============ */
   .scope-target-overlay {
     display: none;
     flex-direction: column;
@@ -247,40 +286,22 @@
   .scope-target-data-row .tc .v.low { color: var(--warn); }
   .scope-target-data-row .tc .v.off { color: var(--muted); }
 
-  .scope-night-chart-wrap {
-    padding: 6px 14px 0;
-  }
-  #scopeNightChart {
-    width: 100%; height: 72px; display: block;
-    border-radius: 6px; background: #000;
-    border: 1px solid var(--line);
-  }
-  .scope-night-chart-meta {
-    padding: 4px 14px 8px;
-    font-size: 10px; color: var(--muted);
-    display: flex; justify-content: space-between; gap: 8px;
-    border-bottom: 1px solid var(--line);
-  }
+  .scope-night-chart-wrap { padding: 6px 14px 0; }
+  #scopeNightChart { width: 100%; height: 72px; display: block; border-radius: 6px; background: #000; border: 1px solid var(--line); }
+  .scope-night-chart-meta { padding: 4px 14px 8px; font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); }
   .scope-night-chart-meta strong { color: var(--ok); }
 
   .target-step-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 12px 14px 4px;
-    gap: 6px;
+    display: flex; justify-content: center; align-items: center;
+    padding: 12px 14px 4px; gap: 6px;
   }
   .step-indicator { display: flex; align-items: center; gap: 4px; }
   .step-dot {
-    width: 28px; height: 28px;
-    border-radius: 50%;
+    width: 28px; height: 28px; border-radius: 50%;
     border: 1.5px solid var(--line);
-    background: var(--bg2);
-    color: var(--muted);
+    background: var(--bg2); color: var(--muted);
     display: grid; place-items: center;
-    font-size: 12px;
-    font-weight: bold;
-    font-family: 'Orbitron';
+    font-size: 12px; font-weight: bold; font-family: 'Orbitron';
     transition: 0.3s;
   }
   .step-dot.active { border-color: var(--accent); background: var(--accent); color: #000; box-shadow: 0 0 12px var(--glow); }
@@ -297,16 +318,10 @@
     gap: 8px;
   }
   .target-actions-row button {
-    padding: 11px 6px;
-    border-radius: 9px;
-    font-weight: 700;
-    font-size: 12px;
-    cursor: pointer;
-    border: 1px solid var(--line);
-    background: var(--bg2);
-    color: var(--text);
-    transition: 0.2s;
-    font-family: 'Inter', sans-serif;
+    padding: 11px 6px; border-radius: 9px;
+    font-weight: 700; font-size: 12px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--bg2); color: var(--text);
+    transition: 0.2s; font-family: 'Inter', sans-serif;
   }
   .target-actions-row button:hover { border-color: var(--accent); color: var(--accent); }
   .target-actions-row .btn-goto-large {
@@ -323,7 +338,6 @@
   .target-actions-row .btn-sync:hover { background: var(--ok); color: #000; }
   .target-actions-row .btn-stop { background: rgba(248,113,113,.15); border-color: var(--bad); color: var(--bad); }
 
-  /* Park overlay RIDOTTO (angolo, non copre mappa) */
   .park-overlay {
     position: absolute; top: 10px; right: 10px; width: 180px;
     background: rgba(0,0,0,.88); backdrop-filter: blur(6px);
@@ -341,6 +355,35 @@
   .scope-zoom { position: absolute; bottom: 15px; right: 15px; display: flex; flex-direction: column; gap: 6px; z-index: 10; }
   .scope-zoom button { width: 34px; height: 34px; border-radius: 50%; background: rgba(13,18,28,.9); border: 1px solid var(--accent); color: var(--accent); font-size: 16px; font-weight: bold; cursor: pointer; display: grid; place-items: center; }
   .scope-zoom button:hover { background: var(--accent); color: #000; }
+
+  /* STOP DI EMERGENZA (basso sinistra mappa telescopio) */
+  .scope-emergency-stop {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    width: 64px;
+    height: 64px;
+    z-index: 20;
+    border-radius: 50%;
+    background: rgba(239,68,68,.92);
+    color: #fff;
+    border: 3px solid #7f1d1d;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 0 18px rgba(239,68,68,.6);
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.1;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  .scope-emergency-stop:hover { background: #ef4444; box-shadow: 0 0 30px rgba(239,68,68,.9); transform: scale(1.05); }
+  .scope-emergency-stop:active { transform: scale(.92); }
 
   .scope-panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px; max-height: 900px; overflow-y: auto; }
   .conn-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; background: var(--bad); color: #000; }
@@ -392,12 +435,7 @@
   .catalog-item.selected { background: rgba(212,175,55,.12); border-color: var(--accent); box-shadow: 0 0 0 1px rgba(212,175,55,.2) inset; }
   .catalog-item.dim { opacity: 0.45; }
   .catalog-item .left-info { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
-  .catalog-item .icon {
-    width: 24px; height: 24px; border-radius: 6px;
-    display: grid; place-items: center; font-size: 12px; flex-shrink: 0;
-    background: rgba(139,211,255,.1); border: 1px solid rgba(139,211,255,.2);
-    color: var(--blue);
-  }
+  .catalog-item .icon { width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center; font-size: 12px; flex-shrink: 0; background: rgba(139,211,255,.1); border: 1px solid rgba(139,211,255,.2); color: var(--blue); }
   .catalog-item .icon.planet { background: rgba(255,204,0,.1); border-color: rgba(255,204,0,.25); color: #ffd700; }
   .catalog-item .icon.star { background: rgba(243,229,171,.1); border-color: rgba(243,229,171,.25); color: var(--accent2); }
   .catalog-item .icon.moon { background: rgba(203,213,225,.12); border-color: rgba(203,213,225,.25); color: #e2e8f0; }
@@ -417,13 +455,13 @@
   .map-tooltip { position: absolute; pointer-events: none; z-index: 30; background: rgba(4,6,11,.92); border: 1px solid var(--accent); border-radius: 6px; padding: 4px 8px; font-size: 10px; font-family: 'Orbitron'; color: var(--accent2); transform: translate(12px,12px); opacity: 0; transition: opacity .12s; white-space: nowrap; }
   .map-tooltip.show { opacity: 1; }
 
-  /* ============ POPUP OGGETTO MAPPA CIELO ============ */
+  /* Popup oggetto mappa cielo */
   #skyObjectPopup {
     display: none;
     background: var(--card);
     border: 1.5px solid var(--accent);
     border-radius: 16px;
-    margin-top: 20px;
+    margin-top: 15px;
     padding: 20px;
     animation: slideUp 0.35s ease;
     box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px var(--glow);
@@ -446,12 +484,12 @@
   }
   @media (max-width: 600px) {
     #cat-detail-modal .detail-grid, #solar-modal .detail-grid { grid-template-columns: 1fr; }
-    #obsChartCanvas { height: 150px; }
     .time-slider-inline { flex-wrap: wrap; }
     .time-display-inline { width: 100%; text-align: center; margin-top: 5px; }
     .target-actions-row { grid-template-columns: 1fr; }
     .step-line { width: 24px; }
     #skyObjectPopup .popup-grid { grid-template-columns: 1fr; }
+    .scope-hud-outside { gap: 10px; font-size: 11px; padding: 8px 10px; }
   }
 </style>
 </head>
@@ -473,7 +511,7 @@
     <div class="logo-text" id="logoFallback"><span>EG</span><span>ASTRO</span></div>
   </div>
   <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
-  <h1>EGastro <span>DISCOVER</span></h1>
+  <h1>EGastro <span>DISCOVER</span> <span class="version-badge">v8</span></h1>
 </header>
 
 <nav id="menu">
@@ -500,18 +538,6 @@
           <label>Città / Provincia (Italia)</label>
           <select id="citySelect" onchange="loadCity()">
             <option value="">-- Seleziona una città --</option>
-            <optgroup label="Italia">
-              <option value="41.9028,12.4964,Roma">Roma</option>
-              <option value="45.4642,9.1900,Milano">Milano</option>
-              <option value="40.8518,14.2681,Napoli">Napoli</option>
-              <option value="45.0703,7.6869,Torino">Torino</option>
-              <option value="38.1157,13.3615,Palermo">Palermo</option>
-              <option value="44.4949,11.3426,Bologna">Bologna</option>
-              <option value="43.7696,11.2558,Firenze">Firenze</option>
-              <option value="41.1171,16.8719,Bari">Bari</option>
-              <option value="37.5079,15.0830,Catania">Catania</option>
-              <option value="45.4408,12.3155,Venezia">Venezia</option>
-            </optgroup>
           </select>
         </div>
         <div><label>Latitudine</label><input type="number" id="lat" value="41.9028" step="0.0001"></div>
@@ -609,6 +635,19 @@
           <button class="map-btn" onclick="toggleAutoRotate()" id="autoRotBtn">🔄 Auto-ruota</button>
         </div>
       </div>
+
+      <!-- POPUP OGGETTO SELEZIONATO (subito sotto la mappa) -->
+      <div id="skyObjectPopup">
+        <div class="popup-title" id="skyPopupTitle">Oggetto</div>
+        <div class="popup-sub" id="skyPopupSub">—</div>
+        <div class="popup-grid" id="skyPopupGrid"></div>
+        <div id="skyPopupChart"></div>
+        <div class="popup-actions">
+          <button class="btn" onclick="sendSkyTargetToTelescope()">🔭 Invia al Telescopio</button>
+          <button class="btn btn-ghost" onclick="closeSkyObjectPopup()">Chiudi</button>
+        </div>
+      </div>
+
       <div class="compass-indicator">
         <span id="compN">N</span><span id="compNE">NE</span><span id="compE">E</span><span id="compSE">SE</span>
         <span id="compS">S</span><span id="compSO">SO</span><span id="compO">O</span><span id="compNO">NO</span>
@@ -619,17 +658,6 @@
         <span style="color:#ffcc00">☀️ Sole</span>
         <span style="color:#f3e5ab">🌙 Luna</span>
         <span style="color:#8bd3ff">● Oggetti Profondi</span>
-      </div>
-    </div>
-    <!-- Popup oggetto selezionato sulla mappa cielo -->
-    <div id="skyObjectPopup">
-      <div class="popup-title" id="skyPopupTitle">Oggetto</div>
-      <div class="popup-sub" id="skyPopupSub">—</div>
-      <div class="popup-grid" id="skyPopupGrid"></div>
-      <div id="skyPopupChart"></div>
-      <div class="popup-actions">
-        <button class="btn" onclick="sendSkyTargetToTelescope()">🔭 Invia al Telescopio</button>
-        <button class="btn btn-ghost" onclick="closeSkyObjectPopup()">Chiudi</button>
       </div>
     </div>
   </div>
@@ -721,19 +749,20 @@
     </div>
   </div>
 
-  <!-- ============ TELESCOPIO ============ -->
   <div id="tab-scope" class="tab-content">
     <div class="scope-layout">
       <div class="scope-left-col">
+        <!-- HUD FUORI DAL RIQUADRO MAPPA -->
+        <div class="scope-hud-outside">
+          <span>AZ <b id="scopeHudAz">--</b></span>
+          <span>ALT <b id="scopeHudAlt">--</b></span>
+          <span>FOV <b id="scopeHudFov">80°</b></span>
+          <span id="scopeHudTrack" style="color:var(--muted)">OFF</span>
+        </div>
+
         <div class="scope-map-wrap" id="scopeMapWrap">
           <canvas id="scopeCanvas"></canvas>
           <canvas id="scopeOverlayCanvas"></canvas>
-          <div class="scope-hud">
-            <span>AZ <b id="scopeHudAz">--</b></span>
-            <span>ALT <b id="scopeHudAlt">--</b></span>
-            <span>FOV <b id="scopeHudFov">80°</b></span>
-            <span id="scopeHudTrack" style="color:var(--muted)">OFF</span>
-          </div>
           <div class="edge-arrow edge-n" onpointerdown="startEdgeMove('N')" onpointerup="stopEdgeMove()" onpointerleave="stopEdgeMove()" title="Alto (velocità = rate)">▲</div>
           <div class="edge-arrow edge-s" onpointerdown="startEdgeMove('S')" onpointerup="stopEdgeMove()" onpointerleave="stopEdgeMove()" title="Basso (velocità = rate)">▼</div>
           <div class="edge-arrow edge-e" onpointerdown="startEdgeMove('E')" onpointerup="stopEdgeMove()" onpointerleave="stopEdgeMove()" title="Destra (velocità = rate)">▶</div>
@@ -753,6 +782,10 @@
             <button onclick="scopeZoomOut()">−</button>
             <button onclick="scopeRecenter()" style="font-size:12px">⌖</button>
           </div>
+
+          <button class="scope-emergency-stop" onclick="scopeEmergencyStop()" title="STOP di emergenza - ferma tutti i movimenti">
+            🛑<br>STOP
+          </button>
         </div>
 
         <div class="scope-target-overlay" id="scopeTargetOverlay">
@@ -851,7 +884,7 @@
           <button class="triton-btn" onclick="scopePark()">Park</button>
           <button class="triton-btn" onclick="scopeUnpark()">Unpark</button>
           <button class="triton-btn" onclick="scopeMeridianFlip()">Flip</button>
-          <button class="triton-btn goto-btn" onclick="scopeSlewToTarget()">🎯 GOTO</button>
+          <button class="triton-btn goto-btn" id="scopePanelGotoBtn" onclick="scopeSlewToTarget()">🎯 GOTO</button>
         </div>
         <div class="triton-header">
           <button class="triton-btn" onclick="scopeSetHome()">SET HOME</button>
@@ -1067,7 +1100,7 @@ const NEBULAE_EXTRA = [
 ];
 
 /* ============================================================
-   COSTELLAZIONI (caricate all'avvio - 88)
+   COSTELLAZIONI (fallback, poi caricate dal server)
    ============================================================ */
 let CONSTELLATIONS = [
   {name:"Orsa Maggiore", stars:[{ra:165.93,dec:61.75},{ra:165.46,dec:56.38},{ra:178.46,dec:53.69},{ra:183.86,dec:57.03},{ra:193.51,dec:55.96},{ra:200.98,dec:54.93},{ra:206.88,dec:49.31}], area:"1.280°q", season:"Primavera", desc:"La costellazione più famosa."},
@@ -1119,7 +1152,6 @@ async function loadConstellations() {
       if (loaded.length > 20) {
         CONSTELLATIONS = loaded;
         console.log(`✅ Caricate ${loaded.length} costellazioni dal server`);
-        // Ridefinisci CATALOG per includere le nuove costellazioni
         if (typeof rebuildCatalog === 'function') rebuildCatalog();
         return;
       }
@@ -1384,115 +1416,66 @@ function loadCity() {
 }
 
 /* ============================================================
-   PROVINCE ITALIANE (caricate all'avvio)
+   PROVINCE ITALIANE
    ============================================================ */
 const ITALIAN_PROVINCES = [
-  {n:"Torino",r:"Piemonte",lat:45.0703,lon:7.6869},
-  {n:"Vercelli",r:"Piemonte",lat:45.3206,lon:8.4185},
-  {n:"Novara",r:"Piemonte",lat:45.4469,lon:8.6222},
-  {n:"Cuneo",r:"Piemonte",lat:44.3931,lon:7.5496},
-  {n:"Asti",r:"Piemonte",lat:44.9008,lon:8.2064},
-  {n:"Alessandria",r:"Piemonte",lat:44.9133,lon:8.6155},
-  {n:"Biella",r:"Piemonte",lat:45.5675,lon:8.0517},
-  {n:"Verbania",r:"Piemonte",lat:45.9212,lon:8.5512},
+  {n:"Torino",r:"Piemonte",lat:45.0703,lon:7.6869},{n:"Vercelli",r:"Piemonte",lat:45.3206,lon:8.4185},
+  {n:"Novara",r:"Piemonte",lat:45.4469,lon:8.6222},{n:"Cuneo",r:"Piemonte",lat:44.3931,lon:7.5496},
+  {n:"Asti",r:"Piemonte",lat:44.9008,lon:8.2064},{n:"Alessandria",r:"Piemonte",lat:44.9133,lon:8.6155},
+  {n:"Biella",r:"Piemonte",lat:45.5675,lon:8.0517},{n:"Verbania",r:"Piemonte",lat:45.9212,lon:8.5512},
   {n:"Aosta",r:"Valle d'Aosta",lat:45.7370,lon:7.3201},
-  {n:"Milano",r:"Lombardia",lat:45.4642,lon:9.1900},
-  {n:"Bergamo",r:"Lombardia",lat:45.6983,lon:9.6773},
-  {n:"Brescia",r:"Lombardia",lat:45.5416,lon:10.2118},
-  {n:"Como",r:"Lombardia",lat:45.8081,lon:9.0852},
-  {n:"Cremona",r:"Lombardia",lat:45.1332,lon:10.0227},
-  {n:"Lecco",r:"Lombardia",lat:45.8566,lon:9.3977},
-  {n:"Lodi",r:"Lombardia",lat:45.3140,lon:9.5037},
-  {n:"Mantova",r:"Lombardia",lat:45.1564,lon:10.7914},
-  {n:"Monza",r:"Lombardia",lat:45.5845,lon:9.2744},
-  {n:"Pavia",r:"Lombardia",lat:45.1847,lon:9.1582},
-  {n:"Sondrio",r:"Lombardia",lat:46.1699,lon:9.8788},
-  {n:"Varese",r:"Lombardia",lat:45.8206,lon:8.8251},
-  {n:"Trento",r:"Trentino-Alto Adige",lat:46.0700,lon:11.1185},
-  {n:"Bolzano",r:"Trentino-Alto Adige",lat:46.4983,lon:11.3548},
-  {n:"Venezia",r:"Veneto",lat:45.4408,lon:12.3155},
-  {n:"Belluno",r:"Veneto",lat:46.1425,lon:12.2167},
-  {n:"Padova",r:"Veneto",lat:45.4064,lon:11.8768},
-  {n:"Rovigo",r:"Veneto",lat:45.0705,lon:11.7902},
-  {n:"Treviso",r:"Veneto",lat:45.6669,lon:12.2430},
-  {n:"Verona",r:"Veneto",lat:45.4384,lon:10.9916},
+  {n:"Milano",r:"Lombardia",lat:45.4642,lon:9.1900},{n:"Bergamo",r:"Lombardia",lat:45.6983,lon:9.6773},
+  {n:"Brescia",r:"Lombardia",lat:45.5416,lon:10.2118},{n:"Como",r:"Lombardia",lat:45.8081,lon:9.0852},
+  {n:"Cremona",r:"Lombardia",lat:45.1332,lon:10.0227},{n:"Lecco",r:"Lombardia",lat:45.8566,lon:9.3977},
+  {n:"Lodi",r:"Lombardia",lat:45.3140,lon:9.5037},{n:"Mantova",r:"Lombardia",lat:45.1564,lon:10.7914},
+  {n:"Monza",r:"Lombardia",lat:45.5845,lon:9.2744},{n:"Pavia",r:"Lombardia",lat:45.1847,lon:9.1582},
+  {n:"Sondrio",r:"Lombardia",lat:46.1699,lon:9.8788},{n:"Varese",r:"Lombardia",lat:45.8206,lon:8.8251},
+  {n:"Trento",r:"Trentino-Alto Adige",lat:46.0700,lon:11.1185},{n:"Bolzano",r:"Trentino-Alto Adige",lat:46.4983,lon:11.3548},
+  {n:"Venezia",r:"Veneto",lat:45.4408,lon:12.3155},{n:"Belluno",r:"Veneto",lat:46.1425,lon:12.2167},
+  {n:"Padova",r:"Veneto",lat:45.4064,lon:11.8768},{n:"Rovigo",r:"Veneto",lat:45.0705,lon:11.7902},
+  {n:"Treviso",r:"Veneto",lat:45.6669,lon:12.2430},{n:"Verona",r:"Veneto",lat:45.4384,lon:10.9916},
   {n:"Vicenza",r:"Veneto",lat:45.5455,lon:11.5354},
-  {n:"Trieste",r:"Friuli-Venezia Giulia",lat:45.6495,lon:13.7768},
-  {n:"Gorizia",r:"Friuli-Venezia Giulia",lat:45.9408,lon:13.6215},
-  {n:"Pordenone",r:"Friuli-Venezia Giulia",lat:45.9563,lon:12.6605},
-  {n:"Udine",r:"Friuli-Venezia Giulia",lat:46.0711,lon:13.2346},
-  {n:"Genova",r:"Liguria",lat:44.4056,lon:8.9463},
-  {n:"Imperia",r:"Liguria",lat:43.8896,lon:8.0262},
-  {n:"La Spezia",r:"Liguria",lat:44.1025,lon:9.8241},
-  {n:"Savona",r:"Liguria",lat:44.3091,lon:8.4772},
-  {n:"Bologna",r:"Emilia-Romagna",lat:44.4949,lon:11.3426},
-  {n:"Ferrara",r:"Emilia-Romagna",lat:44.8381,lon:11.6198},
-  {n:"Forlì",r:"Emilia-Romagna",lat:44.2227,lon:12.0412},
-  {n:"Modena",r:"Emilia-Romagna",lat:44.6471,lon:10.9252},
-  {n:"Parma",r:"Emilia-Romagna",lat:44.8015,lon:10.3280},
-  {n:"Piacenza",r:"Emilia-Romagna",lat:45.0526,lon:9.6930},
-  {n:"Ravenna",r:"Emilia-Romagna",lat:44.4184,lon:12.2035},
-  {n:"Reggio Emilia",r:"Emilia-Romagna",lat:44.6989,lon:10.6312},
+  {n:"Trieste",r:"Friuli-Venezia Giulia",lat:45.6495,lon:13.7768},{n:"Gorizia",r:"Friuli-Venezia Giulia",lat:45.9408,lon:13.6215},
+  {n:"Pordenone",r:"Friuli-Venezia Giulia",lat:45.9563,lon:12.6605},{n:"Udine",r:"Friuli-Venezia Giulia",lat:46.0711,lon:13.2346},
+  {n:"Genova",r:"Liguria",lat:44.4056,lon:8.9463},{n:"Imperia",r:"Liguria",lat:43.8896,lon:8.0262},
+  {n:"La Spezia",r:"Liguria",lat:44.1025,lon:9.8241},{n:"Savona",r:"Liguria",lat:44.3091,lon:8.4772},
+  {n:"Bologna",r:"Emilia-Romagna",lat:44.4949,lon:11.3426},{n:"Ferrara",r:"Emilia-Romagna",lat:44.8381,lon:11.6198},
+  {n:"Forlì",r:"Emilia-Romagna",lat:44.2227,lon:12.0412},{n:"Modena",r:"Emilia-Romagna",lat:44.6471,lon:10.9252},
+  {n:"Parma",r:"Emilia-Romagna",lat:44.8015,lon:10.3280},{n:"Piacenza",r:"Emilia-Romagna",lat:45.0526,lon:9.6930},
+  {n:"Ravenna",r:"Emilia-Romagna",lat:44.4184,lon:12.2035},{n:"Reggio Emilia",r:"Emilia-Romagna",lat:44.6989,lon:10.6312},
   {n:"Rimini",r:"Emilia-Romagna",lat:44.0678,lon:12.5695},
-  {n:"Firenze",r:"Toscana",lat:43.7696,lon:11.2558},
-  {n:"Arezzo",r:"Toscana",lat:43.4633,lon:11.8796},
-  {n:"Grosseto",r:"Toscana",lat:42.7597,lon:11.1136},
-  {n:"Livorno",r:"Toscana",lat:43.5485,lon:10.3106},
-  {n:"Lucca",r:"Toscana",lat:43.8430,lon:10.5027},
-  {n:"Massa",r:"Toscana",lat:44.0350,lon:10.1393},
-  {n:"Pisa",r:"Toscana",lat:43.7228,lon:10.4017},
-  {n:"Pistoia",r:"Toscana",lat:43.9333,lon:10.9167},
-  {n:"Prato",r:"Toscana",lat:43.8777,lon:11.1022},
-  {n:"Siena",r:"Toscana",lat:43.3188,lon:11.3308},
-  {n:"Perugia",r:"Umbria",lat:43.1107,lon:12.3908},
-  {n:"Terni",r:"Umbria",lat:42.5636,lon:12.6427},
-  {n:"Ancona",r:"Marche",lat:43.6158,lon:13.5189},
-  {n:"Ascoli Piceno",r:"Marche",lat:42.8542,lon:13.5750},
-  {n:"Fermo",r:"Marche",lat:43.1607,lon:13.7242},
-  {n:"Macerata",r:"Marche",lat:43.3006,lon:13.4530},
+  {n:"Firenze",r:"Toscana",lat:43.7696,lon:11.2558},{n:"Arezzo",r:"Toscana",lat:43.4633,lon:11.8796},
+  {n:"Grosseto",r:"Toscana",lat:42.7597,lon:11.1136},{n:"Livorno",r:"Toscana",lat:43.5485,lon:10.3106},
+  {n:"Lucca",r:"Toscana",lat:43.8430,lon:10.5027},{n:"Massa",r:"Toscana",lat:44.0350,lon:10.1393},
+  {n:"Pisa",r:"Toscana",lat:43.7228,lon:10.4017},{n:"Pistoia",r:"Toscana",lat:43.9333,lon:10.9167},
+  {n:"Prato",r:"Toscana",lat:43.8777,lon:11.1022},{n:"Siena",r:"Toscana",lat:43.3188,lon:11.3308},
+  {n:"Perugia",r:"Umbria",lat:43.1107,lon:12.3908},{n:"Terni",r:"Umbria",lat:42.5636,lon:12.6427},
+  {n:"Ancona",r:"Marche",lat:43.6158,lon:13.5189},{n:"Ascoli Piceno",r:"Marche",lat:42.8542,lon:13.5750},
+  {n:"Fermo",r:"Marche",lat:43.1607,lon:13.7242},{n:"Macerata",r:"Marche",lat:43.3006,lon:13.4530},
   {n:"Pesaro",r:"Marche",lat:43.9102,lon:12.9131},
-  {n:"Roma",r:"Lazio",lat:41.9028,lon:12.4964},
-  {n:"Frosinone",r:"Lazio",lat:41.6400,lon:13.3426},
-  {n:"Latina",r:"Lazio",lat:41.4675,lon:12.9037},
-  {n:"Rieti",r:"Lazio",lat:42.4047,lon:12.8567},
+  {n:"Roma",r:"Lazio",lat:41.9028,lon:12.4964},{n:"Frosinone",r:"Lazio",lat:41.6400,lon:13.3426},
+  {n:"Latina",r:"Lazio",lat:41.4675,lon:12.9037},{n:"Rieti",r:"Lazio",lat:42.4047,lon:12.8567},
   {n:"Viterbo",r:"Lazio",lat:42.4207,lon:12.1076},
-  {n:"L'Aquila",r:"Abruzzo",lat:42.3499,lon:13.3995},
-  {n:"Chieti",r:"Abruzzo",lat:42.3512,lon:14.1675},
-  {n:"Pescara",r:"Abruzzo",lat:42.4618,lon:14.2161},
-  {n:"Teramo",r:"Abruzzo",lat:42.6589,lon:13.7044},
-  {n:"Campobasso",r:"Molise",lat:41.5603,lon:14.6627},
-  {n:"Isernia",r:"Molise",lat:41.5960,lon:14.2333},
-  {n:"Napoli",r:"Campania",lat:40.8518,lon:14.2681},
-  {n:"Avellino",r:"Campania",lat:40.9146,lon:14.7906},
-  {n:"Benevento",r:"Campania",lat:41.1298,lon:14.7826},
-  {n:"Caserta",r:"Campania",lat:41.0723,lon:14.3329},
+  {n:"L'Aquila",r:"Abruzzo",lat:42.3499,lon:13.3995},{n:"Chieti",r:"Abruzzo",lat:42.3512,lon:14.1675},
+  {n:"Pescara",r:"Abruzzo",lat:42.4618,lon:14.2161},{n:"Teramo",r:"Abruzzo",lat:42.6589,lon:13.7044},
+  {n:"Campobasso",r:"Molise",lat:41.5603,lon:14.6627},{n:"Isernia",r:"Molise",lat:41.5960,lon:14.2333},
+  {n:"Napoli",r:"Campania",lat:40.8518,lon:14.2681},{n:"Avellino",r:"Campania",lat:40.9146,lon:14.7906},
+  {n:"Benevento",r:"Campania",lat:41.1298,lon:14.7826},{n:"Caserta",r:"Campania",lat:41.0723,lon:14.3329},
   {n:"Salerno",r:"Campania",lat:40.6824,lon:14.7681},
-  {n:"Bari",r:"Puglia",lat:41.1171,lon:16.8719},
-  {n:"Andria",r:"Puglia",lat:41.2273,lon:16.2954},
-  {n:"Brindisi",r:"Puglia",lat:40.6327,lon:17.9418},
-  {n:"Foggia",r:"Puglia",lat:41.4622,lon:15.5446},
-  {n:"Lecce",r:"Puglia",lat:40.3515,lon:18.1750},
-  {n:"Taranto",r:"Puglia",lat:40.4644,lon:17.2470},
-  {n:"Potenza",r:"Basilicata",lat:40.6395,lon:15.8056},
-  {n:"Matera",r:"Basilicata",lat:40.6664,lon:16.6043},
-  {n:"Catanzaro",r:"Calabria",lat:38.9098,lon:16.5877},
-  {n:"Cosenza",r:"Calabria",lat:39.2983,lon:16.2539},
-  {n:"Crotone",r:"Calabria",lat:39.0808,lon:17.1271},
-  {n:"Reggio Calabria",r:"Calabria",lat:38.1113,lon:15.6473},
+  {n:"Bari",r:"Puglia",lat:41.1171,lon:16.8719},{n:"Andria",r:"Puglia",lat:41.2273,lon:16.2954},
+  {n:"Brindisi",r:"Puglia",lat:40.6327,lon:17.9418},{n:"Foggia",r:"Puglia",lat:41.4622,lon:15.5446},
+  {n:"Lecce",r:"Puglia",lat:40.3515,lon:18.1750},{n:"Taranto",r:"Puglia",lat:40.4644,lon:17.2470},
+  {n:"Potenza",r:"Basilicata",lat:40.6395,lon:15.8056},{n:"Matera",r:"Basilicata",lat:40.6664,lon:16.6043},
+  {n:"Catanzaro",r:"Calabria",lat:38.9098,lon:16.5877},{n:"Cosenza",r:"Calabria",lat:39.2983,lon:16.2539},
+  {n:"Crotone",r:"Calabria",lat:39.0808,lon:17.1271},{n:"Reggio Calabria",r:"Calabria",lat:38.1113,lon:15.6473},
   {n:"Vibo Valentia",r:"Calabria",lat:38.6758,lon:16.1003},
-  {n:"Palermo",r:"Sicilia",lat:38.1157,lon:13.3615},
-  {n:"Agrigento",r:"Sicilia",lat:37.3111,lon:13.5765},
-  {n:"Caltanissetta",r:"Sicilia",lat:37.4901,lon:14.0629},
-  {n:"Catania",r:"Sicilia",lat:37.5079,lon:15.0830},
-  {n:"Enna",r:"Sicilia",lat:37.5670,lon:14.2793},
-  {n:"Messina",r:"Sicilia",lat:38.1938,lon:15.5540},
-  {n:"Ragusa",r:"Sicilia",lat:36.9269,lon:14.7258},
-  {n:"Siracusa",r:"Sicilia",lat:37.0755,lon:15.2866},
+  {n:"Palermo",r:"Sicilia",lat:38.1157,lon:13.3615},{n:"Agrigento",r:"Sicilia",lat:37.3111,lon:13.5765},
+  {n:"Caltanissetta",r:"Sicilia",lat:37.4901,lon:14.0629},{n:"Catania",r:"Sicilia",lat:37.5079,lon:15.0830},
+  {n:"Enna",r:"Sicilia",lat:37.5670,lon:14.2793},{n:"Messina",r:"Sicilia",lat:38.1938,lon:15.5540},
+  {n:"Ragusa",r:"Sicilia",lat:36.9269,lon:14.7258},{n:"Siracusa",r:"Sicilia",lat:37.0755,lon:15.2866},
   {n:"Trapani",r:"Sicilia",lat:38.0176,lon:12.5365},
-  {n:"Cagliari",r:"Sardegna",lat:39.2238,lon:9.1217},
-  {n:"Nuoro",r:"Sardegna",lat:40.3203,lon:9.3264},
-  {n:"Oristano",r:"Sardegna",lat:39.9062,lon:8.5884},
-  {n:"Sassari",r:"Sardegna",lat:40.7259,lon:8.5557},
+  {n:"Cagliari",r:"Sardegna",lat:39.2238,lon:9.1217},{n:"Nuoro",r:"Sardegna",lat:40.3203,lon:9.3264},
+  {n:"Oristano",r:"Sardegna",lat:39.9062,lon:8.5884},{n:"Sassari",r:"Sardegna",lat:40.7259,lon:8.5557},
   {n:"Sud Sardegna (Carbonia)",r:"Sardegna",lat:39.1672,lon:8.5222}
 ];
 
@@ -1639,7 +1622,7 @@ function renderSunMoon() {
 }
 
 /* ============================================================
-   MAPPA DEL CIELO (tab-sky)
+   MAPPA DEL CIELO
    ============================================================ */
 const canvas = document.getElementById('skyCanvas');
 const ctx = canvas.getContext('2d');
@@ -1983,7 +1966,6 @@ canvas.addEventListener('touchmove', e => {
 }, {passive: true});
 canvas.addEventListener('touchend', () => { isDragging = false; touchStartDist = 0; });
 
-/* Click sulla mappa cielo: mostra popup con dettagli + tasto Invia al Telescopio */
 canvas.addEventListener('click', e => {
   if (dragMoved) return;
   const rect = canvas.getBoundingClientRect();
@@ -2023,21 +2005,21 @@ function showSkyObjectPopup(obj) {
   if (obj.dist) rows += `<div class="popup-row"><div class="k">Distanza</div><div class="v">${obj.dist}</div></div>`;
   if (obj.desc) rows += `<div class="popup-row" style="grid-column:1/-1;"><div class="k">Descrizione</div><div class="v">${obj.desc}</div></div>`;
   grid.innerHTML = rows;
-
-  // Popup scroll into view
-  popup.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-  // Grafico di osservabilità
+  // MODIFICA: scroll automatico per mostrare mappa + popup subito sotto la mappa
+  setTimeout(() => {
+    const card = document.querySelector('#tab-sky .card');
+    if (card) {
+      const header = document.querySelector('header');
+      const headerH = header ? header.offsetHeight : 0;
+      const cardRect = card.getBoundingClientRect();
+      const scrollTarget = window.scrollY + cardRect.top - headerH - 5;
+      window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+    }
+  }, 100);
   const chartContainer = document.getElementById('skyPopupChart');
   chartContainer.innerHTML = '<div id="sky-popup-obs-chart"></div>';
   setTimeout(() => {
-    const oldCont = document.getElementById('obs-chart-container');
-    if (oldCont && oldCont !== chartContainer.firstChild) {
-      // Riusa la funzione buildObservationChart con container specifico
-      buildObservationChart(obj.n || obj.name, obj.ra, obj.dec, null, type, 'sky-popup-obs-chart');
-    } else {
-      buildObservationChart(obj.n || obj.name, obj.ra, obj.dec, null, type, 'sky-popup-obs-chart');
-    }
+    buildObservationChart(obj.n || obj.name, obj.ra, obj.dec, null, type, 'sky-popup-obs-chart');
   }, 50);
 }
 
@@ -2666,9 +2648,7 @@ function showObjectModal(name, ra, dec) {
 }
 
 /* ============================================================
-   ============================================================
    TELESCOPIO
-   ============================================================
    ============================================================ */
 const scopeState = {
   connected: false, connType: 'wifi',
@@ -2765,7 +2745,7 @@ function scopeSetTrackRate(rate) {
   }
 }
 
-function scopeMoveToContinuous(targetGetter, onComplete) {
+function scopeMoveToContinuous(targetGetter, onComplete, progressButtonId) {
   if (scopeState.slewing) {
     scopeLog("Slewing già in corso. Premi STOP per interrompere.", "warn");
     return false;
@@ -2810,7 +2790,7 @@ function scopeMoveToContinuous(targetGetter, onComplete) {
     const dist = Math.sqrt(dAlt*dAlt + dAz*dAz);
     const stepDist = SLEW_SPEED_DEG * dt;
 
-    const btn = document.getElementById('scopeStepBtn');
+    const btn = document.getElementById(progressButtonId || 'scopeStepBtn');
     if (btn && scopeState.slewing) {
       const progress = initialDist > 0.01 ? Math.min(99, Math.round((1 - dist / initialDist) * 100)) : 50;
       btn.innerText = `SLEWING ${progress}% · ${dist.toFixed(2)}°`;
@@ -2858,7 +2838,6 @@ function scopeManualMove(dir) {
   scopeUpdateUI(); scopeDraw();
 }
 
-/* Frecce direzionali sulla mappa: velocità proporzionale al rate */
 function startEdgeMove(dir) {
   if (!scopeState.connected || scopeState.isParked) return;
   scopeState.movingEdge = dir;
@@ -2901,6 +2880,33 @@ function scopeStopSlewing() {
       scopeUpdateStepUI();
     }
   }
+}
+
+function scopeEmergencyStop() {
+  scopeState.slewCancelled = true;
+  scopeState.slewing = false;
+  stopEdgeMove();
+  scopeState.movingEdge = null;
+  scopeState.tracking = false;
+
+  const trackBtn = document.getElementById('scopeTrackBtn');
+  if (trackBtn) { trackBtn.innerText = "Track ON"; trackBtn.className = "triton-btn"; }
+
+  const stepBtn = document.getElementById('scopeStepBtn');
+  if (stepBtn && scopeState.target) {
+    stepBtn.disabled = false;
+    stepBtn.className = 'btn-goto-large';
+    stepBtn.innerText = '🚀 GOTO';
+    scopeState.step = 1;
+    scopeUpdateStepUI();
+  }
+
+  const panelBtn = document.getElementById('scopePanelGotoBtn');
+  if (panelBtn) { panelBtn.disabled = false; panelBtn.innerText = '🎯 GOTO'; }
+
+  scopeLog("🛑 STOP DI EMERGENZA - Tutti i movimenti arrestati.", "err");
+  scopeUpdateUI();
+  scopeDraw();
 }
 
 /* ============================================================
@@ -3112,10 +3118,39 @@ function scopeSyncMount() {
   scopeState.synced = true;
   scopeState.syncFlashStart = performance.now();
   scopeState.step = 0;
-  scopeLog(`✓ SYNC completato su ${scopeState.target.name}.`, "ok");
+  scopeLog(`✓ SYNC completato su ${scopeState.target.name}. Ripristino vista...`, "ok");
   scopeUpdateStepUI();
   scopeUpdateUI();
   scopeDraw();
+  setTimeout(() => scopeResetViewToTarget(), 200);
+}
+
+function scopeResetViewToTarget() {
+  if (!scopeState.target) return;
+  const tPos = getAltAz(scopeState.target.ra, scopeState.target.dec, state.currentTime);
+  const startAlt = scopeState.camAlt;
+  const startAz = scopeState.camAz;
+  const startFov = scopeState.fov;
+  const targetAlt = clamp(tPos.alt, 0, 89);
+  let dAz = tPos.az - startAz;
+  while (dAz > 180) dAz -= 360;
+  while (dAz < -180) dAz += 360;
+  const targetAz = startAz + dAz;
+  const targetFov = 80;
+  const duration = 900;
+  const startTime = performance.now();
+
+  function animate(time) {
+    const t = Math.min(1, (time - startTime) / duration);
+    const e = 1 - Math.pow(1 - t, 3);
+    scopeState.camAlt = startAlt + (targetAlt - startAlt) * e;
+    scopeState.camAz = norm360(startAz + (targetAz - startAz) * e);
+    scopeState.fov = startFov + (targetFov - startFov) * e;
+    scopeDraw();
+    if (t < 1) requestAnimationFrame(animate);
+    else scopeLog('Vista default ripristinata (FOV 80°, soggetto centrato).', 'ok');
+  }
+  requestAnimationFrame(animate);
 }
 
 function scopeResetSteps() {
@@ -3338,7 +3373,6 @@ function scopeGotoMap() {
   drawMap(); showInfo(state.target);
 }
 
-/* GOTO veloce dal pannello comandi (senza passare dal popup) */
 function scopeSlewToTarget() {
   if (!scopeState.connected) { scopeLog("Connetti prima.", "warn"); return; }
   if (!scopeState.target) { scopeLog("Nessun target selezionato.", "warn"); return; }
@@ -3347,19 +3381,19 @@ function scopeSlewToTarget() {
 
   const t = scopeState.target;
   scopeLog(`GOTO (pannello) verso ${t.name}...`, '');
-  const btn = document.getElementById('scopeStepBtn');
-  if (btn) { btn.disabled = true; btn.className = 'btn-goto-large slewing'; }
+  const panelBtn = document.getElementById('scopePanelGotoBtn');
+  if (panelBtn) { panelBtn.disabled = true; }
 
   scopeMoveToContinuous(getTargetCurrentAltAz, () => {
     scopeState.tracking = true;
     document.getElementById('scopeTrackBtn').innerText = "Track OFF";
     document.getElementById('scopeTrackBtn').className = "triton-btn active";
-    if (btn) { btn.disabled = false; btn.className = 'btn-goto-large'; btn.innerText = '✓ RAGGIUNTO'; }
+    if (panelBtn) { panelBtn.disabled = false; panelBtn.innerText = '✓ OK'; }
     scopeState.step = 2;
     scopeUpdateStepUI();
     scopeLog(`✓ ${t.name} raggiunto. Tracking ON.`, "ok");
-    setTimeout(() => { if (btn) { btn.innerText = '🚀 GOTO'; btn.className = 'btn-goto-large'; } }, 1800);
-  });
+    setTimeout(() => { if (panelBtn) { panelBtn.innerText = '🎯 GOTO'; } }, 1800);
+  }, 'scopePanelGotoBtn');
 }
 
 /* ============================================================
@@ -3748,6 +3782,18 @@ function scopeZoomIn() { scopeState.fov = clamp(scopeState.fov - 10, 10, 150); s
 function scopeZoomOut() { scopeState.fov = clamp(scopeState.fov + 10, 10, 150); scopeDraw(); }
 function scopeRecenter() { scopeState.camAlt = scopeState.mountAlt; scopeState.camAz = scopeState.mountAz; scopeDraw(); }
 
+/* MODIFICA: helper per rilevare click vicino alle frecce direzionali (buffer di sicurezza) */
+function isInArrowZone(pos) {
+  const pad = 14;
+  const sz = 54 + pad * 2;
+  const W = scopeW, H = scopeH;
+  if (pos.y < sz && Math.abs(pos.x - W/2) < sz/2) return true;
+  if (pos.y > H - sz && Math.abs(pos.x - W/2) < sz/2) return true;
+  if (pos.x > W - sz && Math.abs(pos.y - H/2) < sz/2) return true;
+  if (pos.x < sz && Math.abs(pos.y - H/2) < sz/2) return true;
+  return false;
+}
+
 function scopeAttachEvents() {
   if (!scopeCanvasEl || scopeCanvasEl._events) return;
   scopeCanvasEl._events = true;
@@ -3761,6 +3807,8 @@ function scopeAttachEvents() {
 
   const onStart = (e) => {
     const pos = getPos(e);
+    // MODIFICA: se il click è nella zona buffer delle frecce, ignora
+    if (isInArrowZone(pos)) return;
     const mPt = scopeProject(scopeState.mountAlt, scopeState.mountAz);
     const distToMount = mPt.visible ? Math.hypot(pos.x - mPt.x, pos.y - mPt.y) : 999;
 
@@ -3815,10 +3863,18 @@ function scopeAttachEvents() {
     }
   };
 
-  /* Click sulla mappa telescopio: SOLO selezione oggetto (nessuno slew) */
   const onEnd = (e) => {
+    // MODIFICA: se non c'è stato mousedown sul canvas (es. click sulle frecce), esci subito
+    if (!scopeIsDragging) return;
     const pos = getPos(e.changedTouches ? e.changedTouches[0] : e);
     if (!scopeDragMoved) {
+      // Ulteriore controllo: se il click è in zona frecce, ignora
+      if (isInArrowZone(pos)) {
+        scopeIsDragging = false;
+        scopeDragMode = null;
+        scopeCanvasEl.style.cursor = 'grab';
+        return;
+      }
       const mPt = scopeProject(scopeState.mountAlt, scopeState.mountAz);
       const distToMount = mPt.visible ? Math.hypot(pos.x - mPt.x, pos.y - mPt.y) : 999;
 
@@ -3932,15 +3988,9 @@ window.onload = async () => {
   const savedAllSky = localStorage.getItem('egastro_allsky_url');
   if (savedAllSky) document.getElementById('allsky-url').value = savedAllSky;
 
-  // Popola province italiane
   populateProvinces();
+  loadConstellations().then(() => { rebuildCatalog(); });
 
-  // Carica costellazioni dal server (fallback: 10 locali)
-  loadConstellations().then(() => {
-    rebuildCatalog();
-  });
-
-  // Avvia app
   updateAll();
   checkGPSAvailability();
 };
