@@ -2,33 +2,35 @@
   "name": "EGastro DISCOVER",
   "short_name": "EGastro",
   "description": "Astronomia, mappa del cielo, catalogo oggetti e osservazione",
+  "id": "/EGASTRO/",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#03050a",
   "theme_color": "#d4af37",
   "lang": "it",
   "icons": [
     {
-      "src": "https://egastrodiscover.github.io/EGASTRO/icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://egastrodiscover.github.io/EGASTRO/icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://egastrodiscover.github.io/EGASTRO/icon-192-maskable.png",
+      "src": "./icon-192-maskable.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://egastrodiscover.github.io/EGASTRO/icon-512-maskable.png",
+      "src": "./icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
