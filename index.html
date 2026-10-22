@@ -304,7 +304,7 @@
 <main>
   <div id="tab-sun" class="tab-content active">
     <div id="gpsBanner" class="gps-banner">
-      <span>📡 <strong>Posizione:</strong> rileva con GPS (smartphone) o IP (PC).</span>
+      <span>📡 <strong>Posizione:</strong> rileva con GPS (smartphone/APK) o IP (PC).</span>
       <button class="gps-btn" onclick="activateGPS()">📍 Rileva posizione</button>
     </div>
     <div class="card">
@@ -569,7 +569,7 @@ const state = {
   lat: 41.9028, lon: 12.4964,
   baseTime: new Date(), currentTime: new Date(),
   planets: [],
-  camAlt: 45, camAz: 180, fov: 120,
+  camAlt: 45, camAz: 0, fov: 80,   // ← vista iniziale: Nord, FOV 80° (come "Punta Nord")
   clouds: 0, target: null,
   sqm: 21.0,
   autoRotate: false,
@@ -1077,6 +1077,7 @@ function switchTab(id, btn) {
   if (id === 'tab-sky') {
     readInputs(); state.planets = calcPlanetsPrecise(state.currentTime);
     document.getElementById('timeSlider').value = 0; onSliderChange();
+    resetView();   // ← forza la vista Nord all'apertura della mappa
   }
   if (id === 'tab-tonight') { readInputs(); state.planets = calcPlanetsPrecise(state.currentTime); renderTonight(); }
   if (id === 'tab-catalog') renderCatalog();
@@ -1116,12 +1117,42 @@ function loadCity() {
   updateAll();
 }
 
-/* ===== GPS ROBUSTO ===== */
+/* ===== GPS ROBUSTO (browser + WebIntoApp APK + IP fallback) ===== */
 function checkGPSAvailability() {
   document.getElementById('gpsBanner').style.display = 'flex';
 }
 
 function activateGPS() { document.getElementById('gpsBanner').style.display = 'flex'; getLocation(); }
+
+// Permesso nativo per WebIntoApp / wrapper Android
+async function ensureLocationPermission() {
+  if (window.Native && typeof window.Native.call === "function") {
+    return new Promise((resolve) => {
+      try {
+        window.Native.call(
+          "permissions",
+          {
+            action: "ASK_FOR_PERMISSION",
+            payload: { permission: "LOCATION" }
+          },
+          (result) => {
+            try {
+              const res = typeof result === "string" ? JSON.parse(result) : result;
+              const status = res?.params?.permissionStatus || res?.status;
+              console.log("WebIntoApp permission result:", res);
+              resolve(status === "GRANTED" || status === true);
+            } catch (e) { resolve(false); }
+          }
+        );
+      } catch (e) { console.warn("Native bridge error:", e); resolve(false); }
+    });
+  }
+  if (window.Android && typeof window.Android.requestLocationPermission === "function") {
+    try { window.Android.requestLocationPermission(); return true; }
+    catch (e) { return false; }
+  }
+  return true;
+}
 
 function applyCoordinates(lat, lon, city, accuracy) {
   const latStr = parseFloat(lat).toFixed(4), lonStr = parseFloat(lon).toFixed(4);
@@ -1172,13 +1203,18 @@ async function getIPLocation() {
 async function getLocation() {
   const msg = document.getElementById('msg-coord');
   msg.innerText = "📡 Rilevamento posizione...";
-  msg.className = "msg"; msg.style.color = "var(--accent)";
+  msg.className = "msg";
+  msg.style.color = "var(--accent)";
 
+  // 0) Permesso nativo (WebIntoApp / APK)
+  await ensureLocationPermission();
+
+  // 1) GPS browser
   if (navigator.geolocation) {
     try {
       const pos = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true, timeout: 12000, maximumAge: 0
+          enableHighAccuracy: true, timeout: 15000, maximumAge: 0
         });
       });
       applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS', pos.coords.accuracy);
@@ -1186,10 +1222,11 @@ async function getLocation() {
       return;
     } catch (err) {
       console.warn('GPS browser fallito:', err);
-      msg.innerText = "⚠️ GPS browser non disponibile, provo via IP...";
+      msg.innerText = "⚠️ GPS non disponibile, provo via IP...";
     }
   }
 
+  // 2) IP
   try {
     const loc = await getIPLocation();
     if (loc && isFinite(loc.lat) && isFinite(loc.lon)) {
@@ -1644,7 +1681,16 @@ function drawMap() {
   });
 }
 
-function resetView() { state.camAlt = 45; state.camAz = 180; state.fov = 120; state.autoRotate = false; document.getElementById('autoRotBtn').textContent = '🔄 Auto-ruota'; drawMap(); }
+function resetView() {
+  state.camAlt = 45;
+  state.camAz = 0;         // Nord
+  state.fov = 80;          // stessa apertura di "Punta Nord"
+  state.autoRotate = false;
+  const btn = document.getElementById('autoRotBtn');
+  if (btn) btn.textContent = '🔄 Auto-ruota';
+  if (autoRotateTimer) { clearInterval(autoRotateTimer); autoRotateTimer = null; }
+  drawMap();
+}
 function zoomIn() { state.fov = Math.max(10, state.fov - 15); drawMap(); }
 function zoomOut() { state.fov = Math.min(180, state.fov + 15); drawMap(); }
 function lookAtObject(name) {
