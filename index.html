@@ -1547,20 +1547,155 @@ function calcPlanetsPrecise(date) {
   return result;
 }
 
-function estimateSQM(lat, lon) {
-  const urban = [{lat:41.9028,lon:12.4964,w:1},{lat:45.4642,lon:9.19,w:1},{lat:40.8518,lon:14.2681,w:.8},{lat:45.0703,lon:7.6869,w:.7}];
-  let inf = 0;
-  urban.forEach(c => { const d = Math.hypot((lat-c.lat)*111, (lon-c.lon)*111*Math.cos(rad(lat))); inf += c.w * Math.exp(-d/40); });
-  return Math.round(Math.max(17.5, Math.min(22.0, 22.0 - inf*2.5)) * 100) / 100;
-}
-function sqmToDesc(sqm) {
-  if (sqm >= 21.8) return { label: "Eccellente", badge: "ok" };
-  if (sqm >= 21.0) return { label: "Buona", badge: "ok" };
-  if (sqm >= 20.0) return { label: "Discreta", badge: "warn" };
-  if (sqm >= 19.0) return { label: "Mediocre", badge: "warn" };
-  return { label: "Scarsa", badge: "bad" };
+/* ============================================================
+   CALCOLO SQM E BORTLE (VERSIONE IBRIDA)
+   ============================================================ */
+
+// Database di città italiane con SQM medio stimato (fonte: lightpollutionmap.info / ATLAS)
+// I valori sono riferiti al centro urbano.
+const CITY_SQM_DB = [
+  { lat: 45.4642, lon: 9.1900, sqm: 17.2 }, // Milano
+  { lat: 41.9028, lon: 12.4964, sqm: 17.6 }, // Roma
+  { lat: 40.8518, lon: 14.2681, sqm: 17.5 }, // Napoli
+  { lat: 45.0703, lon: 7.6869, sqm: 17.6 }, // Torino
+  { lat: 38.1157, lon: 13.3615, sqm: 18.1 }, // Palermo
+  { lat: 44.4056, lon: 8.9463, sqm: 17.8 }, // Genova
+  { lat: 44.4949, lon: 11.3426, sqm: 18.0 }, // Bologna
+  { lat: 43.7696, lon: 11.2558, sqm: 18.2 }, // Firenze
+  { lat: 45.4408, lon: 12.3155, sqm: 18.0 }, // Venezia
+  { lat: 45.4384, lon: 10.9916, sqm: 18.3 }, // Verona
+  { lat: 41.1171, lon: 16.8719, sqm: 18.4 }, // Bari
+  { lat: 37.5079, lon: 15.0830, sqm: 18.4 }, // Catania
+  { lat: 45.6495, lon: 13.7768, sqm: 18.6 }, // Trieste
+  { lat: 39.2238, lon: 9.1217, sqm: 18.8 }, // Cagliari
+  { lat: 46.0700, lon: 11.1185, sqm: 19.0 }, // Trento
+  { lat: 40.6327, lon: 17.9418, sqm: 19.0 }, // Brindisi
+  { lat: 38.1938, lon: 15.5540, sqm: 18.5 }, // Messina
+  { lat: 39.2983, lon: 16.2539, sqm: 19.2 }, // Cosenza
+  { lat: 40.6824, lon: 14.7681, sqm: 18.6 }, // Salerno
+  { lat: 41.1298, lon: 14.7826, sqm: 19.2 }, // Benevento
+  { lat: 43.6158, lon: 13.5189, sqm: 19.0 }, // Ancona
+  { lat: 43.1107, lon: 12.3908, sqm: 19.0 }, // Perugia
+  { lat: 42.3499, lon: 13.3995, sqm: 19.4 }, // L'Aquila
+  { lat: 40.6395, lon: 15.8056, sqm: 19.4 }, // Potenza
+  { lat: 41.5603, lon: 14.6627, sqm: 19.6 }, // Campobasso
+  { lat: 46.4983, lon: 11.3548, sqm: 19.1 }, // Bolzano
+  { lat: 45.7370, lon: 7.3201, sqm: 19.2 }  // Aosta
+];
+
+// Funzione per calcolare la distanza in km tra due coordinate (Haversine)
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Raggio terrestre in km
+  const dLat = rad(lat2 - lat1);
+  const dLon = rad(lon2 - lon1);
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(rad(lat1)) * Math.cos(rad(lat2)) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
 }
 
+// Stima SQM basata sulla città più vicina e sulla distanza
+function estimateSQMFromCity(lat, lon) {
+  let closest = null;
+  let minDist = Infinity;
+  CITY_SQM_DB.forEach(city => {
+    const d = haversineDistance(lat, lon, city.lat, city.lon);
+    if (d < minDist) { minDist = d; closest = city; }
+  });
+  if (!closest) return 21.5; // fallback
+  // Allontanandosi dalla città, l'SQM aumenta (cielo più scuro)
+  // Formula empirica: +1.2 mag per ogni decade di distanza (a partire da 10 km)
+  const baseSqm = closest.sqm;
+  const distFactor = 1.2 * Math.log10(1 + minDist / 10);
+  let sqm = baseSqm + distFactor;
+  // Limita a un massimo realistico per l'Italia (Bortle 2/1)
+  return Math.min(21.9, Math.max(17.0, sqm));
+}
+
+// Formula logaritmica basata sulla popolazione di tutte le città (modello fisico)
+function estimateSQMFromPopulation(lat, lon) {
+  // Grandi aree metropolitane italiane (popolazione in migliaia)
+  const cities = [
+    { lat: 41.9028, lon: 12.4964, pop: 4300 }, // Roma
+    { lat: 45.4642, lon: 9.1900,  pop: 3200 }, // Milano
+    { lat: 40.8518, lon: 14.2681, pop: 3000 }, // Napoli
+    { lat: 45.0703, lon: 7.6869,  pop: 1700 }, // Torino
+    { lat: 38.1157, lon: 13.3615, pop: 1000 }, // Palermo
+    { lat: 44.4056, lon: 8.9463,  pop: 850 },  // Genova
+    { lat: 44.4949, lon: 11.3426, pop: 1000 }, // Bologna
+    { lat: 43.7696, lon: 11.2558, pop: 1000 }, // Firenze
+    { lat: 45.4408, lon: 12.3155, pop: 700 },  // Venezia
+    { lat: 45.4384, lon: 10.9916, pop: 500 },  // Verona
+    { lat: 41.1171, lon: 16.8719, pop: 800 },  // Bari
+    { lat: 37.5079, lon: 15.0830, pop: 800 },  // Catania
+    { lat: 45.6495, lon: 13.7768, pop: 250 },  // Trieste
+    { lat: 39.2238, lon: 9.1217,  pop: 400 },  // Cagliari
+    { lat: 46.0700, lon: 11.1185, pop: 200 },  // Trento
+    { lat: 40.6327, lon: 17.9418, pop: 250 },  // Brindisi
+    { lat: 38.1938, lon: 15.5540, pop: 650 },  // Messina
+    { lat: 39.2983, lon: 16.2539, pop: 200 },  // Cosenza
+    { lat: 40.6824, lon: 14.7681, pop: 400 },  // Salerno
+    { lat: 41.1298, lon: 14.7826, pop: 200 }   // Benevento
+  ];
+  // Aggiungi tutti i capoluoghi di provincia italiani con popolazione media
+  if (typeof ITALIAN_PROVINCES !== 'undefined') {
+    ITALIAN_PROVINCES.forEach(p => {
+      const exists = cities.find(c => Math.abs(c.lat - p.lat) < 0.005 && Math.abs(c.lon - p.lon) < 0.005);
+      if (!exists) cities.push({ lat: p.lat, lon: p.lon, pop: 150 });
+    });
+  }
+  let light = 0;
+  cities.forEach(c => {
+    const dLat = (lat - c.lat) * 111.0;
+    const dLon = (lon - c.lon) * 111.0 * Math.cos(rad(lat));
+    const dist = Math.max(0.3, Math.sqrt(dLat * dLat + dLon * dLon));
+    const popEff = Math.sqrt(c.pop);
+    const sigma = 5 + popEff * 0.3;
+    light += popEff * Math.exp(-dist / sigma) / Math.sqrt(sigma);
+  });
+  const naturalSQM = 22.0;
+  const reduction = Math.min(4.7, 5.52 * Math.log10(1 + 0.5 * light));
+  const sqm = naturalSQM - reduction;
+  return Math.max(16.5, Math.min(22.0, sqm));
+}
+
+// Funzione finale: combina i due modelli con una media pesata
+function estimateSQM(lat, lon) {
+  const sqmCity = estimateSQMFromCity(lat, lon);
+  const sqmPop = estimateSQMFromPopulation(lat, lon);
+  // Media pesata: 60% città (dato reale locale), 40% modello fisico
+  let sqm = sqmCity * 0.6 + sqmPop * 0.4;
+  return Math.round(Math.max(16.5, Math.min(22.0, sqm)) * 100) / 100;
+}
+
+// Conversione SQM -> Bortle (tabella standard)
+function sqmToBortle(sqm) {
+  if (sqm >= 21.99) return 1;
+  if (sqm >= 21.89) return 2;
+  if (sqm >= 21.69) return 3;
+  if (sqm >= 20.49) return 4;
+  if (sqm >= 19.50) return 5;
+  if (sqm >= 18.94) return 6;
+  if (sqm >= 18.38) return 7;
+  if (sqm >= 17.80) return 8;
+  return 9;
+}
+
+function sqmToDesc(sqm) {
+  const bortle = sqmToBortle(sqm);
+  if (bortle <= 2) return { label: `Eccellente (Bortle ${bortle})`, badge: "ok" };
+  if (bortle === 3) return { label: `Ottima (Bortle ${bortle})`, badge: "ok" };
+  if (bortle === 4) return { label: `Buona (Bortle ${bortle})`, badge: "ok" };
+  if (bortle === 5) return { label: `Discreta (Bortle ${bortle})`, badge: "warn" };
+  if (bortle === 6) return { label: `Mediocre (Bortle ${bortle})`, badge: "warn" };
+  if (bortle === 7) return { label: `Scarsa (Bortle ${bortle})`, badge: "bad" };
+  return { label: `Pessima (Bortle ${bortle})`, badge: "bad" };
+}
+
+/* ============================================================
+   IL RESTO DEL CODICE (INVARIATO)
+   ============================================================ */
 function getExactMoonData(date) {
   if (typeof Astronomy !== 'undefined') {
     try {
@@ -1587,10 +1722,6 @@ function getExactMoonData(date) {
   return { illumPct: 50, isWaxing: true, name: "Luna" };
 }
 
-/* ============================================================
-   FIX: getSunTimesPure usa il MEZZOGIORNO UTC del giorno
-   per non incorrere in bug da fuso orario
-   ============================================================ */
 function getSunTimesPure(lat, lon, date, alt) {
   try {
     const y = date.getFullYear();
@@ -1614,9 +1745,6 @@ function getSunTimesPure(lat, lon, date, alt) {
   } catch(e) { return null; }
 }
 
-/* ============================================================
-   Finestra notte (tramonto → alba successiva) per data
-   ============================================================ */
 function getNightWindow(date) {
   const todayNoon = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
   const sunRiseToday = getSunTimesPure(state.lat, state.lon, todayNoon, -0.833);
@@ -1630,12 +1758,6 @@ function getNightWindow(date) {
   return null;
 }
 
-/* ============================================================
-   Data di riferimento per "Stasera":
-   - Se ora attuale < (alba di oggi + 1h) → mostra notte del giorno PRIMA (ieri)
-   - Altrimenti → mostra notte di OGGI
-   Questo evita salti al cambio mezzanotte: il refresh avviene 1 ora dopo l'alba
-   ============================================================ */
 function getTonightReferenceDate() {
   const now = new Date();
   const tStd = getSunTimesPure(state.lat, state.lon, now, -0.833);
@@ -1691,9 +1813,6 @@ function altAzToRaDec(alt, az) {
   return { ra: norm360(deg(ra)), dec: deg(dec) };
 }
 
-/* ============================================================
-   INPUT & UI
-   ============================================================ */
 function readInputs() {
   state.lat = parseFloat(document.getElementById('lat').value) || 0;
   state.lon = parseFloat(document.getElementById('lon').value) || 0;
@@ -1777,9 +1896,7 @@ function loadCity() {
   updateAll();
 }
 
-/* ============================================================
-   WEB INFO
-   ============================================================ */
+/* WEB INFO */
 const WIKI_MAP = {
   'Sole': 'Sole', 'Luna': 'Luna',
   'Mercurio': 'Mercurio_(astronomia)', 'Venere': 'Venere_(astronomia)',
@@ -1827,9 +1944,7 @@ function openWebInfoFromSky() {
   openObjectWebInfo(obj.n || obj.name, type, obj.cat || '');
 }
 
-/* ============================================================
-   PROVINCE ITALIANE (invariato)
-   ============================================================ */
+/* PROVINCE ITALIANE */
 const ITALIAN_PROVINCES = [
   {n:"Torino",r:"Piemonte",lat:45.0703,lon:7.6869},{n:"Vercelli",r:"Piemonte",lat:45.3206,lon:8.4185},
   {n:"Novara",r:"Piemonte",lat:45.4469,lon:8.6222},{n:"Cuneo",r:"Piemonte",lat:44.3931,lon:7.5496},
@@ -1912,9 +2027,7 @@ function populateProvinces() {
   if (currentValue) select.value = currentValue;
 }
 
-/* ============================================================
-   GPS
-   ============================================================ */
+/* GPS */
 function checkGPSAvailability() { document.getElementById('gpsBanner').style.display = 'flex'; }
 function activateGPS() { document.getElementById('gpsBanner').style.display = 'flex'; getLocation(); }
 async function ensureLocationPermission() { return true; }
@@ -1988,14 +2101,13 @@ function toggleGPSLive() {
   );
 }
 
-/* ============================================================
-   RENDER VARI
-   ============================================================ */
+/* RENDER VARI */
 function renderSkyQuality() {
   const desc = sqmToDesc(state.sqm);
+  const bortle = sqmToBortle(state.sqm);
   document.getElementById('sky-quality-grid').innerHTML = `
     <div class="card"><label>Qualità Cielo (SQM)</label><div class="val">${state.sqm.toFixed(2)} <span style="font-size:12px; color:var(--muted);">mag/arcsec²</span></div></div>
-    <div class="card"><label>Giudizio</label><div class="val" style="color:var(--${desc.badge})">${desc.label}</div></div>
+    <div class="card"><label>Scala Bortle</label><div class="val" style="color:var(--${desc.badge})">Classe ${bortle} — ${desc.label}</div></div>
   `;
 }
 
@@ -2035,9 +2147,7 @@ function renderSunMoon() {
   document.getElementById('moon-phase-name').innerText = m.name;
 }
 
-/* ============================================================
-   MAPPA DEL CIELO
-   ============================================================ */
+/* MAPPA DEL CIELO */
 const canvas = document.getElementById('skyCanvas');
 const ctx = canvas.getContext('2d');
 const SIZE = 1000;
@@ -2399,9 +2509,7 @@ canvas.addEventListener('click', e => {
   if (closest) { showSkyObjectPopup(closest); state.target = closest; drawMap(); }
 });
 
-/* ============================================================
-   STRISCIA INFO OGGETTO
-   ============================================================ */
+/* STRISCIA INFO OGGETTO */
 function updateInfoStrip() {
   const nameEl = document.getElementById('stripObjName');
   if (!nameEl) return;
@@ -2518,9 +2626,7 @@ function onSliderChange() {
 }
 function setTimeOffset(m) { document.getElementById('timeSlider').value = m; onSliderChange(); }
 
-/* ============================================================
-   TONIGHT — usa getTonightReferenceDate() per la notte
-   ============================================================ */
+/* TONIGHT */
 function renderTonight() {
   const now = state.currentTime;
   document.getElementById('tonight-time').innerText = now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
@@ -2615,9 +2721,7 @@ function tonightClick(payload) {
   try { const obj = JSON.parse(decodeURIComponent(payload)); showObjectModal(obj.n, obj.ra, obj.dec); } catch(e) {}
 }
 
-/* ============================================================
-   SEARCH
-   ============================================================ */
+/* SEARCH */
 function searchObjects() {
   const q = document.getElementById('objectSearch').value.trim().toLowerCase();
   const rd = document.getElementById('searchResults');
@@ -2654,9 +2758,7 @@ function gotoObject(idx) {
 }
 function clearSearch() { document.getElementById('objectSearch').value = ''; document.getElementById('searchResults').style.display = 'none'; }
 
-/* ============================================================
-   METEO
-   ============================================================ */
+/* METEO */
 let _weatherData = null;
 function weatherCodeInfo(code) {
   if (code === 0) return { icon: '☀️', text: 'Sereno' };
@@ -2954,9 +3056,7 @@ function renderQuality() {
   `;
 }
 
-/* ============================================================
-   ALLSKY / NINA / LOGO / PREVIEW
-   ============================================================ */
+/* ALLSKY / NINA / LOGO / PREVIEW */
 let autoTimer = null;
 function loadAllSky() {
   const urlInput = document.getElementById('allsky-url');
@@ -3019,9 +3119,7 @@ function reloadPreview() { const url = document.getElementById('preview-quick-ur
 function closePreview() { document.getElementById('preview-modal').classList.remove('open'); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePreview(); closeCatDetail(); closeSolarModal(); closeMoonModal(); closeSkyObjectPopup(); } });
 
-/* ============================================================
-   SOLAR / MOON MODAL
-   ============================================================ */
+/* SOLAR / MOON MODAL */
 function openSolarModal() {
   const grid = document.getElementById('solar-detail-grid');
   let distAU = "—", distKm = "—", raSun = "—", decSun = "—", altSun = "—", azSun = "—";
@@ -3131,9 +3229,7 @@ function openMoonModal() {
 }
 function closeMoonModal() { document.getElementById('moon-modal').classList.remove('open'); }
 
-/* ============================================================
-   CATALOG
-   ============================================================ */
+/* CATALOG */
 function buildCatalogData() {
   const items = [];
   items.push({ id: 'sun', name: 'Sole', symbol: '☀️', cat: 'planet', type: 'Stella (Sole)', ra: null, dec: null, facts: { ...SUN_FACTS }, desc: SUN_FACTS.desc, tags: ['Sistema Solare', 'Sole'] });
@@ -3272,9 +3368,7 @@ function catDetailGotoTelescope() {
   }, 250);
 }
 
-/* ============================================================
-   OBSERVATION CHART
-   ============================================================ */
+/* OBSERVATION CHART */
 function getSunAltitude(date) { const sp = getSunPositionPure(date); return getAltAz(sp.ra, sp.dec, date).alt; }
 function skyPhaseCategory(sunAlt) {
   if (sunAlt > -0.833) return 'day';
@@ -3371,9 +3465,7 @@ function drawObsChart(samples, tStart, tEnd, bestStart, bestEnd, canvasId) {
   }
 }
 
-/* ============================================================
-   SHOW OBJECT MODAL
-   ============================================================ */
+/* SHOW OBJECT MODAL */
 function showObjectModal(name, ra, dec) {
   const star = STARS.find(s => s.n === name);
   const mess = Object.values(MESSIER).find(m => m.n === name);
@@ -3407,9 +3499,7 @@ function showObjectModal(name, ra, dec) {
   setTimeout(() => buildObservationChart(name, ra, dec, null, type), 30);
 }
 
-/* ============================================================
-   TELESCOPIO
-   ============================================================ */
+/* TELESCOPIO */
 const scopeState = {
   connected: false, connType: 'wifi', protocol: 'lx200', mountType: 'gem',
   ip: '192.168.0.1', port: '9998', btDevice: '',
@@ -4170,10 +4260,7 @@ setInterval(() => {
   }
 }, 5000);
 
-/* ============================================================
-   AUTO-REFRESH "STASERA" — controlla ogni minuto se è cambiata
-   la data di riferimento (1 ora dopo l'alba → nuova notte)
-   ============================================================ */
+/* AUTO-REFRESH "STASERA" */
 let _lastTonightRefDate = null;
 (function initTonightRefWatcher() {
   _lastTonightRefDate = null;
@@ -4200,9 +4287,7 @@ setInterval(() => {
   } catch(e) { console.warn('Tonight watcher:', e); }
 }, 60000);
 
-/* ============================================================
-   SERVICE WORKER & INIT
-   ============================================================ */
+/* SERVICE WORKER & INIT */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js', { scope: './' })
