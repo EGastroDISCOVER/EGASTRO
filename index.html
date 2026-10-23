@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#d4af37">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="8.0.4">
+<meta name="app-version" content="8.0.8">
 <meta name="app-name" content="EGastro DISCOVER">
 <link rel="manifest" href="./manifest.json">
 <title>EGastro DISCOVER v8</title>
@@ -215,19 +215,8 @@
     order: -1;
   }
   .scope-hud-outside span { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
-  .scope-hud-outside b {
-    color: var(--accent);
-    display: inline-block;
-    min-width: 62px;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-  .scope-hud-outside #scopeHudTrack {
-    display: inline-block;
-    min-width: 90px;
-    text-align: center;
-  }
-
+  .scope-hud-outside b { color: var(--accent); display: inline-block; min-width: 62px; text-align: right; font-variant-numeric: tabular-nums; }
+  .scope-hud-outside #scopeHudTrack { display: inline-block; min-width: 90px; text-align: center; }
   .scope-map-wrap { position: relative; background: #000; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); height: 620px; }
   #scopeCanvas, #scopeOverlayCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   #scopeCanvas { cursor: grab; touch-action: none; background: #000; }
@@ -235,14 +224,12 @@
   #scopeOverlayCanvas { pointer-events: none; }
   .scope-hud { position: absolute; top: 10px; left: 10px; background: rgba(4,6,11,.8); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 11px; font-family: 'Orbitron'; color: var(--accent2); display: flex; gap: 12px; pointer-events: none; backdrop-filter: blur(4px); z-index: 5; flex-wrap: wrap; max-width: calc(100% - 20px); }
   .scope-hud b { color: var(--accent); }
-
   .edge-arrow { position: absolute; width: 54px; height: 54px; background: rgba(13,18,28,.88); border: 1.5px solid var(--accent); border-radius: 50%; color: var(--accent); font-size: 22px; display: grid; place-items: center; cursor: pointer; pointer-events: auto; z-index: 15; transition: .1s; backdrop-filter: blur(4px); user-select: none; box-shadow: 0 0 12px rgba(212,175,55,0.35); }
   .edge-arrow:active { background: var(--accent); color: #000; transform: scale(.92); }
   .edge-n { top: 8px; left: 50%; transform: translateX(-50%); }
   .edge-s { bottom: 8px; left: 50%; transform: translateX(-50%); }
   .edge-e { top: 50%; right: 8px; transform: translateY(-50%); }
   .edge-o { top: 50%; left: 8px; transform: translateY(-50%); }
-
   .scope-target-overlay {
     display: none;
     flex-direction: column;
@@ -264,72 +251,29 @@
   .target-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
   .target-close { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 2px 8px; border-radius: 4px; }
   .target-close:hover { color: var(--bad); background: rgba(248,113,113,.1); }
-
-  .scope-target-data-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
-    padding: 10px 14px;
-  }
-  .scope-target-data-row .tc {
-    background: var(--bg2);
-    border: 1px solid var(--line);
-    border-radius: 7px;
-    padding: 5px 7px;
-    min-width: 0;
-  }
-  .scope-target-data-row .tc .k {
-    font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
-  }
-  .scope-target-data-row .tc .v {
-    font-family: 'Orbitron'; font-size: 11px; color: var(--accent2); font-weight: bold;
-    margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
+  .scope-target-data-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 10px 14px; }
+  .scope-target-data-row .tc { background: var(--bg2); border: 1px solid var(--line); border-radius: 7px; padding: 5px 7px; min-width: 0; }
+  .scope-target-data-row .tc .k { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .scope-target-data-row .tc .v { font-family: 'Orbitron'; font-size: 11px; color: var(--accent2); font-weight: bold; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .scope-target-data-row .tc .v.low { color: var(--warn); }
   .scope-target-data-row .tc .v.off { color: var(--muted); }
-
   .scope-night-chart-wrap { padding: 6px 14px 0; }
   #scopeNightChart { width: 100%; height: 72px; display: block; border-radius: 6px; background: #000; border: 1px solid var(--line); }
   .scope-night-chart-meta { padding: 4px 14px 8px; font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); }
   .scope-night-chart-meta strong { color: var(--ok); }
-
-  .target-step-row {
-    display: flex; justify-content: center; align-items: center;
-    padding: 12px 14px 4px; gap: 6px;
-  }
+  .target-step-row { display: flex; justify-content: center; align-items: center; padding: 12px 14px 4px; gap: 6px; }
   .step-indicator { display: flex; align-items: center; gap: 4px; }
-  .step-dot {
-    width: 28px; height: 28px; border-radius: 50%;
-    border: 1.5px solid var(--line);
-    background: var(--bg2); color: var(--muted);
-    display: grid; place-items: center;
-    font-size: 12px; font-weight: bold; font-family: 'Orbitron';
-    transition: 0.3s;
-  }
+  .step-dot { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--bg2); color: var(--muted); display: grid; place-items: center; font-size: 12px; font-weight: bold; font-family: 'Orbitron'; transition: 0.3s; }
   .step-dot.active { border-color: var(--accent); background: var(--accent); color: #000; box-shadow: 0 0 12px var(--glow); }
   .step-dot.done { border-color: var(--ok); background: var(--ok); color: #000; }
   .step-dot.done::after { content: "✓"; }
   .step-dot.done span { display: none; }
   .step-line { width: 36px; height: 2px; background: var(--line); transition: 0.3s; }
   .step-line.done { background: var(--ok); }
-
-  .target-actions-row {
-    padding: 10px 14px 14px;
-    display: grid;
-    grid-template-columns: 1.7fr 1fr 1fr;
-    gap: 8px;
-  }
-  .target-actions-row button {
-    padding: 11px 6px; border-radius: 9px;
-    font-weight: 700; font-size: 12px; cursor: pointer;
-    border: 1px solid var(--line); background: var(--bg2); color: var(--text);
-    transition: 0.2s; font-family: 'Inter', sans-serif;
-  }
+  .target-actions-row { padding: 10px 14px 14px; display: grid; grid-template-columns: 1.7fr 1fr 1fr; gap: 8px; }
+  .target-actions-row button { padding: 11px 6px; border-radius: 9px; font-weight: 700; font-size: 12px; cursor: pointer; border: 1px solid var(--line); background: var(--bg2); color: var(--text); transition: 0.2s; font-family: 'Inter', sans-serif; }
   .target-actions-row button:hover { border-color: var(--accent); color: var(--accent); }
-  .target-actions-row .btn-goto-large {
-    background: var(--ok); color: #000; border-color: var(--ok);
-    font-family: 'Orbitron'; letter-spacing: 0.5px; font-size: 13px;
-  }
+  .target-actions-row .btn-goto-large { background: var(--ok); color: #000; border-color: var(--ok); font-family: 'Orbitron'; letter-spacing: 0.5px; font-size: 13px; }
   .target-actions-row .btn-goto-large:hover { filter: brightness(1.15); color: #000; }
   .target-actions-row .btn-goto-large:disabled { opacity: 0.35; cursor: not-allowed; filter: none; }
   .target-actions-row .btn-goto-large.slewing { background: var(--warn); animation: pulse 1.2s infinite; color: #000; }
@@ -339,53 +283,18 @@
   .target-actions-row .btn-sync { background: rgba(74,222,128,.12); border-color: var(--ok); color: var(--ok); }
   .target-actions-row .btn-sync:hover { background: var(--ok); color: #000; }
   .target-actions-row .btn-stop { background: rgba(248,113,113,.15); border-color: var(--bad); color: var(--bad); }
-
-  .park-overlay {
-    position: absolute; top: 10px; right: 10px; width: 180px;
-    background: rgba(0,0,0,.88); backdrop-filter: blur(6px);
-    border: 1px solid var(--warn); border-radius: 12px;
-    z-index: 50; display: none; flex-direction: column;
-    align-items: center; text-align: center; padding: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-  }
+  .park-overlay { position: absolute; top: 10px; right: 10px; width: 180px; background: rgba(0,0,0,.88); backdrop-filter: blur(6px); border: 1px solid var(--warn); border-radius: 12px; z-index: 50; display: none; flex-direction: column; align-items: center; text-align: center; padding: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.6); }
   .park-overlay.open { display: flex; }
   .park-icon { font-size: 26px; margin-bottom: 4px; color: var(--warn); }
   .park-title { font-family: 'Orbitron'; font-size: 12px; color: var(--warn); margin-bottom: 4px; }
   .park-text { font-size: 10px; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
   .park-btn { padding: 6px 14px; border-radius: 6px; border: none; background: var(--ok); color: #000; font-weight: bold; font-size: 11px; cursor: pointer; box-shadow: 0 0 10px rgba(74,222,128,.3); }
-
   .scope-zoom { position: absolute; bottom: 15px; right: 15px; display: flex; flex-direction: column; gap: 6px; z-index: 10; }
   .scope-zoom button { width: 34px; height: 34px; border-radius: 50%; background: rgba(13,18,28,.9); border: 1px solid var(--accent); color: var(--accent); font-size: 16px; font-weight: bold; cursor: pointer; display: grid; place-items: center; }
   .scope-zoom button:hover { background: var(--accent); color: #000; }
-
-  .scope-emergency-stop {
-    position: absolute;
-    bottom: 15px;
-    left: 15px;
-    width: 64px;
-    height: 64px;
-    z-index: 20;
-    border-radius: 50%;
-    background: rgba(239,68,68,.92);
-    color: #fff;
-    border: 3px solid #7f1d1d;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    font-weight: 900;
-    cursor: pointer;
-    box-shadow: 0 0 18px rgba(239,68,68,.6);
-    transition: 0.2s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    line-height: 1.1;
-    text-align: center;
-    letter-spacing: 0.5px;
-  }
+  .scope-emergency-stop { position: absolute; bottom: 15px; left: 15px; width: 64px; height: 64px; z-index: 20; border-radius: 50%; background: rgba(239,68,68,.92); color: #fff; border: 3px solid #7f1d1d; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; cursor: pointer; box-shadow: 0 0 18px rgba(239,68,68,.6); transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; text-align: center; letter-spacing: 0.5px; }
   .scope-emergency-stop:hover { background: #ef4444; box-shadow: 0 0 30px rgba(239,68,68,.9); transform: scale(1.05); }
   .scope-emergency-stop:active { transform: scale(.92); }
-
   .scope-panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px; max-height: 900px; overflow-y: auto; }
   .conn-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; background: var(--bad); color: #000; }
   .conn-badge.on { background: var(--ok); }
@@ -425,13 +334,8 @@
   .track-rate-pills { display: flex; gap: 6px; }
   .track-pill { flex: 1; padding: 6px 0; border-radius: 6px; border: 1px solid var(--line); background: var(--bg2); color: var(--muted); font-size: 10px; font-weight: bold; cursor: pointer; text-align: center; }
   .track-pill.active { background: var(--accent); color: #000; border-color: var(--accent); }
-
   .catalog-list { max-height: 220px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; padding: 4px; }
-  .catalog-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 7px 9px; border-radius: 6px; border: 1px solid transparent;
-    font-size: 11px; cursor: pointer; transition: .15s;
-  }
+  .catalog-item { display: flex; justify-content: space-between; align-items: center; padding: 7px 9px; border-radius: 6px; border: 1px solid transparent; font-size: 11px; cursor: pointer; transition: .15s; }
   .catalog-item:hover { background: var(--bg2); border-color: var(--line); }
   .catalog-item.selected { background: rgba(212,175,55,.12); border-color: var(--accent); box-shadow: 0 0 0 1px rgba(212,175,55,.2) inset; }
   .catalog-item.dim { opacity: 0.45; }
@@ -445,24 +349,15 @@
   .catalog-item .alt { font-family: 'Orbitron'; font-size: 10.5px; font-weight: 700; color: var(--accent2); white-space: nowrap; }
   .catalog-item .alt.low { color: var(--warn); }
   .catalog-item .alt.off { color: var(--muted); }
-
   .scope-log { background: #000; border: 1px solid var(--line); border-radius: 8px; padding: 6px; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); height: 80px; overflow-y: auto; }
   .scope-log .log-line { border-bottom: 1px solid rgba(255,255,255,.03); padding: 1px 0; }
   .scope-log .log-line.ok { color: var(--ok); }
   .scope-log .log-line.warn { color: var(--warn); }
   .scope-log .log-line.err { color: var(--bad); }
   .scope-log .log-line .t { color: var(--accent); margin-right: 6px; }
-
   .map-tooltip { position: absolute; pointer-events: none; z-index: 30; background: rgba(4,6,11,.92); border: 1px solid var(--accent); border-radius: 6px; padding: 4px 8px; font-size: 10px; font-family: 'Orbitron'; color: var(--accent2); transform: translate(12px,12px); opacity: 0; transition: opacity .12s; white-space: nowrap; }
   .map-tooltip.show { opacity: 1; }
-
-  #skyObjectPopup {
-    display: none;
-    background: var(--card);
-    border-top: 1.5px solid var(--accent);
-    padding: 20px;
-    animation: slideUp 0.35s ease;
-  }
+  #skyObjectPopup { display: none; background: var(--card); border-top: 1.5px solid var(--accent); padding: 20px; animation: slideUp 0.35s ease; }
   #skyObjectPopup.open { display: block; }
   #skyObjectPopup .popup-title { font-family: 'Orbitron'; color: var(--accent2); font-size: 18px; margin-bottom: 6px; font-weight: bold; }
   #skyObjectPopup .popup-sub { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
@@ -471,15 +366,7 @@
   #skyObjectPopup .popup-row .k { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
   #skyObjectPopup .popup-row .v { color: var(--text); font-weight: 600; margin-top: 2px; }
   #skyObjectPopup .popup-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
-
-  .skymap-info-strip {
-    display: flex; flex-wrap: wrap; gap: 6px 18px;
-    justify-content: space-between; align-items: center;
-    padding: 10px 14px;
-    background: linear-gradient(90deg, rgba(212,175,55,0.12), rgba(212,175,55,0.02));
-    border-bottom: 1px solid var(--accent);
-    min-height: 48px;
-  }
+  .skymap-info-strip { display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: space-between; align-items: center; padding: 10px 14px; background: linear-gradient(90deg, rgba(212,175,55,0.12), rgba(212,175,55,0.02)); border-bottom: 1px solid var(--accent); min-height: 48px; }
   .strip-item { display: flex; flex-direction: column; gap: 2px; min-width: 60px; }
   .strip-item .k { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
   .strip-item .v { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--accent2); font-weight: 700; white-space: nowrap; }
@@ -489,6 +376,193 @@
   @media (max-width: 600px) {
     .skymap-info-strip { gap: 4px 10px; padding: 8px 10px; }
     .strip-item .v { font-size: 11px; }
+  }
+
+  /* ============ METEO AVANZATO ============ */
+  .weather-status-bar {
+    display: flex; flex-wrap: wrap; gap: 10px 20px;
+    align-items: center; justify-content: space-between;
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .weather-status-bar .ws-loc { font-family: 'Orbitron', sans-serif; color: var(--accent2); font-weight: 700; }
+  .weather-status-bar .ws-updated { color: var(--muted); font-size: 11px; }
+  .weather-status-bar button { padding: 8px 16px; font-size: 12px; }
+  .weather-section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 25px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .weather-section-title .sub { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 500; }
+  #weather-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 8px; }
+  .weather-kpi {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.2s;
+  }
+  .weather-kpi:hover { border-color: var(--accent); box-shadow: 0 0 15px var(--glow); }
+  .weather-kpi .k { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .weather-kpi .v { font-family: 'Orbitron', sans-serif; font-size: 18px; color: var(--accent2); font-weight: 700; }
+  .weather-kpi .v.small { font-size: 14px; }
+  .weather-kpi .sub { font-size: 10px; color: var(--muted); }
+  .nights-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+  }
+  .night-card {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .night-card:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--glow); transform: translateY(-2px); }
+  .night-card.active { border-color: var(--accent); background: rgba(212,175,55,0.05); }
+  .night-card .nc-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 8px; border-bottom: 1px solid var(--line); margin-bottom: 4px;
+  }
+  .night-card .nc-date { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--accent2); font-weight: 700; }
+  .night-card .nc-moon { font-size: 14px; }
+  .night-card .nc-score {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+  }
+  .night-card .nc-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .night-card .nc-row span:last-child { color: var(--text); font-weight: 600; }
+  .night-card .nc-window {
+    font-size: 11px;
+    padding: 6px;
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.25);
+    border-radius: 6px;
+    color: var(--ok);
+    text-align: center;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .night-card .nc-window.bad { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.25); color: var(--bad); }
+  .weather-day-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .weather-day-tabs button {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--bg2);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 0.5px;
+  }
+  .weather-day-tabs button:hover { border-color: var(--accent); color: var(--accent); }
+  .weather-day-tabs button.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 15px var(--glow); }
+  .weather-day-tabs button .dow { font-size: 10px; opacity: 0.7; display: block; margin-top: 2px; }
+  .weather-hourly-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg2);
+    -webkit-overflow-scrolling: touch;
+  }
+  .weather-hourly-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .weather-hourly-table thead th {
+    position: sticky;
+    top: 0;
+    background: var(--card);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 8px;
+    color: var(--muted);
+    font-weight: 700;
+    text-align: center;
+    border-bottom: 2px solid var(--accent);
+    white-space: nowrap;
+    z-index: 2;
+  }
+  .weather-hourly-table tbody td {
+    padding: 8px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+    color: var(--text);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .weather-hourly-table tbody tr:hover { background: rgba(212,175,55,0.05); }
+  .weather-hourly-table tbody tr.night-row { background: rgba(30,58,138,0.06); }
+  .weather-hourly-table tbody tr.night-row:hover { background: rgba(30,58,138,0.12); }
+  .weather-hourly-table .cell-time { font-family: 'Orbitron', sans-serif; font-weight: 700; color: var(--accent2); font-size: 12px; }
+  .weather-hourly-table .cell-weather { font-size: 16px; }
+  .weather-hourly-table .cell-score { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 13px; padding: 6px; }
+  .cell-good { color: var(--ok) !important; }
+  .cell-mid { color: var(--warn) !important; }
+  .cell-bad { color: var(--bad) !important; }
+  .cell-neutral { color: var(--text) !important; }
+  .score-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 11px;
+  }
+  .score-badge.good { background: rgba(74,222,128,0.15); color: var(--ok); border: 1px solid rgba(74,222,128,0.3); }
+  .score-badge.mid { background: rgba(251,191,36,0.15); color: var(--warn); border: 1px solid rgba(251,191,36,0.3); }
+  .score-badge.bad { background: rgba(248,113,113,0.15); color: var(--bad); border: 1px solid rgba(248,113,113,0.3); }
+  .weather-loading, .weather-error, .weather-empty {
+    padding: 30px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+  }
+  .weather-error { color: var(--bad); border-color: rgba(248,113,113,0.3); }
+  @media (max-width: 600px) {
+    .weather-status-bar { font-size: 12px; }
+    .weather-kpi .v { font-size: 16px; }
+    .weather-hourly-table { font-size: 11px; }
+    .weather-hourly-table thead th, .weather-hourly-table tbody td { padding: 6px 5px; }
   }
 
   @media (max-width: 900px) {
@@ -696,6 +770,7 @@
       <div class="tonight-summary">
         <div class="big-time" id="tonight-time">--:--</div>
         <div class="location" id="tonight-location">--</div>
+        <div id="tonight-debug" style="font-size:10px; color:var(--muted); margin-top:5px; opacity:0.7;"></div>
       </div>
       <div class="search-box">
         <input type="text" id="objectSearch" placeholder="🔍 Cerca oggetto (es. M42, Orione, Giove...)" oninput="searchObjects()">
@@ -738,14 +813,36 @@
 
   <div id="tab-weather" class="tab-content">
     <div class="card">
-      <h2>⛅ Meteo & Qualità</h2>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <button class="btn" onclick="fetchWeather()">Scarica Meteo</button>
-        <span class="msg" id="msg-weather" style="margin:0;">In attesa...</span>
+      <h2>⛅ Meteo & Qualità Astrofotografia</h2>
+      <div class="weather-status-bar">
+        <div>📍 <span class="ws-loc" id="weather-loc">--</span></div>
+        <div class="ws-updated">🕒 <span id="weather-updated">Mai aggiornato</span></div>
+        <button class="btn" onclick="fetchWeather()">🔄 Aggiorna Meteo</button>
+        <span class="msg" id="msg-weather" style="margin:0;"></span>
       </div>
-      <div class="grid" id="weather-grid" style="margin-top:20px;"></div>
-      <h3 style="color:var(--accent); margin-top:25px; font-size:16px; border-top:1px solid var(--line); padding-top:15px; font-family:'Orbitron',sans-serif;">Qualità Astrofotografia (Notte)</h3>
+      <div class="weather-section-title">📊 Condizioni Attuali <span class="sub">adesso</span></div>
+      <div class="grid" id="weather-grid">
+        <div class="weather-kpi"><div class="k">Nuvole</div><div class="v small" style="color:var(--muted);">—</div></div>
+        <div class="weather-kpi"><div class="k">Temperatura</div><div class="v small" style="color:var(--muted);">—</div></div>
+        <div class="weather-kpi"><div class="k">Umidità</div><div class="v small" style="color:var(--muted);">—</div></div>
+        <div class="weather-kpi"><div class="k">Vento</div><div class="v small" style="color:var(--muted);">—</div></div>
+      </div>
+      <div class="weather-section-title">🌙 Qualità Notte Prossima <span class="sub">astrofotografia</span></div>
       <div class="grid" id="quality-grid"></div>
+      <div class="weather-section-title">📅 Prossime Notti <span class="sub">clicca per dettagli orari</span></div>
+      <div id="weather-nights-summary" class="nights-summary">
+        <div class="weather-empty">Carica il meteo per vedere il riepilogo delle prossime notti.</div>
+      </div>
+      <div class="weather-section-title">📈 Dettaglio Orario <span class="sub">ogni ora, tutti i dati per astrofotografia</span></div>
+      <div class="weather-day-tabs" id="weather-day-tabs"></div>
+      <div class="weather-hourly-wrap">
+        <table class="weather-hourly-table" id="weather-hourly-table">
+          <thead id="weather-hourly-head"></thead>
+          <tbody id="weather-hourly-body">
+            <tr><td colspan="13" style="text-align:center; padding:30px; color:var(--muted);">Carica il meteo per vedere i dettagli orari.</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -1020,7 +1117,8 @@ const state = {
   clouds: 0, target: null, sqm: 21.0,
   autoRotate: false, gpsLiveWatchId: null, gpsLiveActive: false,
   gpsAccuracy: null, catalogFilter: 'all', catalogDetailObj: null,
-  skyObject: null
+  skyObject: null,
+  weatherDayIndex: 0
 };
 const _planetCache = { key: null, data: null };
 const rad = d => d * Math.PI / 180;
@@ -1489,9 +1587,18 @@ function getExactMoonData(date) {
   return { illumPct: 50, isWaxing: true, name: "Luna" };
 }
 
+/* ============================================================
+   FIX: getSunTimesPure usa il MEZZOGIORNO UTC del giorno
+   per non incorrere in bug da fuso orario
+   ============================================================ */
 function getSunTimesPure(lat, lon, date, alt) {
   try {
-    const jd = date.getTime() / 86400000 + 2440587.5;
+    // Usa mezzogiorno UTC del giorno della data locale (indipendente dal fuso orario)
+    const y = date.getFullYear();
+    const m = date.getMonth();
+    const d = date.getDate();
+    const utcNoonMs = Date.UTC(y, m, d, 12, 0, 0);
+    const jd = utcNoonMs / 86400000 + 2440587.5;
     const n = Math.floor(jd - 2451545.0 + 0.0008);
     const Jstar = n - lon / 360;
     const M = norm360(357.5291 + 0.98560028 * Jstar);
@@ -1508,6 +1615,9 @@ function getSunTimesPure(lat, lon, date, alt) {
   } catch(e) { return null; }
 }
 
+/* ============================================================
+   Finestra notte (tramonto → alba successiva) per data
+   ============================================================ */
 function getNightWindow(date) {
   const todayNoon = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
   const sunRiseToday = getSunTimesPure(state.lat, state.lon, todayNoon, -0.833);
@@ -1519,6 +1629,25 @@ function getNightWindow(date) {
   const sunRise = getSunTimesPure(state.lat, state.lon, nextNoon, -0.833);
   if (sunSet && sunRise) return { start: sunSet.set, end: sunRise.rise };
   return null;
+}
+
+/* ============================================================
+   Data di riferimento per "Stasera":
+   - Se ora attuale < (alba di oggi + 1h) → mostra notte del giorno PRIMA (ieri)
+   - Altrimenti → mostra notte di OGGI
+   Questo evita salti al cambio mezzanotte: il refresh avviene 1 ora dopo l'alba
+   ============================================================ */
+function getTonightReferenceDate() {
+  const now = new Date();
+  const tStd = getSunTimesPure(state.lat, state.lon, now, -0.833);
+  if (tStd && tStd.rise) {
+    const cutoff = new Date(tStd.rise.getTime() + 60 * 60 * 1000); // alba + 1 ora
+    if (now < cutoff) {
+      // Prima di (alba+1h): mostra la notte del giorno precedente
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 12, 0, 0);
+    }
+  }
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
 }
 
 function getMoonRiseSet(lat, lon, date) {
@@ -1576,7 +1705,9 @@ function readInputs() {
     const [year, month, day] = d.split('-');
     const [hour, min, sec] = t.split(':');
     state.baseTime = new Date(year, month - 1, day, hour, min, sec || 0);
-  } else state.baseTime = new Date();
+  } else {
+    state.baseTime = new Date();
+  }
   state.currentTime = new Date(state.baseTime);
   state.sqm = estimateSQM(state.lat, state.lon);
   _planetCache.key = null;
@@ -1587,9 +1718,31 @@ function switchTab(id, btn) {
   document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'tab-sky') { readInputs(); state.planets = calcPlanetsPrecise(state.currentTime); document.getElementById('timeSlider').value = 0; onSliderChange(); resetView(); updateInfoStrip(); }
-  if (id === 'tab-tonight') { readInputs(); _planetCache.key = null; state.planets = calcPlanetsPrecise(state.currentTime); renderTonight(); }
+
+  if (id === 'tab-sky') {
+    readInputs();
+    state.planets = calcPlanetsPrecise(state.currentTime);
+    document.getElementById('timeSlider').value = 0;
+    onSliderChange();
+    resetView();
+    updateInfoStrip();
+  }
+
+  if (id === 'tab-tonight') {
+    // Sincronizza l'input al giorno reale, ma il render usa getTonightReferenceDate()
+    const now = new Date();
+    const todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+    document.getElementById('date').value = todayStr;
+    const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('time').value = timeStr;
+    readInputs();
+    _planetCache.key = null;
+    state.planets = calcPlanetsPrecise(state.currentTime);
+    renderTonight();
+  }
+
   if (id === 'tab-catalog') renderCatalog();
+  if (id === 'tab-weather') { readInputs(); if (!_weatherData) fetchWeather(); }
   if (id === 'tab-scope') scopeInit();
 }
 
@@ -1628,18 +1781,13 @@ function loadCity() {
 }
 
 /* ============================================================
-   WEB INFO — Sinbad/Wikipedia/Google
+   WEB INFO
    ============================================================ */
 const WIKI_MAP = {
-  'Sole': 'Sole',
-  'Luna': 'Luna',
-  'Mercurio': 'Mercurio_(astronomia)',
-  'Venere': 'Venere_(astronomia)',
-  'Marte': 'Marte_(astronomia)',
-  'Giove': 'Giove_(astronomia)',
-  'Saturno': 'Saturno_(astronomia)',
-  'Urano': 'Urano_(astronomia)',
-  'Nettuno': 'Nettuno_(astronomia)'
+  'Sole': 'Sole', 'Luna': 'Luna',
+  'Mercurio': 'Mercurio_(astronomia)', 'Venere': 'Venere_(astronomia)',
+  'Marte': 'Marte_(astronomia)', 'Giove': 'Giove_(astronomia)',
+  'Saturno': 'Saturno_(astronomia)', 'Urano': 'Urano_(astronomia)', 'Nettuno': 'Nettuno_(astronomia)'
 };
 const STAR_INTL = {
   'Sirio': 'Sirius', 'Arturo': 'Arcturus', 'Regolo': 'Regulus',
@@ -1657,39 +1805,17 @@ function openObjectWebInfo(name, type, cat) {
   const n = String(name);
   const t = String(type || '');
   const c = String(cat || '');
-
-  // Pianeti, Sole, Luna → Wikipedia IT
   const isSolar = t.includes('Pianeta') || t === 'Stella (Sole)' || t === 'Satellite naturale' || t === 'Satellite' ||
                   Object.values(PLANET_IT).includes(n) || n === 'Sole' || n === 'Luna';
-  if (isSolar) {
-    const wikiName = WIKI_MAP[n] || n;
-    window.open('https://it.wikipedia.org/wiki/' + encodeURIComponent(wikiName), '_blank');
-    return;
-  }
-
-  // Costellazioni → Wikipedia IT
-  if (c === 'constellation' || t === 'Costellazione') {
-    window.open('https://it.wikipedia.org/wiki/' + encodeURIComponent(n), '_blank');
-    return;
-  }
-
-  // Stelle e oggetti deep-sky → SIMBAD
+  if (isSolar) { window.open('https://it.wikipedia.org/wiki/' + encodeURIComponent(WIKI_MAP[n] || n), '_blank'); return; }
+  if (c === 'constellation' || t === 'Costellazione') { window.open('https://it.wikipedia.org/wiki/' + encodeURIComponent(n), '_blank'); return; }
   let simbadId = n;
-  const m = n.match(/^(M\d+)/);
-  if (m) simbadId = m[1];
-  const ngc = n.match(/\((NGC\d+|IC\d+)\)/);
-  if (ngc) simbadId = ngc[1];
+  const m = n.match(/^(M\d+)/); if (m) simbadId = m[1];
+  const ngc = n.match(/\((NGC\d+|IC\d+)\)/); if (ngc) simbadId = ngc[1];
   simbadId = STAR_INTL[simbadId] || simbadId;
-
   window.open('https://simbad.cds.unistra.fr/simbad/sim-id?Ident=' + encodeURIComponent(simbadId) + '&submit=submit+id', '_blank');
 }
-
-function openWebInfoFromDetail() {
-  const it = state.catalogDetailObj;
-  if (!it) { alert('Nessun oggetto selezionato.'); return; }
-  openObjectWebInfo(it.name, it.type, it.cat);
-}
-
+function openWebInfoFromDetail() { const it = state.catalogDetailObj; if (!it) { alert('Nessun oggetto selezionato.'); return; } openObjectWebInfo(it.name, it.type, it.cat); }
 function openWebInfoFromSky() {
   const obj = state.skyObject || state.target;
   if (!obj) { alert('Nessun oggetto selezionato.'); return; }
@@ -1705,7 +1831,7 @@ function openWebInfoFromSky() {
 }
 
 /* ============================================================
-   PROVINCE ITALIANE
+   PROVINCE ITALIANE (invariato)
    ============================================================ */
 const ITALIAN_PROVINCES = [
   {n:"Torino",r:"Piemonte",lat:45.0703,lon:7.6869},{n:"Vercelli",r:"Piemonte",lat:45.3206,lon:8.4185},
@@ -1772,10 +1898,7 @@ function populateProvinces() {
   const select = document.getElementById('citySelect');
   if (!select) return;
   const byRegion = {};
-  ITALIAN_PROVINCES.forEach(p => {
-    if (!byRegion[p.r]) byRegion[p.r] = [];
-    byRegion[p.r].push(p);
-  });
+  ITALIAN_PROVINCES.forEach(p => { if (!byRegion[p.r]) byRegion[p.r] = []; byRegion[p.r].push(p); });
   const currentValue = select.value;
   select.innerHTML = '<option value="">-- Seleziona una città --</option>';
   Object.keys(byRegion).sort().forEach(region => {
@@ -1790,7 +1913,6 @@ function populateProvinces() {
     select.appendChild(og);
   });
   if (currentValue) select.value = currentValue;
-  console.log(`✅ Caricate ${ITALIAN_PROVINCES.length} province italiane`);
 }
 
 /* ============================================================
@@ -1815,6 +1937,7 @@ function applyCoordinates(lat, lon, city, accuracy) {
   if (document.getElementById('tab-sky').classList.contains('active')) { document.getElementById('timeSlider').value = 0; onSliderChange(); }
   if (document.getElementById('tab-tonight').classList.contains('active')) renderTonight();
   if (scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) { scopeUpdateUI(); scopeDraw(); }
+  fetchWeather();
 }
 
 async function getIPLocation() {
@@ -1834,18 +1957,16 @@ async function getLocation() {
     try {
       const pos = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }));
       applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS', pos.coords.accuracy);
-      fetchWeather(); return;
-    } catch (err) {
-      msg.innerText = "⚠️ GPS non disponibile, provo via IP (approssimativo)...";
-    }
+      return;
+    } catch (err) { msg.innerText = "⚠️ GPS non disponibile, provo via IP (approssimativo)..."; }
   }
   try {
     const loc = await getIPLocation();
     if (loc) {
       applyCoordinates(loc.lat, loc.lon, loc.city || 'IP', null);
-      msg.innerHTML = `📍 <strong style="color:var(--warn);">Posizione IP approssimativa</strong> — provider: ${loc.city || 'sconosciuto'}. Non è GPS reale. Se impreciso, inserisci lat/lon manualmente o usa "GPS".`;
+      msg.innerHTML = `📍 <strong style="color:var(--warn);">Posizione IP approssimativa</strong> — provider: ${loc.city || 'sconosciuto'}.`;
       msg.className = "msg"; msg.style.color = "var(--warn)";
-      fetchWeather(); return;
+      return;
     }
   } catch (e) {}
   msg.innerHTML = "⚠️ Impossibile rilevare la posizione."; msg.style.color = "var(--warn)";
@@ -2401,12 +2522,18 @@ function onSliderChange() {
 function setTimeOffset(m) { document.getElementById('timeSlider').value = m; onSliderChange(); }
 
 /* ============================================================
-   TONIGHT
+   TONIGHT — usa getTonightReferenceDate() per la notte
    ============================================================ */
 function renderTonight() {
   const now = state.currentTime;
   document.getElementById('tonight-time').innerText = now.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
-  const night = getNightWindow(now);
+
+  // ▶▶ FIX: usa la data di riferimento (oggi oppure ieri se prima di alba+1h) ▶▶
+  const refDate = getTonightReferenceDate();
+  const refDateStr = refDate.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric' });
+  document.getElementById('tonight-debug').innerText = `Riferimento: ${refDateStr} · Refresh auto 1h dopo l'alba`;
+
+  const night = getNightWindow(refDate);
   if (!night) { document.getElementById('tonight-location').innerText = "Dati notturni non disponibili."; return; }
   const nightStart = night.start, nightEnd = night.end;
   const dateStr = nightStart.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long' });
@@ -2534,36 +2661,284 @@ function clearSearch() { document.getElementById('objectSearch').value = ''; doc
 /* ============================================================
    METEO
    ============================================================ */
+let _weatherData = null;
+function weatherCodeInfo(code) {
+  if (code === 0) return { icon: '☀️', text: 'Sereno' };
+  if (code === 1) return { icon: '🌤️', text: 'Preval. sereno' };
+  if (code === 2) return { icon: '⛅', text: 'Poco nuvoloso' };
+  if (code === 3) return { icon: '☁️', text: 'Nuvoloso' };
+  if (code === 45 || code === 48) return { icon: '🌫️', text: 'Nebbia' };
+  if (code >= 51 && code <= 57) return { icon: '🌦️', text: 'Pioviggine' };
+  if (code >= 61 && code <= 67) return { icon: '🌧️', text: 'Pioggia' };
+  if (code >= 71 && code <= 77) return { icon: '🌨️', text: 'Neve' };
+  if (code >= 80 && code <= 82) return { icon: '🌧️', text: 'Rovesci' };
+  if (code >= 85 && code <= 86) return { icon: '🌨️', text: 'Rovesci neve' };
+  if (code >= 95) return { icon: '⛈️', text: 'Temporale' };
+  return { icon: '❓', text: '—' };
+}
+function windDirectionLabel(deg) {
+  if (deg === null || deg === undefined) return '—';
+  const dirs = ['N','NE','E','SE','S','SO','O','NO'];
+  return dirs[Math.round(deg / 45) % 8];
+}
+function scoreClass(score) {
+  if (score >= 70) return 'cell-good';
+  if (score >= 40) return 'cell-mid';
+  return 'cell-bad';
+}
+function scoreBadgeClass(score) {
+  if (score >= 70) return 'good';
+  if (score >= 40) return 'mid';
+  return 'bad';
+}
+function computeAstroScore(h) {
+  let score = 100;
+  const cloud = h.cloud_cover ?? 0;
+  score -= cloud * 0.9;
+  const dewDelta = (h.temperature_2m ?? 0) - (h.dew_point_2m ?? 0);
+  if (dewDelta < 1) score -= 30;
+  else if (dewDelta < 3) score -= 18;
+  else if (dewDelta < 5) score -= 8;
+  const hum = h.relative_humidity_2m ?? 0;
+  if (hum > 92) score -= 18;
+  else if (hum > 85) score -= 10;
+  else if (hum > 78) score -= 4;
+  const gusts = h.wind_gusts_10m ?? 0;
+  if (gusts > 45) score -= 25;
+  else if (gusts > 30) score -= 15;
+  else if (gusts > 20) score -= 6;
+  const precip = h.precipitation_probability ?? 0;
+  if (precip > 60) score -= 35;
+  else if (precip > 35) score -= 18;
+  else if (precip > 15) score -= 8;
+  const vpd = h.vapour_pressure_deficit ?? 0;
+  if (vpd < 0.1) score -= 6;
+  const vis = h.visibility ?? 20000;
+  if (vis < 2000) score -= 15;
+  else if (vis < 5000) score -= 8;
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+function estimateSeeing(h) {
+  let s = 5;
+  const gusts = h.wind_gusts_10m ?? 0;
+  const hum = h.relative_humidity_2m ?? 0;
+  const vpd = h.vapour_pressure_deficit ?? 1;
+  if (gusts > 50) s -= 3;
+  else if (gusts > 35) s -= 2;
+  else if (gusts > 20) s -= 1;
+  if (hum > 90) s -= 2;
+  else if (hum > 80) s -= 1;
+  if (vpd < 0.15) s -= 1;
+  if (h.cloud_cover > 80) s -= 1;
+  s = Math.max(1, Math.min(5, s));
+  return s;
+}
+
 async function fetchWeather() {
   const msg = document.getElementById('msg-weather');
-  msg.innerText = "Caricamento meteo..."; msg.className = "msg";
+  if (msg) { msg.innerText = "⏳ Caricamento meteo..."; msg.className = "msg"; msg.style.color = "var(--accent)"; }
   try {
-    const refTime = state.currentTime;
-    const startStr = new Date(refTime.getFullYear(), refTime.getMonth(), refTime.getDate(), refTime.getHours()).toISOString().slice(0,13) + ":00";
-    const nextDay = new Date(refTime); nextDay.setDate(nextDay.getDate() + 1);
-    const endStr = new Date(nextDay.getFullYear(), nextDay.getMonth(), nextDay.getDate(), nextDay.getHours()).toISOString().slice(0,13) + ":00";
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${state.lat}&longitude=${state.lon}&hourly=cloud_cover,temperature_2m,relative_humidity_2m,wind_speed_10m&timezone=auto&forecast_days=2`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${state.lat}&longitude=${state.lon}` +
+      `&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,rain,showers,snowfall,weather_code,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,surface_pressure,vapour_pressure_deficit` +
+      `&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant` +
+      `&timezone=auto&forecast_days=5`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    let clouds = [], temps = [], hums = [], winds = [];
-    data.hourly.time.forEach((t, i) => {
-      if (t >= startStr && t <= endStr) { clouds.push(data.hourly.cloud_cover[i]); temps.push(data.hourly.temperature_2m[i]); hums.push(data.hourly.relative_humidity_2m[i]); winds.push(data.hourly.wind_speed_10m[i]); }
-    });
-    if (clouds.length === 0) { clouds = data.hourly.cloud_cover.slice(0,12); temps = data.hourly.temperature_2m.slice(0,12); hums = data.hourly.relative_humidity_2m.slice(0,12); winds = data.hourly.wind_speed_10m.slice(0,12); }
-    if (clouds.length === 0) throw new Error("Dati non disponibili");
-    const avgClouds = clouds.reduce((a,b) => a+b, 0)/clouds.length;
-    state.clouds = avgClouds;
-    document.getElementById('weather-grid').innerHTML = `
-      <div class="card"><label>Nuvole</label><div class="val">${avgClouds.toFixed(0)} %</div></div>
-      <div class="card"><label>Temp Min</label><div class="val">${Math.min(...temps).toFixed(1)} °C</div></div>
-      <div class="card"><label>Umidità Max</label><div class="val">${Math.max(...hums).toFixed(0)} %</div></div>
-      <div class="card"><label>Vento Max</label><div class="val">${Math.max(...winds).toFixed(0)} km/h</div></div>
-    `;
-    msg.innerText = "✅ Meteo aggiornato."; msg.className = "msg success";
+    if (!data.hourly || !data.hourly.time) throw new Error("Dati non disponibili");
+    const daysMap = {};
+    for (let i = 0; i < data.hourly.time.length; i++) {
+      const t = data.hourly.time[i];
+      const dateStr = t.slice(0, 10);
+      if (!daysMap[dateStr]) daysMap[dateStr] = { dateStr, hourly: [] };
+      daysMap[dateStr].hourly.push({
+        time: t, hour: parseInt(t.slice(11, 13)),
+        temperature_2m: data.hourly.temperature_2m[i],
+        apparent_temperature: data.hourly.apparent_temperature[i],
+        relative_humidity_2m: data.hourly.relative_humidity_2m[i],
+        dew_point_2m: data.hourly.dew_point_2m[i],
+        precipitation_probability: data.hourly.precipitation_probability[i],
+        precipitation: data.hourly.precipitation[i],
+        rain: data.hourly.rain[i], showers: data.hourly.showers[i], snowfall: data.hourly.snowfall[i],
+        weather_code: data.hourly.weather_code[i],
+        cloud_cover: data.hourly.cloud_cover[i],
+        cloud_cover_low: data.hourly.cloud_cover_low[i],
+        cloud_cover_mid: data.hourly.cloud_cover_mid[i],
+        cloud_cover_high: data.hourly.cloud_cover_high[i],
+        visibility: data.hourly.visibility[i],
+        wind_speed_10m: data.hourly.wind_speed_10m[i],
+        wind_direction_10m: data.hourly.wind_direction_10m[i],
+        wind_gusts_10m: data.hourly.wind_gusts_10m[i],
+        pressure_msl: data.hourly.pressure_msl[i],
+        surface_pressure: data.hourly.surface_pressure[i],
+        vapour_pressure_deficit: data.hourly.vapour_pressure_deficit[i]
+      });
+    }
+    const days = Object.keys(daysMap).sort().map(k => daysMap[k]).slice(0, 5);
+    _weatherData = { lat: state.lat, lon: state.lon, updatedAt: new Date(), days, daily: data.daily };
+    const now = new Date();
+    const nowHourStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + 'T' + String(now.getHours()).padStart(2,'0');
+    let currentHour = null;
+    for (const d of days) { const f = d.hourly.find(h => h.time.startsWith(nowHourStr)); if (f) { currentHour = f; break; } }
+    if (!currentHour && days[0] && days[0].hourly[0]) currentHour = days[0].hourly[0];
+    if (currentHour) state.clouds = currentHour.cloud_cover ?? 0;
+    renderWeatherUI();
     renderQuality();
-  } catch(e) {
-    msg.innerText = "❌ " + e.message; msg.className = "msg"; msg.style.color = "var(--bad)";
+    if (msg) { msg.innerText = "✅ Meteo aggiornato."; msg.className = "msg success"; msg.style.color = ""; }
+  } catch (e) {
+    if (msg) { msg.innerText = "❌ " + (e.message || 'Errore caricamento'); msg.className = "msg"; msg.style.color = "var(--bad)"; }
+    const nightsEl = document.getElementById('weather-nights-summary');
+    if (nightsEl) nightsEl.innerHTML = `<div class="weather-error">❌ Impossibile caricare i dati meteo.</div>`;
   }
+}
+
+function getCurrentWeatherHour() {
+  if (!_weatherData) return null;
+  const now = new Date();
+  const todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  const currentDay = _weatherData.days.find(d => d.dateStr === todayStr);
+  if (!currentDay) return null;
+  const hour = now.getHours();
+  return currentDay.hourly.find(h => h.hour === hour) || currentDay.hourly[0];
+}
+
+function renderWeatherUI() {
+  if (!_weatherData) return;
+  const locEl = document.getElementById('weather-loc');
+  if (locEl) {
+    const city = document.getElementById('citySelect');
+    let cityName = '';
+    if (city && city.value) { const parts = city.value.split(','); if (parts.length >= 3) cityName = parts[2]; }
+    locEl.innerText = cityName || `${state.lat.toFixed(4)}°, ${state.lon.toFixed(4)}°`;
+  }
+  const updEl = document.getElementById('weather-updated');
+  if (updEl) updEl.innerText = _weatherData.updatedAt.toLocaleString('it-IT', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+  const current = getCurrentWeatherHour();
+  const kpiGrid = document.getElementById('weather-grid');
+  if (current && kpiGrid) {
+    const wc = weatherCodeInfo(current.weather_code);
+    const score = computeAstroScore(current);
+    kpiGrid.innerHTML = `
+      <div class="weather-kpi"><div class="k">Meteo adesso</div><div class="v small">${wc.icon} ${wc.text}</div></div>
+      <div class="weather-kpi"><div class="k">Nuvole</div><div class="v small">${(current.cloud_cover ?? 0).toFixed(0)}%</div><div class="sub">L ${(current.cloud_cover_low??0).toFixed(0)} · M ${(current.cloud_cover_mid??0).toFixed(0)} · H ${(current.cloud_cover_high??0).toFixed(0)}</div></div>
+      <div class="weather-kpi"><div class="k">Temperatura</div><div class="v small">${(current.temperature_2m ?? '—')}°C</div><div class="sub">Percepita ${(current.apparent_temperature??'—')}°C</div></div>
+      <div class="weather-kpi"><div class="k">Umidità</div><div class="v small">${(current.relative_humidity_2m ?? 0).toFixed(0)}%</div><div class="sub">Dew ${(current.dew_point_2m ?? '—')}°C</div></div>
+      <div class="weather-kpi"><div class="k">Vento</div><div class="v small">${(current.wind_speed_10m ?? 0).toFixed(0)} km/h ${windDirectionLabel(current.wind_direction_10m)}</div><div class="sub">Raffiche ${(current.wind_gusts_10m ?? 0).toFixed(0)} km/h</div></div>
+      <div class="weather-kpi"><div class="k">Score Astro</div><div class="v small" style="color:${score>=70?'var(--ok)':score>=40?'var(--warn)':'var(--bad)'}">${score}/100</div><div class="sub">${score>=70?'Ottimo':score>=40?'Discreto':'Scarso'}</div></div>
+    `;
+  }
+  renderWeatherNights();
+  renderWeatherDayTabs();
+  renderWeatherHourly(state.weatherDayIndex);
+}
+function getNightHoursOfDay(day) { const nightHours = []; day.hourly.forEach(h => { if (h.hour >= 20 || h.hour < 6) nightHours.push(h); }); return nightHours; }
+
+function renderWeatherNights() {
+  const el = document.getElementById('weather-nights-summary');
+  if (!el || !_weatherData) return;
+  const nights = _weatherData.days.slice(0, 5);
+  let html = '';
+  nights.forEach((day, idx) => {
+    const nightHours = getNightHoursOfDay(day);
+    if (nightHours.length === 0) return;
+    const scores = nightHours.map(computeAstroScore);
+    const avgScore = Math.round(scores.reduce((a,b) => a+b, 0) / scores.length);
+    const avgCloud = Math.round(nightHours.reduce((a,h) => a+(h.cloud_cover??0), 0) / nightHours.length);
+    const avgHum = Math.round(nightHours.reduce((a,h) => a+(h.relative_humidity_2m??0), 0) / nightHours.length);
+    const maxGust = Math.max(...nightHours.map(h => h.wind_gusts_10m ?? 0));
+    const minDewDelta = Math.min(...nightHours.map(h => (h.temperature_2m??0)-(h.dew_point_2m??0)));
+    const bestHour = nightHours.reduce((best, h) => computeAstroScore(h) > computeAstroScore(best) ? h : best, nightHours[0]);
+    const bestScore = computeAstroScore(bestHour);
+    const dayDate = new Date(day.dateStr + 'T12:00:00');
+    const dateLabel = dayDate.toLocaleDateString('it-IT', { weekday:'short', day:'2-digit', month:'short' });
+    const isToday = day.dateStr === new Date().toISOString().slice(0,10);
+    const moonSample = new Date(day.dateStr + 'T23:00:00');
+    const moon = getExactMoonData(moonSample);
+    const moonIcon = moon.illumPct < 20 ? '🌑' : moon.illumPct < 50 ? (moon.isWaxing ? '🌒' : '🌘') : moon.illumPct < 60 ? (moon.isWaxing ? '🌓' : '🌗') : moon.illumPct < 90 ? (moon.isWaxing ? '🌔' : '🌖') : '🌕';
+    const scoreColor = avgScore >= 70 ? 'var(--ok)' : avgScore >= 40 ? 'var(--warn)' : 'var(--bad)';
+    const windowLabel = bestScore >= 50 ? `✅ Migliore: ${String(bestHour.hour).padStart(2,'0')}:00 (${bestScore}/100)` : `❌ Nessuna finestra buona`;
+    html += `
+      <div class="night-card ${idx === 0 ? 'active' : ''}" onclick="selectWeatherDay(${idx})">
+        <div class="nc-header"><div><div class="nc-date">${isToday ? '🌙 Stanotte' : dateLabel}</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">${moonIcon} ${moon.illumPct.toFixed(0)}% Luna</div></div><div class="nc-score" style="color:${scoreColor};">${avgScore}</div></div>
+        <div class="nc-row"><span>☁️ Nuvole medie</span><span>${avgCloud}%</span></div>
+        <div class="nc-row"><span>💧 Umidità media</span><span>${avgHum}%</span></div>
+        <div class="nc-row"><span>💨 Raffiche max</span><span>${maxGust.toFixed(0)} km/h</span></div>
+        <div class="nc-row"><span>🌡️ ΔT-Dew min</span><span style="color:${minDewDelta<2?'var(--bad)':minDewDelta<4?'var(--warn)':'var(--ok)'}">${minDewDelta.toFixed(1)}°</span></div>
+        <div class="nc-window ${bestScore >= 50 ? '' : 'bad'}">${windowLabel}</div>
+      </div>
+    `;
+  });
+  el.innerHTML = html || '<div class="weather-empty">Nessun dato notturno disponibile.</div>';
+}
+function renderWeatherDayTabs() {
+  const el = document.getElementById('weather-day-tabs');
+  if (!el || !_weatherData) return;
+  const today = new Date().toISOString().slice(0,10);
+  let html = '';
+  _weatherData.days.forEach((day, idx) => {
+    const d = new Date(day.dateStr + 'T12:00:00');
+    const isToday = day.dateStr === today;
+    const dow = isToday ? 'Oggi' : d.toLocaleDateString('it-IT', { weekday:'short' });
+    const dm = d.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit' });
+    html += `<button class="${idx === state.weatherDayIndex ? 'active' : ''}" onclick="selectWeatherDay(${idx})">${dow.toUpperCase()}<span class="dow">${dm}</span></button>`;
+  });
+  el.innerHTML = html;
+}
+function selectWeatherDay(idx) {
+  state.weatherDayIndex = idx;
+  renderWeatherDayTabs();
+  renderWeatherHourly(idx);
+  document.querySelectorAll('.night-card').forEach((c, i) => c.classList.toggle('active', i === idx));
+  const tableEl = document.querySelector('.weather-hourly-wrap');
+  if (tableEl) {
+    const rect = tableEl.getBoundingClientRect();
+    if (rect.top > window.innerHeight || rect.top < 0) tableEl.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+}
+function renderWeatherHourly(dayIndex) {
+  if (!_weatherData) return;
+  const day = _weatherData.days[dayIndex];
+  if (!day) return;
+  const head = document.getElementById('weather-hourly-head');
+  const body = document.getElementById('weather-hourly-body');
+  if (!head || !body) return;
+  head.innerHTML = `<tr><th>Ora</th><th>Meteo</th><th>Temp</th><th>Dew</th><th>ΔT-D</th><th>Umid</th><th>Nuvole</th><th>L/M/H</th><th>Vento</th><th>Raffiche</th><th>Pioggia</th><th>Press</th><th>Vis</th><th>Score</th></tr>`;
+  let html = '';
+  const todayStr = new Date().toISOString().slice(0,10);
+  const isToday = day.dateStr === todayStr;
+  const nowHour = new Date().getHours();
+  day.hourly.forEach(h => {
+    const wc = weatherCodeInfo(h.weather_code);
+    const score = computeAstroScore(h);
+    const dewDelta = (h.temperature_2m ?? 0) - (h.dew_point_2m ?? 0);
+    const dewClass = dewDelta < 2 ? 'cell-bad' : dewDelta < 4 ? 'cell-mid' : 'cell-good';
+    const humClass = h.relative_humidity_2m > 90 ? 'cell-bad' : h.relative_humidity_2m > 80 ? 'cell-mid' : '';
+    const cloudClass = h.cloud_cover > 70 ? 'cell-bad' : h.cloud_cover > 40 ? 'cell-mid' : 'cell-good';
+    const gustClass = h.wind_gusts_10m > 40 ? 'cell-bad' : h.wind_gusts_10m > 25 ? 'cell-mid' : '';
+    const precipClass = h.precipitation_probability > 50 ? 'cell-bad' : h.precipitation_probability > 20 ? 'cell-mid' : '';
+    const visClass = h.visibility < 5000 ? 'cell-bad' : h.visibility < 10000 ? 'cell-mid' : '';
+    const isNight = (h.hour >= 21 || h.hour < 6);
+    const isNow = isToday && h.hour === nowHour;
+    const rowClass = isNight ? 'night-row' : '';
+    const nowMarker = isNow ? ' <span style="color:var(--accent);font-size:9px;">●</span>' : '';
+    html += `<tr class="${rowClass}">
+      <td class="cell-time">${String(h.hour).padStart(2,'0')}:00${nowMarker}</td>
+      <td class="cell-weather">${wc.icon}</td>
+      <td class="${(h.temperature_2m ?? 0) < 0 ? 'cell-bad' : ''}">${(h.temperature_2m ?? '—').toFixed?.(1) ?? h.temperature_2m}°</td>
+      <td>${(h.dew_point_2m ?? '—').toFixed?.(1) ?? h.dew_point_2m}°</td>
+      <td class="${dewClass}"><strong>${dewDelta.toFixed(1)}°</strong></td>
+      <td class="${humClass}">${(h.relative_humidity_2m ?? 0).toFixed(0)}%</td>
+      <td class="${cloudClass}">${(h.cloud_cover ?? 0).toFixed(0)}%</td>
+      <td style="font-size:10px; color:var(--muted);">${(h.cloud_cover_low??0).toFixed(0)}/${(h.cloud_cover_mid??0).toFixed(0)}/${(h.cloud_cover_high??0).toFixed(0)}</td>
+      <td>${(h.wind_speed_10m ?? 0).toFixed(0)} <span style="font-size:9px;color:var(--muted);">${windDirectionLabel(h.wind_direction_10m)}</span></td>
+      <td class="${gustClass}">${(h.wind_gusts_10m ?? 0).toFixed(0)}</td>
+      <td class="${precipClass}">${(h.precipitation_probability ?? 0).toFixed(0)}%</td>
+      <td>${(h.pressure_msl ?? 0).toFixed(0)}</td>
+      <td class="${visClass}">${((h.visibility ?? 0)/1000).toFixed(0)}km</td>
+      <td class="cell-score ${scoreClass(score)}">${score}</td>
+    </tr>`;
+  });
+  body.innerHTML = html || '<tr><td colspan="14" style="text-align:center; padding:20px; color:var(--muted);">Nessun dato per questo giorno.</td></tr>';
 }
 
 function renderQuality() {
@@ -2574,7 +2949,8 @@ function renderQuality() {
   const score = Math.max(1, Math.min(10, sqmScore - moonPenalty - cloudPenalty));
   const badge = score > 7 ? 'ok' : (score > 4 ? 'warn' : 'bad');
   const text = score > 7 ? 'Eccellente' : (score > 4 ? 'Discreto' : 'Scarso');
-  document.getElementById('quality-grid').innerHTML = `
+  const qg = document.getElementById('quality-grid');
+  if (qg) qg.innerHTML = `
     <div class="card"><label>Punteggio</label><div class="val">${score.toFixed(1)} / 10</div></div>
     <div class="card"><label>Giudizio</label><div class="val" style="color:var(--${badge})">${text}</div></div>
     <div class="card"><label>SQM</label><div class="val">${state.sqm.toFixed(2)}</div></div>
@@ -2602,10 +2978,7 @@ function loadAllSky() {
   test.onerror = () => { img.style.display = 'none'; if (span) { span.style.display = 'block'; span.innerText = 'Errore caricamento.'; } };
   test.src = fullUrl;
 }
-function toggleAutoRefresh() {
-  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
-  if (document.getElementById('allsky-auto').checked) autoTimer = setInterval(loadAllSky, 30000);
-}
+function toggleAutoRefresh() { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } if (document.getElementById('allsky-auto').checked) autoTimer = setInterval(loadAllSky, 30000); }
 function loadNina() {
   const url = document.getElementById('nina-url').value;
   if (!url) return;
@@ -2631,8 +3004,7 @@ function openPreview() {
   const quick = document.getElementById('preview-quick-url');
   let url = document.getElementById('allsky-url').value.trim() || localStorage.getItem('egastro_allsky_url') || '';
   quick.value = url; modal.classList.add('open');
-  if (url) loadPreviewImage(url);
-  else { img.style.display = 'none'; empty.style.display = 'block'; }
+  if (url) loadPreviewImage(url); else { img.style.display = 'none'; empty.style.display = 'block'; }
 }
 function loadPreviewImage(url) {
   const img = document.getElementById('preview-modal-img');
@@ -2646,19 +3018,13 @@ function loadPreviewImage(url) {
   test.onerror = () => { empty.innerHTML = '<div style="font-size:40px;">❌</div><div>Impossibile caricare.</div>'; };
   test.src = fullUrl;
 }
-function loadPreviewQuick() {
-  const url = document.getElementById('preview-quick-url').value.trim();
-  if (url) loadPreviewImage(url);
-}
-function reloadPreview() {
-  const url = document.getElementById('preview-quick-url').value.trim() || localStorage.getItem('egastro_allsky_url') || '';
-  if (url) loadPreviewImage(url);
-}
+function loadPreviewQuick() { const url = document.getElementById('preview-quick-url').value.trim(); if (url) loadPreviewImage(url); }
+function reloadPreview() { const url = document.getElementById('preview-quick-url').value.trim() || localStorage.getItem('egastro_allsky_url') || ''; if (url) loadPreviewImage(url); }
 function closePreview() { document.getElementById('preview-modal').classList.remove('open'); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePreview(); closeCatDetail(); closeSolarModal(); closeMoonModal(); closeSkyObjectPopup(); } });
 
 /* ============================================================
-   SOLAR MODAL
+   SOLAR / MOON MODAL
    ============================================================ */
 function openSolarModal() {
   const grid = document.getElementById('solar-detail-grid');
@@ -2706,9 +3072,6 @@ function openSolarModal() {
 }
 function closeSolarModal() { document.getElementById('solar-modal').classList.remove('open'); }
 
-/* ============================================================
-   MOON MODAL
-   ============================================================ */
 function getNextMoonPhases(count = 4) {
   if (typeof Astronomy === 'undefined') return [];
   const results = [];
@@ -2721,10 +3084,7 @@ function getNextMoonPhases(count = 4) {
   try {
     const startTime = new Astronomy.AstroTime(state.currentTime);
     for (const t of targets) {
-      try {
-        const res = Astronomy.SearchMoonPhase(t.angle, startTime, 40);
-        if (res && res.date) results.push({ ...t, date: res.date });
-      } catch(e) {}
+      try { const res = Astronomy.SearchMoonPhase(t.angle, startTime, 40); if (res && res.date) results.push({ ...t, date: res.date }); } catch(e) {}
     }
   } catch(e) {}
   return results.sort((a, b) => a.date - b.date).slice(0, count);
@@ -2737,7 +3097,6 @@ function openMoonModal() {
   const moonTimes = getMoonRiseSet(state.lat, state.lon, night ? night.start : state.currentTime);
   const fmt = d => d ? d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '—';
   const fmtDate = d => d ? d.toLocaleDateString('it-IT', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '—';
-
   let distKm = '—', age = '—', diameter = '—';
   if (typeof Astronomy !== 'undefined') {
     try {
@@ -2752,9 +3111,7 @@ function openMoonModal() {
       diameter = (angularDiameter * 180 / Math.PI * 60).toFixed(1) + "'";
     } catch(e) {}
   }
-
   const emoji = m.illumPct < 2 ? '🌑' : m.illumPct < 45 ? (m.isWaxing ? '🌒' : '🌘') : m.illumPct < 55 ? (m.isWaxing ? '🌓' : '🌗') : m.illumPct < 98 ? (m.isWaxing ? '🌔' : '🌖') : '🌕';
-
   const grid = document.getElementById('moon-detail-grid');
   grid.innerHTML = `
     <div class="detail-row"><div class="dl">Fase attuale</div><div class="dv">${emoji} ${m.name}</div></div>
@@ -2766,20 +3123,14 @@ function openMoonModal() {
     <div class="detail-row"><div class="dl">Alt / Az</div><div class="dv">${pos ? pos.alt.toFixed(1) + '° / ' + pos.az.toFixed(1) + '°' : '—'}</div></div>
     <div class="detail-row"><div class="dl">Sorge / Tramonta</div><div class="dv">${fmt(moonTimes.rise)} / ${fmt(moonTimes.set)}</div></div>
   `;
-
   const cal = document.getElementById('moon-calendar');
   const phases = getNextMoonPhases(4);
   if (phases.length > 0) {
     cal.innerHTML = `
       <div style="font-family:'Orbitron'; font-size:13px; color:var(--accent); margin:16px 0 10px; text-transform:uppercase; letter-spacing:1px;">📅 Prossime Fasi Lunari</div>
-      <div class="detail-grid">
-        ${phases.map(p => `<div class="detail-row"><div class="dl">${p.icon} ${p.name}</div><div class="dv" style="font-size:12px;">${fmtDate(p.date)}</div></div>`).join('')}
-      </div>
+      <div class="detail-grid">${phases.map(p => `<div class="detail-row"><div class="dl">${p.icon} ${p.name}</div><div class="dv" style="font-size:12px;">${fmtDate(p.date)}</div></div>`).join('')}</div>
     `;
-  } else {
-    cal.innerHTML = '';
-  }
-
+  } else cal.innerHTML = '';
   document.getElementById('moon-modal').classList.add('open');
 }
 function closeMoonModal() { document.getElementById('moon-modal').classList.remove('open'); }
@@ -2791,9 +3142,7 @@ function buildCatalogData() {
   const items = [];
   items.push({ id: 'sun', name: 'Sole', symbol: '☀️', cat: 'planet', type: 'Stella (Sole)', ra: null, dec: null, facts: { ...SUN_FACTS }, desc: SUN_FACTS.desc, tags: ['Sistema Solare', 'Sole'] });
   items.push({ id: 'moon', name: 'Luna', symbol: '🌙', cat: 'planet', type: 'Satellite naturale', ra: null, dec: null, facts: { ...MOON_FACTS }, desc: MOON_FACTS.desc, tags: ['Sistema Solare', 'Satellite'] });
-  PLANET_NAMES.forEach(name => {
-    items.push({ id: 'planet-' + name, name: PLANET_IT[name], symbol: PLANET_SYMBOLS[name], cat: 'planet', type: 'Pianeta', ra: null, dec: null, facts: PLANET_FACTS[name] || {}, tags: ['Sistema Solare', 'Pianeta'] });
-  });
+  PLANET_NAMES.forEach(name => { items.push({ id: 'planet-' + name, name: PLANET_IT[name], symbol: PLANET_SYMBOLS[name], cat: 'planet', type: 'Pianeta', ra: null, dec: null, facts: PLANET_FACTS[name] || {}, tags: ['Sistema Solare', 'Pianeta'] }); });
   STARS.forEach(s => {
     const f = getStarInfo(s);
     items.push({ id: 'star-' + s.n, name: s.n, symbol: '★', cat: 'star', type: 'Stella', ra: s.ra, dec: s.dec, mag: s.mag,
@@ -2807,8 +3156,7 @@ function buildCatalogData() {
       desc: m.desc, tags: [k, m.type, 'Messier'] });
   });
   NEBULAE_EXTRA.forEach(n => {
-    const match = n.n.match(/\(([^)]+)\)/);
-    const sigla = match ? match[1] : n.n;
+    const match = n.n.match(/\(([^)]+)\)/); const sigla = match ? match[1] : n.n;
     items.push({ id: 'neb-' + sigla, name: n.n, symbol: '', cat: 'nebula', type: 'Nebulosa', ra: n.ra, dec: n.dec, mag: n.mag,
       facts: { 'Sigla': sigla, 'Tipo': 'Nebulosa', 'Magnitudine': n.mag, 'Distanza': n.dist, 'RA': n.ra.toFixed(2)+'°', 'Dec': n.dec.toFixed(2)+'°' },
       desc: n.desc, tags: [sigla, 'Nebulosa'] });
@@ -2851,7 +3199,6 @@ function renderCatalog() {
     </div>
   `).join('');
 }
-
 function openCatDetail(id) {
   const it = CATALOG.find(x => x.id === id);
   if (!it) return;
@@ -2906,7 +3253,6 @@ function catDetailGoto() {
   state.camAlt = clamp(pos.alt, 0, 89); state.camAz = pos.az;
   drawMap(); showInfo(state.target); updateInfoStrip();
 }
-
 function catDetailGotoTelescope() {
   const it = state.catalogDetailObj;
   if (!it) return;
@@ -2919,8 +3265,7 @@ function catDetailGotoTelescope() {
     ra = p.ra; dec = p.dec;
   }
   if (ra === null || ra === undefined) { alert('Coordinate non disponibili.'); return; }
-  const name = it.name;
-  const type = objType;
+  const name = it.name; const type = objType;
   closeCatDetail();
   const navBtns = document.querySelectorAll('nav button');
   const scopeBtn = Array.from(navBtns).find(b => b.innerText.includes('Telescopio'));
@@ -2934,10 +3279,7 @@ function catDetailGotoTelescope() {
 /* ============================================================
    OBSERVATION CHART
    ============================================================ */
-function getSunAltitude(date) {
-  const sp = getSunPositionPure(date);
-  return getAltAz(sp.ra, sp.dec, date).alt;
-}
+function getSunAltitude(date) { const sp = getSunPositionPure(date); return getAltAz(sp.ra, sp.dec, date).alt; }
 function skyPhaseCategory(sunAlt) {
   if (sunAlt > -0.833) return 'day';
   if (sunAlt > -6) return 'civil';
@@ -2967,9 +3309,7 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType, customCo
     if (objCat === 'planet' || objType === 'Pianeta' || objType === 'Satellite naturale') {
       const p = calcPlanetsPrecise(d).find(x => x.n === objName);
       if (p) alt = p.alt;
-    } else if (objRa !== null && objRa !== undefined) {
-      alt = getAltAz(objRa, objDec, d).alt;
-    }
+    } else if (objRa !== null && objRa !== undefined) alt = getAltAz(objRa, objDec, d).alt;
     samples.push({ t, sunAlt, phase, alt });
   }
   let bestStart = null, bestEnd = null;
@@ -2977,10 +3317,7 @@ function buildObservationChart(objName, objRa, objDec, objCat, objType, customCo
   const fmtTime = t => new Date(t).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
   let summaryHTML = '';
   if (bestStart === null || bestEnd === null) summaryHTML = '<div class="obs-chart-summary bad">❌ Non visibile stanotte sopra 30°</div>';
-  else {
-    const durMin = Math.round((bestEnd - bestStart)/60000);
-    summaryHTML = `<div class="obs-chart-summary ok">✅ Finestra: ${fmtTime(bestStart)} → ${fmtTime(bestEnd)} (${Math.floor(durMin/60)}h ${(durMin%60).toString().padStart(2,'0')}m)</div>`;
-  }
+  else { const durMin = Math.round((bestEnd - bestStart)/60000); summaryHTML = `<div class="obs-chart-summary ok">✅ Finestra: ${fmtTime(bestStart)} → ${fmtTime(bestEnd)} (${Math.floor(durMin/60)}h ${(durMin%60).toString().padStart(2,'0')}m)</div>`; }
   const canvasId = customContainerId ? (customContainerId + '-canvas') : 'obsChartCanvas';
   container.innerHTML = `
     <div class="obs-chart-wrap">
@@ -3078,32 +3415,15 @@ function showObjectModal(name, ra, dec) {
    TELESCOPIO
    ============================================================ */
 const scopeState = {
-  connected: false, connType: 'wifi',
-  protocol: 'lx200',
-  mountType: 'gem',
+  connected: false, connType: 'wifi', protocol: 'lx200', mountType: 'gem',
   ip: '192.168.0.1', port: '9998', btDevice: '',
-  mountAlt: 45, mountAz: 0,
-  homeAlt: 45, homeAz: 0,
-  parkAlt: 0, parkAz: 0,
-  isParked: false,
-  tracking: false, trackRate: 'sidereal',
-  trackingTarget: false,   /* ▶ true SOLO dopo GOTO esplicito */
-  slewing: false, slewCancelled: false,
-  target: null,
-  camAlt: 45, camAz: 0, fov: 80,
-  rate: 20,
-  synced: false, syncFlashStart: 0,
-  connectFlashStart: 0,
-  step: 1
+  mountAlt: 45, mountAz: 0, homeAlt: 45, homeAz: 0, parkAlt: 0, parkAz: 0,
+  isParked: false, tracking: false, trackRate: 'sidereal', trackingTarget: false,
+  slewing: false, slewCancelled: false, target: null,
+  camAlt: 45, camAz: 0, fov: 80, rate: 20,
+  synced: false, syncFlashStart: 0, connectFlashStart: 0, step: 1
 };
-
-/* Velocità di tracking (°/s) per i tre rate */
-const TRACKING_RATES = {
-  sidereal: 15.041 / 3600,
-  solar: 15.000 / 3600,
-  lunar: 14.492 / 3600
-};
-
+const TRACKING_RATES = { sidereal: 15.041 / 3600, solar: 15.000 / 3600, lunar: 14.492 / 3600 };
 let scopeCanvasEl, scopeOverlayEl, scopeCtx, scopeOverlayCtx;
 let scopeW = 800, scopeH = 600;
 let scopeIsDragging = false;
@@ -3112,49 +3432,28 @@ let scopeDragMode = null;
 let edgeMoveInterval = null;
 const SCOPE_MOUNT_GRAB_RADIUS = 34;
 const SLEW_SPEED_DEG = 3.5;
-
-/* Tracking loop continuo
-   - Se trackingTarget === true e target esiste → segue il target (dopo GOTO)
-   - Altrimenti → simula la rotazione terrestre alla velocità impostata
-*/
 let trackingRAF = null;
 let trackingLastTime = 0;
 
 function trackingLoop(time) {
   if (!trackingRAF) return;
-  if (!scopeState.connected || !scopeState.tracking || scopeState.isParked) {
-    trackingRAF = null;
-    return;
-  }
+  if (!scopeState.connected || !scopeState.tracking || scopeState.isParked) { trackingRAF = null; return; }
   const dt = trackingLastTime ? Math.min((time - trackingLastTime) / 1000, 0.2) : 0;
   trackingLastTime = time;
   if (dt > 0 && !scopeState.slewing && document.getElementById('tab-scope').classList.contains('active')) {
     if (scopeState.trackingTarget && scopeState.target) {
-      /* Segue il target dopo GOTO esplicito */
       const p = getAltAz(scopeState.target.ra, scopeState.target.dec, state.currentTime);
-      if (p.alt > 0) {
-        scopeState.mountAlt = p.alt;
-        scopeState.mountAz = p.az;
-      }
+      if (p.alt > 0) { scopeState.mountAlt = p.alt; scopeState.mountAz = p.az; }
     } else {
-      /* Rotazione terrestre alla velocità impostata */
       const rate = TRACKING_RATES[scopeState.trackRate] || TRACKING_RATES.sidereal;
       scopeState.mountAz = norm360(scopeState.mountAz + rate * dt);
     }
-    scopeUpdateUI();
-    scopeDraw();
+    scopeUpdateUI(); scopeDraw();
   }
   trackingRAF = requestAnimationFrame(trackingLoop);
 }
-function startTrackingLoop() {
-  if (trackingRAF) return;
-  trackingLastTime = 0;
-  trackingRAF = requestAnimationFrame(trackingLoop);
-}
-function stopTrackingLoop() {
-  if (trackingRAF) cancelAnimationFrame(trackingRAF);
-  trackingRAF = null;
-}
+function startTrackingLoop() { if (trackingRAF) return; trackingLastTime = 0; trackingRAF = requestAnimationFrame(trackingLoop); }
+function stopTrackingLoop() { if (trackingRAF) cancelAnimationFrame(trackingRAF); trackingRAF = null; }
 
 function scopeLog(msg, type = '') {
   const body = document.getElementById('scopeLogBody');
@@ -3165,27 +3464,20 @@ function scopeLog(msg, type = '') {
   body.appendChild(line);
   body.scrollTop = body.scrollHeight;
 }
-
 function scopeSetConnType(type) {
   scopeState.connType = type;
   document.getElementById('scopeWifiFields').style.display = type === 'wifi' ? 'grid' : 'none';
   document.getElementById('scopeBtFields').style.display = type === 'bt' ? 'grid' : 'none';
 }
-function scopeSetProtocol(proto) {
-  scopeState.protocol = proto;
-  scopeLog(`Protocollo: ${proto.toUpperCase()}`, 'ok');
-}
+function scopeSetProtocol(proto) { scopeState.protocol = proto; scopeLog(`Protocollo: ${proto.toUpperCase()}`, 'ok'); }
 function scopeSetMountType(type) {
   scopeState.mountType = type;
   const mountNames = { gem: 'Equatoriale Tedesca', harmonic: 'Armonica', fork: 'Fork', altaz: 'Alt-Az', dobs: 'Dobson' };
   scopeLog(`Montatura: ${mountNames[type] || type}`, 'ok');
 }
-
 function scopeToggleConnect() {
   if (scopeState.connected) {
-    scopeState.connected = false;
-    scopeState.tracking = false;
-    scopeState.trackingTarget = false;
+    scopeState.connected = false; scopeState.tracking = false; scopeState.trackingTarget = false;
     stopTrackingLoop();
     document.getElementById('scopeTrackBtn').innerText = "Track ON";
     document.getElementById('scopeTrackBtn').className = "triton-btn";
@@ -3195,8 +3487,7 @@ function scopeToggleConnect() {
   } else {
     scopeLog("Connessione in corso...", "");
     setTimeout(() => {
-      scopeState.connected = true;
-      scopeState.connectFlashStart = performance.now();
+      scopeState.connected = true; scopeState.connectFlashStart = performance.now();
       document.getElementById('scopeConnBadge').innerText = "CONNESSO";
       document.getElementById('scopeConnBadge').classList.add('on');
       scopeLog(`Connessione stabilita (${scopeState.protocol.toUpperCase()}).`, "ok");
@@ -3205,7 +3496,6 @@ function scopeToggleConnect() {
   }
   scopeUpdateUI();
 }
-
 function scopeToggleTracking() {
   scopeState.tracking = !scopeState.tracking;
   const btn = document.getElementById('scopeTrackBtn');
@@ -3215,10 +3505,8 @@ function scopeToggleTracking() {
   const mode = scopeState.trackingTarget ? 'target' : 'rotazione terrestre';
   scopeLog(`Tracking ${scopeState.tracking ? 'ON' : 'OFF'} (${rateName}, ${mode}).`, scopeState.tracking ? "ok" : "warn");
   scopeUpdateUI();
-  if (scopeState.tracking) startTrackingLoop();
-  else stopTrackingLoop();
+  if (scopeState.tracking) startTrackingLoop(); else stopTrackingLoop();
 }
-
 function scopeSetTrackRate(rate) {
   scopeState.trackRate = rate;
   document.querySelectorAll('.track-pill').forEach(p => p.classList.remove('active'));
@@ -3227,90 +3515,52 @@ function scopeSetTrackRate(rate) {
   if (rate === 'lunar') document.getElementById('pillLunar').classList.add('active');
   const rateNames = { sidereal: 'Siderale', solar: 'Solare', lunar: 'Lunare' };
   scopeLog(`Rate: ${rateNames[rate]} → inviato a ${scopeState.protocol.toUpperCase()}`, "ok");
-  const pill = rate === 'sidereal' ? document.getElementById('pillSidereal') : (rate === 'solar' ? document.getElementById('pillSolar') : document.getElementById('pillLunar'));
-  if (pill) {
-    pill.style.transform = 'scale(1.1)';
-    setTimeout(() => pill.style.transform = '', 200);
-  }
 }
-
 function scopeMoveToContinuous(targetGetter, onComplete, progressButtonId) {
-  if (scopeState.slewing) {
-    scopeLog("Slewing già in corso. Premi STOP per interrompere.", "warn");
-    return false;
-  }
-  scopeState.slewing = true;
-  scopeState.slewCancelled = false;
-  scopeState.synced = false;
-
+  if (scopeState.slewing) { scopeLog("Slewing già in corso.", "warn"); return false; }
+  scopeState.slewing = true; scopeState.slewCancelled = false; scopeState.synced = false;
   let lastTime = performance.now();
   const initialTgt = targetGetter();
   let dAlt0 = initialTgt.alt - scopeState.mountAlt;
   let dAz0 = initialTgt.az - scopeState.mountAz;
-  while (dAz0 > 180) dAz0 -= 360;
-  while (dAz0 < -180) dAz0 += 360;
+  while (dAz0 > 180) dAz0 -= 360; while (dAz0 < -180) dAz0 += 360;
   const initialDist = Math.sqrt(dAlt0*dAlt0 + dAz0*dAz0);
   scopeState.slewInitialDist = initialDist;
-
   function step(time) {
-    if (!scopeState.slewing || scopeState.slewCancelled) {
-      scopeState.slewing = false;
-      return;
-    }
+    if (!scopeState.slewing || scopeState.slewCancelled) { scopeState.slewing = false; return; }
     let dt = (time - lastTime) / 1000;
     if (!isFinite(dt) || dt < 0) dt = 0.016;
     dt = Math.min(dt, 0.15);
     lastTime = time;
-
     if (!isFinite(scopeState.mountAlt)) scopeState.mountAlt = 0;
     if (!isFinite(scopeState.mountAz)) scopeState.mountAz = 0;
-
     const tgt = targetGetter();
-    if (!isFinite(tgt.alt) || !isFinite(tgt.az)) {
-      scopeState.slewing = false;
-      return;
-    }
-
+    if (!isFinite(tgt.alt) || !isFinite(tgt.az)) { scopeState.slewing = false; return; }
     let dAlt = tgt.alt - scopeState.mountAlt;
     let dAz = tgt.az - scopeState.mountAz;
-    while (dAz > 180) dAz -= 360;
-    while (dAz < -180) dAz += 360;
-
+    while (dAz > 180) dAz -= 360; while (dAz < -180) dAz += 360;
     const dist = Math.sqrt(dAlt*dAlt + dAz*dAz);
     const stepDist = SLEW_SPEED_DEG * dt;
-
     const btn = document.getElementById(progressButtonId || 'scopeStepBtn');
     if (btn && scopeState.slewing) {
       const progress = initialDist > 0.01 ? Math.min(99, Math.round((1 - dist / initialDist) * 100)) : 50;
       btn.innerText = `SLEWING ${progress}% · ${dist.toFixed(2)}°`;
     }
-
     if (dist <= stepDist) {
-      scopeState.mountAlt = tgt.alt;
-      scopeState.mountAz = norm360(tgt.az);
-      scopeState.slewing = false;
-      scopeUpdateUI();
-      scopeDraw();
+      scopeState.mountAlt = tgt.alt; scopeState.mountAz = norm360(tgt.az);
+      scopeState.slewing = false; scopeUpdateUI(); scopeDraw();
       if (onComplete) onComplete();
       return;
     }
-
     const factor = stepDist / dist;
     scopeState.mountAlt = clamp(scopeState.mountAlt + dAlt * factor, -5, 90);
     scopeState.mountAz = norm360(scopeState.mountAz + dAz * factor);
-
-    scopeUpdateUI();
-    scopeDraw();
+    scopeUpdateUI(); scopeDraw();
     requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
   return true;
 }
-
-function scopeMoveTo(tAlt, tAz, onComplete) {
-  return scopeMoveToContinuous(() => ({ alt: tAlt, az: tAz }), onComplete);
-}
-
 function scopeManualMove(dir) {
   if (!scopeState.connected) { scopeLog("Connetti prima.", "warn"); return; }
   if (scopeState.isParked) { scopeLog("Montatura in PARK.", "err"); return; }
@@ -3320,20 +3570,15 @@ function scopeManualMove(dir) {
   if (dir.includes('down')) scopeState.mountAlt = clamp(scopeState.mountAlt - step, 0, 90);
   if (dir.includes('left')) scopeState.mountAz = norm360(scopeState.mountAz - step);
   if (dir.includes('right')) scopeState.mountAz = norm360(scopeState.mountAz + step);
-  scopeState.tracking = false;
-  scopeState.trackingTarget = false;
-  scopeState.synced = false;
+  scopeState.tracking = false; scopeState.trackingTarget = false; scopeState.synced = false;
   stopTrackingLoop();
   document.getElementById('scopeTrackBtn').innerText = "Track ON";
   document.getElementById('scopeTrackBtn').className = "triton-btn";
   scopeUpdateUI(); scopeDraw();
 }
-
 function startEdgeMove(dir) {
   if (!scopeState.connected || scopeState.isParked) return;
-  scopeState.movingEdge = dir;
-  scopeState.synced = false;
-  scopeState.trackingTarget = false;
+  scopeState.movingEdge = dir; scopeState.synced = false; scopeState.trackingTarget = false;
   const step = () => {
     if (!scopeState.movingEdge) return;
     const s = scopeState.rate * 0.08;
@@ -3341,19 +3586,14 @@ function startEdgeMove(dir) {
     if (dir === 'S') scopeState.mountAlt = clamp(scopeState.mountAlt - s, 0, 90);
     if (dir === 'E') scopeState.mountAz = norm360(scopeState.mountAz + s);
     if (dir === 'O') scopeState.mountAz = norm360(scopeState.mountAz - s);
-    scopeState.tracking = false;
-    stopTrackingLoop();
+    scopeState.tracking = false; stopTrackingLoop();
     document.getElementById('scopeTrackBtn').innerText = "Track ON";
     document.getElementById('scopeTrackBtn').className = "triton-btn";
     scopeUpdateUI(); scopeDraw();
   };
   edgeMoveInterval = setInterval(step, 80);
 }
-function stopEdgeMove() {
-  scopeState.movingEdge = null;
-  if (edgeMoveInterval) { clearInterval(edgeMoveInterval); edgeMoveInterval = null; }
-}
-
+function stopEdgeMove() { scopeState.movingEdge = null; if (edgeMoveInterval) { clearInterval(edgeMoveInterval); edgeMoveInterval = null; } }
 function scopeChangeRate(dir) {
   const rates = [1, 5, 10, 20, 50, 100];
   let idx = rates.indexOf(scopeState.rate);
@@ -3362,123 +3602,67 @@ function scopeChangeRate(dir) {
   scopeUpdateUI();
   scopeLog(`Rate manuale: ${scopeState.rate}X`, '');
 }
-
 function scopeStopSlewing() {
   if (scopeState.slewing) {
-    scopeState.slewCancelled = true;
-    scopeState.slewing = false;
-    scopeState.trackingTarget = false;
+    scopeState.slewCancelled = true; scopeState.slewing = false; scopeState.trackingTarget = false;
     scopeLog("Movimento arrestato.", "warn");
     const btn = document.getElementById('scopeStepBtn');
-    if (btn && scopeState.target) {
-      scopeUpdateStepUI();
-    }
+    if (btn && scopeState.target) scopeUpdateStepUI();
   }
 }
-
 function scopeEmergencyStop() {
-  scopeState.slewCancelled = true;
-  scopeState.slewing = false;
-  stopEdgeMove();
-  stopTrackingLoop();
-  scopeState.movingEdge = null;
-  scopeState.tracking = false;
-  scopeState.trackingTarget = false;
-
+  scopeState.slewCancelled = true; scopeState.slewing = false;
+  stopEdgeMove(); stopTrackingLoop();
+  scopeState.movingEdge = null; scopeState.tracking = false; scopeState.trackingTarget = false;
   const trackBtn = document.getElementById('scopeTrackBtn');
   if (trackBtn) { trackBtn.innerText = "Track ON"; trackBtn.className = "triton-btn"; }
-
   const stepBtn = document.getElementById('scopeStepBtn');
-  if (stepBtn && scopeState.target) {
-    stepBtn.disabled = false;
-    stepBtn.className = 'btn-goto-large';
-    stepBtn.innerText = '🚀 GOTO';
-    scopeState.step = 1;
-    scopeUpdateStepUI();
-  }
-
+  if (stepBtn && scopeState.target) { stepBtn.disabled = false; stepBtn.className = 'btn-goto-large'; stepBtn.innerText = '🚀 GOTO'; scopeState.step = 1; scopeUpdateStepUI(); }
   const panelBtn = document.getElementById('scopePanelGotoBtn');
   if (panelBtn) { panelBtn.disabled = false; panelBtn.innerText = '🎯 GOTO'; }
-
-  scopeLog("🛑 STOP DI EMERGENZA - Tutti i movimenti arrestati.", "err");
-  scopeUpdateUI();
-  scopeDraw();
+  scopeLog("🛑 STOP DI EMERGENZA.", "err");
+  scopeUpdateUI(); scopeDraw();
 }
-
-/* ============================================================
-   PARK / HOME - PERSISTENTI
-   ============================================================ */
 function loadScopePositions() {
   const hAlt = localStorage.getItem('egastro_home_alt');
   const hAz = localStorage.getItem('egastro_home_az');
   const pAlt = localStorage.getItem('egastro_park_alt');
   const pAz = localStorage.getItem('egastro_park_az');
-  if (hAlt !== null && hAz !== null) {
-    scopeState.homeAlt = parseFloat(hAlt);
-    scopeState.homeAz = parseFloat(hAz);
-  } else {
-    scopeState.homeAlt = Math.max(0, state.lat);
-    scopeState.homeAz = 0;
-  }
-  if (pAlt !== null && pAz !== null) {
-    scopeState.parkAlt = parseFloat(pAlt);
-    scopeState.parkAz = parseFloat(pAz);
-  } else {
-    scopeState.parkAlt = 0;
-    scopeState.parkAz = 0;
-  }
+  if (hAlt !== null && hAz !== null) { scopeState.homeAlt = parseFloat(hAlt); scopeState.homeAz = parseFloat(hAz); }
+  else { scopeState.homeAlt = Math.max(0, state.lat); scopeState.homeAz = 0; }
+  if (pAlt !== null && pAz !== null) { scopeState.parkAlt = parseFloat(pAlt); scopeState.parkAz = parseFloat(pAz); }
+  else { scopeState.parkAlt = 0; scopeState.parkAz = 0; }
 }
-
 function scopeSetHome() {
-  scopeState.homeAlt = scopeState.mountAlt;
-  scopeState.homeAz = scopeState.mountAz;
-  try {
-    localStorage.setItem('egastro_home_alt', scopeState.homeAlt.toString());
-    localStorage.setItem('egastro_home_az', scopeState.homeAz.toString());
-    scopeLog(`HOME salvata: Alt ${scopeState.homeAlt.toFixed(1)}° Az ${scopeState.homeAz.toFixed(1)}° (persistente)`, "ok");
-  } catch(e) { scopeLog("Errore salvataggio HOME", "err"); }
+  scopeState.homeAlt = scopeState.mountAlt; scopeState.homeAz = scopeState.mountAz;
+  try { localStorage.setItem('egastro_home_alt', scopeState.homeAlt.toString()); localStorage.setItem('egastro_home_az', scopeState.homeAz.toString()); scopeLog(`HOME salvata.`, "ok"); } catch(e) { scopeLog("Errore salvataggio HOME", "err"); }
 }
 function scopeSetPark() {
-  scopeState.parkAlt = scopeState.mountAlt;
-  scopeState.parkAz = scopeState.mountAz;
-  try {
-    localStorage.setItem('egastro_park_alt', scopeState.parkAlt.toString());
-    localStorage.setItem('egastro_park_az', scopeState.parkAz.toString());
-    scopeLog(`PARK salvato: Alt ${scopeState.parkAlt.toFixed(1)}° Az ${scopeState.parkAz.toFixed(1)}° (persistente)`, "ok");
-  } catch(e) { scopeLog("Errore salvataggio PARK", "err"); }
+  scopeState.parkAlt = scopeState.mountAlt; scopeState.parkAz = scopeState.mountAz;
+  try { localStorage.setItem('egastro_park_alt', scopeState.parkAlt.toString()); localStorage.setItem('egastro_park_az', scopeState.parkAz.toString()); scopeLog(`PARK salvato.`, "ok"); } catch(e) { scopeLog("Errore salvataggio PARK", "err"); }
 }
 function scopeHome() {
   if (!scopeState.connected) { scopeLog("Connetti prima.", "warn"); return; }
-  if (scopeState.isParked) { scopeLog("Montatura in PARK. Unpark prima.", "err"); return; }
-  scopeLog(`Ritorno a HOME (Alt ${scopeState.homeAlt.toFixed(1)}° Az ${scopeState.homeAz.toFixed(1)}°)...`, "warn");
-  scopeMoveToContinuous(() => ({ alt: scopeState.homeAlt, az: scopeState.homeAz }), () => {
-    scopeLog("HOME raggiunta.", "ok");
-    if (scopeState.target) scopeRefreshTargetData();
-  });
+  if (scopeState.isParked) { scopeLog("Montatura in PARK.", "err"); return; }
+  scopeLog(`Ritorno a HOME...`, "warn");
+  scopeMoveToContinuous(() => ({ alt: scopeState.homeAlt, az: scopeState.homeAz }), () => { scopeLog("HOME raggiunta.", "ok"); if (scopeState.target) scopeRefreshTargetData(); });
 }
 function scopePark() {
   if (!scopeState.connected || scopeState.isParked) return;
-  scopeLog(`Movimento verso PARK (Alt ${scopeState.parkAlt.toFixed(1)}° Az ${scopeState.parkAz.toFixed(1)}°)...`, "warn");
+  scopeLog(`Movimento verso PARK...`, "warn");
   scopeMoveToContinuous(() => ({ alt: scopeState.parkAlt, az: scopeState.parkAz }), () => {
-    scopeState.isParked = true;
-    scopeState.tracking = false;
-    scopeState.trackingTarget = false;
-    scopeState.synced = false;
+    scopeState.isParked = true; scopeState.tracking = false; scopeState.trackingTarget = false; scopeState.synced = false;
     stopTrackingLoop();
-    document.getElementById('scopeTrackBtn').innerText = "Track ON";
-    document.getElementById('scopeTrackBtn').className = "triton-btn";
+    document.getElementById('scopeTrackBtn').innerText = "Track ON"; document.getElementById('scopeTrackBtn').className = "triton-btn";
     document.getElementById('parkOverlay').classList.add('open');
-    scopeLog("Montatura in PARK. Motori in sicurezza.", "ok");
+    scopeLog("Montatura in PARK.", "ok");
   });
 }
 function scopeUnpark() {
   if (!scopeState.connected) { scopeLog("Connetti prima.", "warn"); return; }
-  scopeState.isParked = false;
-  document.getElementById('parkOverlay').classList.remove('open');
+  scopeState.isParked = false; document.getElementById('parkOverlay').classList.remove('open');
   scopeLog("Montatura sbloccata (UNPARK).", "ok");
-  scopeMoveToContinuous(() => ({ alt: scopeState.homeAlt, az: scopeState.homeAz }), () => {
-    scopeLog("Ritorno a HOME dopo UNPARK.", "ok");
-  });
+  scopeMoveToContinuous(() => ({ alt: scopeState.homeAlt, az: scopeState.homeAz }), () => { scopeLog("Ritorno a HOME dopo UNPARK.", "ok"); });
 }
 function scopeMeridianFlip() {
   if (!scopeState.connected || scopeState.isParked) return;
@@ -3487,116 +3671,53 @@ function scopeMeridianFlip() {
   scopeState.mountAlt = 180 - scopeState.mountAlt;
   if (scopeState.mountAlt < 0) scopeState.mountAlt = 0;
   if (scopeState.mountAlt > 90) scopeState.mountAlt = 90;
-  scopeState.synced = false;
-  scopeState.trackingTarget = false;
-  scopeLog("Meridian Flip eseguito (Az +180°, Alt specchiata).", "warn");
+  scopeState.synced = false; scopeState.trackingTarget = false;
+  scopeLog("Meridian Flip eseguito.", "warn");
   scopeUpdateUI(); scopeDraw();
 }
-
-/* ============================================================
-   3-STEP PROCESS: GOTO → CENTER → SYNC
-   ============================================================ */
-function getTargetCurrentAltAz() {
-  if (!scopeState.target) return { alt: 0, az: 0 };
-  return getAltAz(scopeState.target.ra, scopeState.target.dec, state.currentTime);
-}
-
+function getTargetCurrentAltAz() { if (!scopeState.target) return { alt: 0, az: 0 }; return getAltAz(scopeState.target.ra, scopeState.target.dec, state.currentTime); }
 function scopeUpdateStepUI() {
-  const dot1 = document.getElementById('stepDot1');
-  const dot2 = document.getElementById('stepDot2');
-  const dot3 = document.getElementById('stepDot3');
-  const line1 = document.getElementById('stepLine1');
-  const line2 = document.getElementById('stepLine2');
+  const dot1 = document.getElementById('stepDot1'), dot2 = document.getElementById('stepDot2'), dot3 = document.getElementById('stepDot3');
+  const line1 = document.getElementById('stepLine1'), line2 = document.getElementById('stepLine2');
   const btn = document.getElementById('scopeStepBtn');
   if (!dot1 || !dot2 || !dot3 || !btn) return;
-
-  [dot1, dot2, dot3].forEach(d => { d.classList.remove('active', 'done'); });
+  [dot1, dot2, dot3].forEach(d => d.classList.remove('active', 'done'));
   [line1, line2].forEach(l => { if (l) l.classList.remove('done'); });
-  btn.className = 'btn-goto-large';
-  btn.disabled = false;
-
-  if (scopeState.step === 1) {
-    dot1.classList.add('active');
-    btn.innerText = '🚀 GOTO';
-    btn.disabled = !scopeState.connected || scopeState.isParked;
-  } else if (scopeState.step === 2) {
-    dot1.classList.add('done');
-    if (line1) line1.classList.add('done');
-    dot2.classList.add('active');
-    btn.innerText = '🎯 CENTER';
-    btn.className = 'btn-goto-large centered';
-  } else if (scopeState.step === 3) {
-    dot1.classList.add('done');
-    dot2.classList.add('done');
-    if (line1) line1.classList.add('done');
-    if (line2) line2.classList.add('done');
-    dot3.classList.add('active');
-    btn.innerText = '⇄ SYNC';
-    btn.className = 'btn-goto-large synced';
-  } else if (scopeState.step === 0) {
-    dot1.classList.add('done');
-    dot2.classList.add('done');
-    dot3.classList.add('done');
-    if (line1) line1.classList.add('done');
-    if (line2) line2.classList.add('done');
-    btn.innerText = '✓ COMPLETATO';
-    btn.className = 'btn-goto-large synced';
-  }
+  btn.className = 'btn-goto-large'; btn.disabled = false;
+  if (scopeState.step === 1) { dot1.classList.add('active'); btn.innerText = '🚀 GOTO'; btn.disabled = !scopeState.connected || scopeState.isParked; }
+  else if (scopeState.step === 2) { dot1.classList.add('done'); if (line1) line1.classList.add('done'); dot2.classList.add('active'); btn.innerText = '🎯 CENTER'; btn.className = 'btn-goto-large centered'; }
+  else if (scopeState.step === 3) { dot1.classList.add('done'); dot2.classList.add('done'); if (line1) line1.classList.add('done'); if (line2) line2.classList.add('done'); dot3.classList.add('active'); btn.innerText = '⇄ SYNC'; btn.className = 'btn-goto-large synced'; }
+  else if (scopeState.step === 0) { dot1.classList.add('done'); dot2.classList.add('done'); dot3.classList.add('done'); if (line1) line1.classList.add('done'); if (line2) line2.classList.add('done'); btn.innerText = '✓ COMPLETATO'; btn.className = 'btn-goto-large synced'; }
 }
-
 function scopeStepAction() {
   if (!scopeState.target) return;
-
   if (scopeState.step === 1) {
     if (!scopeState.connected) { scopeLog("Connetti la montatura prima.", "warn"); return; }
     if (scopeState.isParked) { scopeLog("Montatura in PARK. Unpark prima.", "warn"); return; }
     if (scopeState.slewing) { scopeLog("Slewing in corso...", "warn"); return; }
-
     const t = scopeState.target;
     scopeLog(`GOTO verso ${t.name}...`, '');
-    const btn = document.getElementById('scopeStepBtn');
-    btn.disabled = true;
-    btn.className = 'btn-goto-large slewing';
-
+    const btn = document.getElementById('scopeStepBtn'); btn.disabled = true; btn.className = 'btn-goto-large slewing';
     scopeMoveToContinuous(getTargetCurrentAltAz, () => {
-      scopeState.step = 2;
-      scopeState.tracking = true;
-      scopeState.trackingTarget = true;   /* ▶ DOPO GOTO segue il target */
-      document.getElementById('scopeTrackBtn').innerText = "Track OFF";
-      document.getElementById('scopeTrackBtn').className = "triton-btn active";
-      scopeLog(`✓ ${t.name} raggiunto! Tracking ON (target). Premi CENTER per zoomare la mappa.`, "ok");
-      scopeUpdateStepUI();
-      startTrackingLoop();
+      scopeState.step = 2; scopeState.tracking = true; scopeState.trackingTarget = true;
+      document.getElementById('scopeTrackBtn').innerText = "Track OFF"; document.getElementById('scopeTrackBtn').className = "triton-btn active";
+      scopeLog(`✓ ${t.name} raggiunto! Tracking ON (target).`, "ok");
+      scopeUpdateStepUI(); startTrackingLoop();
     });
   } else if (scopeState.step === 2) {
-    const btn = document.getElementById('scopeStepBtn');
-    btn.disabled = true;
+    const btn = document.getElementById('scopeStepBtn'); btn.disabled = true;
     scopeLog(`Centratura mappa su ${scopeState.target.name}...`, '');
-    scopeAnimatedCenter(() => {
-      scopeState.step = 3;
-      scopeLog(`✓ Mappa centrata. Premi SYNC per sincronizzare la montatura.`, "ok");
-      scopeUpdateStepUI();
-    });
-  } else if (scopeState.step === 3) {
-    scopeSyncMount();
-  }
+    scopeAnimatedCenter(() => { scopeState.step = 3; scopeLog(`✓ Mappa centrata. Premi SYNC.`, "ok"); scopeUpdateStepUI(); });
+  } else if (scopeState.step === 3) scopeSyncMount();
 }
-
 function scopeAnimatedCenter(onComplete) {
   const tgt = getTargetCurrentAltAz();
-  const startAlt = scopeState.camAlt;
-  const startAz = scopeState.camAz;
-  const startFov = scopeState.fov;
+  const startAlt = scopeState.camAlt, startAz = scopeState.camAz, startFov = scopeState.fov;
   const targetAlt = clamp(tgt.alt, 0, 89);
-  let targetAz = tgt.az;
-  let dAz = targetAz - startAz;
-  while (dAz > 180) dAz -= 360;
-  while (dAz < -180) dAz += 360;
+  let targetAz = tgt.az; let dAz = targetAz - startAz;
+  while (dAz > 180) dAz -= 360; while (dAz < -180) dAz += 360;
   targetAz = startAz + dAz;
-  const targetFov = 20;
-  const duration = 800;
-  const startTime = performance.now();
-
+  const targetFov = 20, duration = 800, startTime = performance.now();
   function animate(time) {
     const t = Math.min(1, (time - startTime) / duration);
     const e = 1 - Math.pow(1 - t, 3);
@@ -3604,43 +3725,27 @@ function scopeAnimatedCenter(onComplete) {
     scopeState.camAz = norm360(startAz + (targetAz - startAz) * e);
     scopeState.fov = startFov + (targetFov - startFov) * e;
     scopeDraw();
-    if (t < 1) requestAnimationFrame(animate);
-    else if (onComplete) onComplete();
+    if (t < 1) requestAnimationFrame(animate); else if (onComplete) onComplete();
   }
   requestAnimationFrame(animate);
 }
-
 function scopeSyncMount() {
   if (!scopeState.connected || !scopeState.target || scopeState.isParked) return;
-  if (scopeState.slewing) { scopeLog("Attendi fine slewing prima di sync.", "warn"); return; }
+  if (scopeState.slewing) { scopeLog("Attendi fine slewing.", "warn"); return; }
   const tPos = getAltAz(scopeState.target.ra, scopeState.target.dec, state.currentTime);
-  scopeState.mountAlt = tPos.alt;
-  scopeState.mountAz = tPos.az;
-  scopeState.synced = true;
-  scopeState.syncFlashStart = performance.now();
-  scopeState.step = 0;
-  scopeLog(`✓ SYNC completato su ${scopeState.target.name}. Ripristino vista...`, "ok");
-  scopeUpdateStepUI();
-  scopeUpdateUI();
-  scopeDraw();
+  scopeState.mountAlt = tPos.alt; scopeState.mountAz = tPos.az;
+  scopeState.synced = true; scopeState.syncFlashStart = performance.now(); scopeState.step = 0;
+  scopeLog(`✓ SYNC completato su ${scopeState.target.name}.`, "ok");
+  scopeUpdateStepUI(); scopeUpdateUI(); scopeDraw();
   setTimeout(() => scopeResetViewToTarget(), 200);
 }
-
 function scopeResetViewToTarget() {
   if (!scopeState.target) return;
   const tPos = getAltAz(scopeState.target.ra, scopeState.target.dec, state.currentTime);
-  const startAlt = scopeState.camAlt;
-  const startAz = scopeState.camAz;
-  const startFov = scopeState.fov;
+  const startAlt = scopeState.camAlt, startAz = scopeState.camAz, startFov = scopeState.fov;
   const targetAlt = clamp(tPos.alt, 0, 89);
-  let dAz = tPos.az - startAz;
-  while (dAz > 180) dAz -= 360;
-  while (dAz < -180) dAz += 360;
-  const targetAz = startAz + dAz;
-  const targetFov = 80;
-  const duration = 900;
-  const startTime = performance.now();
-
+  let dAz = tPos.az - startAz; while (dAz > 180) dAz -= 360; while (dAz < -180) dAz += 360;
+  const targetAz = startAz + dAz, targetFov = 80, duration = 900, startTime = performance.now();
   function animate(time) {
     const t = Math.min(1, (time - startTime) / duration);
     const e = 1 - Math.pow(1 - t, 3);
@@ -3648,53 +3753,30 @@ function scopeResetViewToTarget() {
     scopeState.camAz = norm360(startAz + (targetAz - startAz) * e);
     scopeState.fov = startFov + (targetFov - startFov) * e;
     scopeDraw();
-    if (t < 1) requestAnimationFrame(animate);
-    else scopeLog('Vista default ripristinata (FOV 80°, soggetto centrato).', 'ok');
+    if (t < 1) requestAnimationFrame(animate); else scopeLog('Vista default ripristinata.', 'ok');
   }
   requestAnimationFrame(animate);
 }
-
-function scopeResetSteps() {
-  scopeState.step = 1;
-  scopeState.synced = false;
-  scopeUpdateStepUI();
-}
-
-/* ============================================================
-   Popup target
-   ============================================================ */
 function scopeSelectTarget(id, name, type, ra, dec, extra = {}) {
   scopeState.target = { id, name, type, ra, dec, mag: extra.mag, dist: extra.dist };
-  scopeState.synced = false;
-  scopeState.step = 1;
-  /* ▶ NON seguire il target finché non viene fatto GOTO */
-  scopeState.trackingTarget = false;
+  scopeState.synced = false; scopeState.step = 1; scopeState.trackingTarget = false;
   document.getElementById('scopeTargetOverlay').classList.add('open');
   document.getElementById('scopeTargetName').innerText = name;
   document.getElementById('scopeTargetMeta').innerText = type;
-  scopeRefreshTargetData();
-  scopeUpdateStepUI();
-  scopeBuildCatalog();
-  scopeDraw();
+  scopeRefreshTargetData(); scopeUpdateStepUI(); scopeBuildCatalog(); scopeDraw();
 }
-
 function scopeRefreshTargetData() {
   if (!scopeState.target) return;
   const t = scopeState.target;
   const pos = getAltAz(t.ra, t.dec, state.currentTime);
   const setText = (id, val, lowClass) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.innerText = val;
-    el.classList.remove('low', 'off');
+    const el = document.getElementById(id); if (!el) return;
+    el.innerText = val; el.classList.remove('low', 'off');
     if (lowClass) el.classList.add(lowClass);
   };
-
-  setText('scopeTgtRa', formatRA(t.ra));
-  setText('scopeTgtDec', formatDec(t.dec));
+  setText('scopeTgtRa', formatRA(t.ra)); setText('scopeTgtDec', formatDec(t.dec));
   setText('scopeTgtAlt', pos.alt.toFixed(1) + '°', pos.alt <= 0 ? 'off' : (pos.alt < 20 ? 'low' : ''));
   setText('scopeTgtAz', pos.az.toFixed(1) + '°');
-
   const lst = getLST(state.currentTime);
   let ha = norm360(lst - t.ra);
   let hoursToTransit;
@@ -3703,167 +3785,84 @@ function scopeRefreshTargetData() {
   else hoursToTransit = 24 - ha / 15;
   if (hoursToTransit < 0.02) hoursToTransit = 0;
   const transitDate = new Date(state.currentTime.getTime() + hoursToTransit * 3600 * 1000);
-  const transitStr = hoursToTransit === 0
-    ? 'ORA'
-    : transitDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  const transitStr = hoursToTransit === 0 ? 'ORA' : transitDate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
   setText('scopeTgtTransit', transitStr);
-
   const night = getNightWindow(state.currentTime);
   let maxAlt = pos.alt, maxAltTime = state.currentTime;
   if (night) {
     const step = 15 * 60000;
     for (let tt = night.start.getTime(); tt <= night.end.getTime(); tt += step) {
-      const d = new Date(tt);
-      const p = getAltAz(t.ra, t.dec, d);
+      const d = new Date(tt); const p = getAltAz(t.ra, t.dec, d);
       if (p.alt > maxAlt) { maxAlt = p.alt; maxAltTime = d; }
     }
   }
-  const maxStr = maxAlt > 0
-    ? `${maxAlt.toFixed(0)}° @${maxAltTime.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`
-    : `${maxAlt.toFixed(0)}°`;
+  const maxStr = maxAlt > 0 ? `${maxAlt.toFixed(0)}° @${maxAltTime.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}` : `${maxAlt.toFixed(0)}°`;
   setText('scopeTgtMaxAlt', maxStr, maxAlt <= 0 ? 'off' : (maxAlt < 30 ? 'low' : ''));
-
   const magStr = t.mag !== undefined && t.mag !== null ? t.mag.toFixed(1) : '—';
   const distStr = t.dist || '—';
   setText('scopeTgtMagDist', `${magStr} / ${distStr}`);
-
-  let dAlt = pos.alt - scopeState.mountAlt;
-  let dAz = pos.az - scopeState.mountAz;
-  while (dAz > 180) dAz -= 360;
-  while (dAz < -180) dAz += 360;
+  let dAlt = pos.alt - scopeState.mountAlt, dAz = pos.az - scopeState.mountAz;
+  while (dAz > 180) dAz -= 360; while (dAz < -180) dAz += 360;
   const delta = Math.sqrt(dAlt*dAlt + dAz*dAz);
   setText('scopeTgtDelta', delta.toFixed(2) + '°', delta > 30 ? 'low' : '');
-
-  document.getElementById('scopeTargetMeta').innerText =
-    `${t.type} · ${pos.alt > 0 ? '👁️ visibile' : '❌ sotto orizzonte'}`;
-
+  document.getElementById('scopeTargetMeta').innerText = `${t.type} · ${pos.alt > 0 ? '👁️ visibile' : '❌ sotto orizzonte'}`;
   drawScopeNightChart(t.ra, t.dec, t.name);
   scopeUpdateStepUI();
 }
-
-function formatRA(deg) {
-  const h = deg / 15;
-  const hh = Math.floor(h);
-  const mm = Math.floor((h - hh)*60);
-  return `${String(hh).padStart(2,'0')}h ${String(mm).padStart(2,'0')}m`;
-}
-function formatDec(deg) {
-  const sign = deg >= 0 ? '+' : '-';
-  const d = Math.abs(deg);
-  const dd = Math.floor(d);
-  const mm = Math.floor((d - dd)*60);
-  return `${sign}${String(dd).padStart(2,'0')}° ${String(mm).padStart(2,'0')}'`;
-}
-
-/* ============================================================
-   NIGHT CHART COMPATTO
-   ============================================================ */
+function formatRA(deg) { const h = deg / 15; const hh = Math.floor(h); const mm = Math.floor((h - hh)*60); return `${String(hh).padStart(2,'0')}h ${String(mm).padStart(2,'0')}m`; }
+function formatDec(deg) { const sign = deg >= 0 ? '+' : '-'; const d = Math.abs(deg); const dd = Math.floor(d); const mm = Math.floor((d - dd)*60); return `${sign}${String(dd).padStart(2,'0')}° ${String(mm).padStart(2,'0')}'`; }
 function drawScopeNightChart(ra, dec, name) {
-  const cv = document.getElementById('scopeNightChart');
-  if (!cv) return;
-  const g = cv.getContext('2d');
-  const W = cv.width, H = cv.height;
-  g.clearRect(0, 0, W, H);
-  g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
-
-  const night = getNightWindow(state.currentTime);
-  if (!night) return;
+  const cv = document.getElementById('scopeNightChart'); if (!cv) return;
+  const g = cv.getContext('2d'); const W = cv.width, H = cv.height;
+  g.clearRect(0, 0, W, H); g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+  const night = getNightWindow(state.currentTime); if (!night) return;
   const PAD_L = 26, PAD_R = 6, PAD_T = 6, PAD_B = 16;
   const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
-  const tStart = night.start.getTime();
-  const tEnd = night.end.getTime();
-  const totalMs = tEnd - tStart;
-
-  const STEP = 15*60000;
-  const samples = [];
+  const tStart = night.start.getTime(), tEnd = night.end.getTime(), totalMs = tEnd - tStart;
+  const STEP = 15*60000; const samples = [];
   for (let t = tStart; t <= tEnd; t += STEP) {
     const d = new Date(t);
-    const sunAlt = getSunAltitude(d);
-    const phase = skyPhaseCategory(sunAlt);
+    const sunAlt = getSunAltitude(d); const phase = skyPhaseCategory(sunAlt);
     const pos = ra !== null && ra !== undefined ? getAltAz(ra, dec, d) : { alt: -90, az: 0 };
     samples.push({ t, phase, alt: pos.alt });
   }
   const phaseColors = { day:'#f59e0b', civil:'#eab308', nautical:'#7c3aed', astronomical:'#1e3a8a', night:'#000000' };
   const phaseAlpha = { day:0.35, civil:0.28, nautical:0.28, astronomical:0.3, night:0.85 };
-  samples.forEach((s, i) => {
-    if (i === 0) return;
-    const x0 = PAD_L + ((samples[i-1].t - tStart)/totalMs)*plotW;
-    const x1 = PAD_L + ((s.t - tStart)/totalMs)*plotW;
-    g.fillStyle = phaseColors[s.phase]; g.globalAlpha = phaseAlpha[s.phase];
-    g.fillRect(x0, PAD_T, x1-x0, plotH); g.globalAlpha = 1;
-  });
-
+  samples.forEach((s, i) => { if (i === 0) return; const x0 = PAD_L + ((samples[i-1].t - tStart)/totalMs)*plotW; const x1 = PAD_L + ((s.t - tStart)/totalMs)*plotW; g.fillStyle = phaseColors[s.phase]; g.globalAlpha = phaseAlpha[s.phase]; g.fillRect(x0, PAD_T, x1-x0, plotH); g.globalAlpha = 1; });
   const y30 = PAD_T + plotH - (30/90)*plotH;
-  g.strokeStyle = '#facc15'; g.lineWidth = 1; g.setLineDash([3,3]);
-  g.beginPath(); g.moveTo(PAD_L, y30); g.lineTo(W-PAD_R, y30); g.stroke(); g.setLineDash([]);
-
-  g.strokeStyle = '#ef4444'; g.lineWidth = 1.5;
-  g.beginPath(); g.moveTo(PAD_L, PAD_T + plotH); g.lineTo(W-PAD_R, PAD_T + plotH); g.stroke();
-
+  g.strokeStyle = '#facc15'; g.lineWidth = 1; g.setLineDash([3,3]); g.beginPath(); g.moveTo(PAD_L, y30); g.lineTo(W-PAD_R, y30); g.stroke(); g.setLineDash([]);
+  g.strokeStyle = '#ef4444'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(PAD_L, PAD_T + plotH); g.lineTo(W-PAD_R, PAD_T + plotH); g.stroke();
   g.beginPath(); let started = false;
-  samples.forEach(s => {
-    const x = PAD_L + ((s.t - tStart)/totalMs)*plotW;
-    const y = PAD_T + plotH - (clamp(s.alt, 0, 90)/90)*plotH;
-    if (!started) { g.moveTo(x, y); started = true; } else g.lineTo(x, y);
-  });
+  samples.forEach(s => { const x = PAD_L + ((s.t - tStart)/totalMs)*plotW; const y = PAD_T + plotH - (clamp(s.alt, 0, 90)/90)*plotH; if (!started) { g.moveTo(x, y); started = true; } else g.lineTo(x, y); });
   g.strokeStyle = '#38bdf8'; g.lineWidth = 2; g.stroke();
-
-  g.lineTo(PAD_L + plotW, PAD_T + plotH);
-  g.lineTo(PAD_L, PAD_T + plotH);
-  g.closePath();
-  const grad = g.createLinearGradient(0, PAD_T, 0, PAD_T + plotH);
-  grad.addColorStop(0, 'rgba(56,189,248,0.3)');
-  grad.addColorStop(1, 'rgba(56,189,248,0.02)');
+  g.lineTo(PAD_L + plotW, PAD_T + plotH); g.lineTo(PAD_L, PAD_T + plotH); g.closePath();
+  const grad = g.createLinearGradient(0, PAD_T, 0, PAD_T + plotH); grad.addColorStop(0, 'rgba(56,189,248,0.3)'); grad.addColorStop(1, 'rgba(56,189,248,0.02)');
   g.fillStyle = grad; g.fill();
-
   const nowMs = state.currentTime.getTime();
-  if (nowMs >= tStart && nowMs <= tEnd) {
-    const xNow = PAD_L + ((nowMs - tStart)/totalMs)*plotW;
-    g.strokeStyle = '#fff'; g.lineWidth = 1; g.setLineDash([2,2]);
-    g.beginPath(); g.moveTo(xNow, PAD_T); g.lineTo(xNow, PAD_T + plotH); g.stroke(); g.setLineDash([]);
-  }
-
+  if (nowMs >= tStart && nowMs <= tEnd) { const xNow = PAD_L + ((nowMs - tStart)/totalMs)*plotW; g.strokeStyle = '#fff'; g.lineWidth = 1; g.setLineDash([2,2]); g.beginPath(); g.moveTo(xNow, PAD_T); g.lineTo(xNow, PAD_T + plotH); g.stroke(); g.setLineDash([]); }
   let bestStart = null, bestEnd = null;
   samples.forEach(s => { if (s.alt > 30 && s.phase !== 'day') { if (bestStart === null) bestStart = s.t; bestEnd = s.t; } });
-  if (bestStart !== null) {
-    const xA = PAD_L + ((bestStart - tStart)/totalMs)*plotW;
-    const xB = PAD_L + ((bestEnd - tStart)/totalMs)*plotW;
-    g.fillStyle = 'rgba(74,222,128,0.15)';
-    g.fillRect(xA, PAD_T, xB-xA, plotH);
-  }
-
-  g.fillStyle = 'rgba(255,255,255,0.6)';
-  g.font = '9px Inter'; g.textAlign = 'center';
+  if (bestStart !== null) { const xA = PAD_L + ((bestStart - tStart)/totalMs)*plotW; const xB = PAD_L + ((bestEnd - tStart)/totalMs)*plotW; g.fillStyle = 'rgba(74,222,128,0.15)'; g.fillRect(xA, PAD_T, xB-xA, plotH); }
+  g.fillStyle = 'rgba(255,255,255,0.6)'; g.font = '9px Inter'; g.textAlign = 'center';
   const fmtT = t => new Date(t).toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
   g.fillText(fmtT(tStart), PAD_L + 15, H - 3);
   g.fillText(fmtT((tStart + tEnd)/2), PAD_L + plotW/2, H - 3);
   g.fillText(fmtT(tEnd), PAD_L + plotW - 15, H - 3);
-  g.textAlign = 'left';
-  g.fillStyle = 'rgba(255,255,255,0.5)';
-  g.fillText('90°', 2, PAD_T + 8);
-  g.fillText('0°', 2, PAD_T + plotH);
-
+  g.textAlign = 'left'; g.fillStyle = 'rgba(255,255,255,0.5)';
+  g.fillText('90°', 2, PAD_T + 8); g.fillText('0°', 2, PAD_T + plotH);
   const infoEl = document.getElementById('scopeNightChartInfo');
   const lblEl = document.getElementById('scopeNightChartLabel');
   if (bestStart !== null) {
     const durMin = Math.round((bestEnd - bestStart)/60000);
     infoEl.innerHTML = `<strong>✅ ${fmtT(bestStart)} → ${fmtT(bestEnd)}</strong> · ${Math.floor(durMin/60)}h ${(durMin%60).toString().padStart(2,'0')}m >30°`;
     lblEl.innerText = `Finestra · ${name}`;
-  } else {
-    infoEl.innerHTML = `<span style="color:var(--bad);">❌ Sotto 30° stanotte</span>`;
-    lblEl.innerText = `Finestra · ${name}`;
-  }
+  } else { infoEl.innerHTML = `<span style="color:var(--bad);">❌ Sotto 30° stanotte</span>`; lblEl.innerText = `Finestra · ${name}`; }
 }
-
 function scopeCloseTarget() {
   document.getElementById('scopeTargetOverlay').classList.remove('open');
-  scopeState.target = null;
-  scopeState.synced = false;
-  scopeState.trackingTarget = false;
-  scopeState.step = 1;
+  scopeState.target = null; scopeState.synced = false; scopeState.trackingTarget = false; scopeState.step = 1;
   scopeBuildCatalog(); scopeDraw();
 }
-
 function scopeGotoMap() {
   if (!scopeState.target) return;
   const { name, ra, dec } = scopeState.target;
@@ -3876,106 +3875,60 @@ function scopeGotoMap() {
   state.camAlt = clamp(pos.alt, 0, 89); state.camAz = pos.az;
   drawMap(); showInfo(state.target); updateInfoStrip();
 }
-
 function scopeSlewToTarget() {
   if (!scopeState.connected) { scopeLog("Connetti prima.", "warn"); return; }
   if (!scopeState.target) { scopeLog("Nessun target selezionato.", "warn"); return; }
   if (scopeState.isParked) { scopeLog("Montatura in PARK.", "err"); return; }
   if (scopeState.slewing) { scopeLog("Slewing in corso.", "warn"); return; }
-
   const t = scopeState.target;
   scopeLog(`GOTO (pannello) verso ${t.name}...`, '');
-  const panelBtn = document.getElementById('scopePanelGotoBtn');
-  if (panelBtn) { panelBtn.disabled = true; }
-
+  const panelBtn = document.getElementById('scopePanelGotoBtn'); if (panelBtn) panelBtn.disabled = true;
   scopeMoveToContinuous(getTargetCurrentAltAz, () => {
-    scopeState.tracking = true;
-    scopeState.trackingTarget = true;   /* ▶ DOPO GOTO segue il target */
-    document.getElementById('scopeTrackBtn').innerText = "Track OFF";
-    document.getElementById('scopeTrackBtn').className = "triton-btn active";
+    scopeState.tracking = true; scopeState.trackingTarget = true;
+    document.getElementById('scopeTrackBtn').innerText = "Track OFF"; document.getElementById('scopeTrackBtn').className = "triton-btn active";
     if (panelBtn) { panelBtn.disabled = false; panelBtn.innerText = '✓ OK'; }
-    scopeState.step = 2;
-    scopeUpdateStepUI();
-    scopeLog(`✓ ${t.name} raggiunto. Tracking ON (target).`, "ok");
+    scopeState.step = 2; scopeUpdateStepUI();
+    scopeLog(`✓ ${t.name} raggiunto.`, "ok");
     startTrackingLoop();
-    setTimeout(() => { if (panelBtn) { panelBtn.innerText = '🎯 GOTO'; } }, 1800);
+    setTimeout(() => { if (panelBtn) panelBtn.innerText = '🎯 GOTO'; }, 1800);
   }, 'scopePanelGotoBtn');
 }
-
-/* ============================================================
-   CATALOGO TELESCOPIO
-   ============================================================ */
 function scopeBuildCatalog() {
   const now = state.currentTime;
   const items = [];
-  calcPlanetsPrecise(now).forEach(p => {
-    if (p.alt > -5) items.push({ id:p.n, name:p.n, type: p.isSun ? 'Sole' : p.isMoon ? 'Luna' : 'Pianeta', ra:p.ra, dec:p.dec, alt:p.alt });
-  });
-  STARS.forEach(s => {
-    const pos = getAltAz(s.ra, s.dec, now);
-    if (pos.alt > -5) items.push({ id:s.n, name:s.n, type:'Stella', ra:s.ra, dec:s.dec, alt:pos.alt, mag:s.mag });
-  });
-  Object.values(MESSIER).forEach(m => {
-    const pos = getAltAz(m.ra, m.dec, now);
-    if (pos.alt > -5) items.push({ id:m.n, name:m.n, type:m.type, ra:m.ra, dec:m.dec, alt:pos.alt, mag:m.mag, dist:m.dist });
-  });
-  NEBULAE_EXTRA.forEach(n => {
-    const pos = getAltAz(n.ra, n.dec, now);
-    if (pos.alt > -5) items.push({ id:n.n, name:n.n, type:'Nebulosa', ra:n.ra, dec:n.dec, alt:pos.alt, mag:n.mag, dist:n.dist });
-  });
-  items.sort((a, b) => {
-    const av = a.alt > 0 ? 1 : 0, bv = b.alt > 0 ? 1 : 0;
-    if (av !== bv) return bv - av;
-    return b.alt - a.alt;
-  });
-  const list = document.getElementById('scopeCatalogList');
-  if (!list) return;
+  calcPlanetsPrecise(now).forEach(p => { if (p.alt > -5) items.push({ id:p.n, name:p.n, type: p.isSun ? 'Sole' : p.isMoon ? 'Luna' : 'Pianeta', ra:p.ra, dec:p.dec, alt:p.alt }); });
+  STARS.forEach(s => { const pos = getAltAz(s.ra, s.dec, now); if (pos.alt > -5) items.push({ id:s.n, name:s.n, type:'Stella', ra:s.ra, dec:s.dec, alt:pos.alt, mag:s.mag }); });
+  Object.values(MESSIER).forEach(m => { const pos = getAltAz(m.ra, m.dec, now); if (pos.alt > -5) items.push({ id:m.n, name:m.n, type:m.type, ra:m.ra, dec:m.dec, alt:pos.alt, mag:m.mag, dist:m.dist }); });
+  NEBULAE_EXTRA.forEach(n => { const pos = getAltAz(n.ra, n.dec, now); if (pos.alt > -5) items.push({ id:n.n, name:n.n, type:'Nebulosa', ra:n.ra, dec:n.dec, alt:pos.alt, mag:n.mag, dist:n.dist }); });
+  items.sort((a, b) => { const av = a.alt > 0 ? 1 : 0, bv = b.alt > 0 ? 1 : 0; if (av !== bv) return bv - av; return b.alt - a.alt; });
+  const list = document.getElementById('scopeCatalogList'); if (!list) return;
   list.innerHTML = items.slice(0, 40).map(o => {
     const sel = scopeState.target && scopeState.target.id === o.id;
-    const visible = o.alt > 0;
-    const altClass = !visible ? 'off' : (o.alt < 20 ? 'low' : '');
+    const visible = o.alt > 0; const altClass = !visible ? 'off' : (o.alt < 20 ? 'low' : '');
     const iconCls = o.type === 'Pianeta' ? 'planet' : (o.type === 'Luna' ? 'moon' : (o.type === 'Stella' ? 'star' : ''));
     const iconSym = o.type === 'Pianeta' ? '◉' : (o.type === 'Luna' ? '☾' : (o.type === 'Stella' ? '★' : (o.type === 'Nebulosa' ? '☁' : (o.type === 'Galassia' ? '✦' : '❋'))));
     const extra = JSON.stringify({ mag: o.mag, dist: o.dist }).replace(/"/g, '&quot;');
     return `<div class="catalog-item ${sel ? 'selected' : ''} ${!visible ? 'dim' : ''}" onclick="scopeSelectTargetFromList('${o.id.replace(/'/g, "\\'")}','${o.name.replace(/'/g, "\\'")}','${o.type}',${o.ra},${o.dec},'${extra}')">
-      <div class="left-info">
-        <div class="icon ${iconCls}">${iconSym}</div>
-        <div style="min-width:0;flex:1">
-          <div class="name">${o.name}</div>
-          <div class="meta">${o.type}</div>
-        </div>
-      </div>
+      <div class="left-info"><div class="icon ${iconCls}">${iconSym}</div><div style="min-width:0;flex:1"><div class="name">${o.name}</div><div class="meta">${o.type}</div></div></div>
       <div class="alt ${altClass}">${o.alt.toFixed(1)}°</div>
     </div>`;
   }).join('') || '<div style="padding:10px;color:var(--muted);font-size:11px;">Nessun oggetto.</div>';
 }
 function scopeSelectTargetFromList(id, name, type, ra, dec, extraJson) {
-  let extra = {};
-  try { extra = JSON.parse((extraJson || '{}').replace(/&quot;/g, '"')); } catch(e) {}
+  let extra = {}; try { extra = JSON.parse((extraJson || '{}').replace(/&quot;/g, '"')); } catch(e) {}
   scopeSelectTarget(id, name, type, ra, dec, extra);
   scopeLog(`Target selezionato: ${name}`, 'ok');
 }
-
-/* ============================================================
-   RESIZE + PROJECT
-   ============================================================ */
 function scopeResize() {
   if (!scopeCanvasEl || !scopeOverlayEl) return;
   const dpr = window.devicePixelRatio || 1;
   const rect = scopeCanvasEl.parentElement.getBoundingClientRect();
-  scopeW = rect.width || 800;
-  scopeH = rect.height || 600;
-  [scopeCanvasEl, scopeOverlayEl].forEach(c => {
-    c.width = Math.floor(scopeW * dpr);
-    c.height = Math.floor(scopeH * dpr);
-    c.style.width = scopeW + 'px';
-    c.style.height = scopeH + 'px';
-  });
+  scopeW = rect.width || 800; scopeH = rect.height || 600;
+  [scopeCanvasEl, scopeOverlayEl].forEach(c => { c.width = Math.floor(scopeW * dpr); c.height = Math.floor(scopeH * dpr); c.style.width = scopeW + 'px'; c.style.height = scopeH + 'px'; });
   scopeCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   scopeOverlayCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   scopeDraw();
 }
-
 function scopeProject(alt, az) {
   const cx = scopeW/2, cy = scopeH/2;
   const altR = rad(alt), azR = rad(az);
@@ -3990,31 +3943,23 @@ function scopeProject(alt, az) {
   const yView = obj.x*up.x + obj.y*up.y + obj.z*up.z;
   const focal = (Math.min(scopeW, scopeH)/2)/Math.tan(rad(scopeState.fov)/2);
   const denom = 1 + zView;
-  const x = cx + (xView*focal)/denom;
-  const y = cy - (yView*focal)/denom;
+  const x = cx + (xView*focal)/denom; const y = cy - (yView*focal)/denom;
   const visible = x >= -50 && x <= scopeW+50 && y >= -50 && y <= scopeH+50;
   return { x, y, visible, zView };
 }
-
 function scopeUnproject(sx, sy) {
   const cx = scopeW/2, cy = scopeH/2;
   const focal = (Math.min(scopeW, scopeH)/2)/Math.tan(rad(scopeState.fov)/2);
   const kx = (sx-cx)/focal, ky = (cy-sy)/focal;
-  const K = kx*kx + ky*ky;
-  const zView = (1-K)/(1+K);
+  const K = kx*kx + ky*ky; const zView = (1-K)/(1+K);
   const xView = kx*(1+zView), yView = ky*(1+zView);
   const camAltR = rad(scopeState.camAlt), camAzR = rad(scopeState.camAz);
   const fwd = { x: Math.cos(camAltR)*Math.sin(camAzR), y: Math.cos(camAltR)*Math.cos(camAzR), z: Math.sin(camAltR) };
   const right = { x: Math.cos(camAzR), y: -Math.sin(camAzR), z: 0 };
   const up = { x: right.y*fwd.z - right.z*fwd.y, y: right.z*fwd.x - right.x*fwd.z, z: right.x*fwd.y - right.y*fwd.x };
-  const obj = {
-    x: xView*right.x + yView*up.x + zView*fwd.x,
-    y: xView*right.y + yView*up.y + zView*fwd.y,
-    z: xView*right.z + yView*up.z + zView*fwd.z
-  };
+  const obj = { x: xView*right.x + yView*up.x + zView*fwd.x, y: xView*right.y + yView*up.y + zView*fwd.y, z: xView*right.z + yView*up.z + zView*fwd.z };
   return { alt: deg(Math.asin(clamp(obj.z, -1, 1))), az: norm360(deg(Math.atan2(obj.x, obj.y))) };
 }
-
 function scopeDraw() {
   if (!scopeCtx) return;
   const ctx = scopeCtx;
@@ -4023,74 +3968,29 @@ function scopeDraw() {
   const bg = ctx.createRadialGradient(cx, cy, 10, cx, cy, Math.max(scopeW, scopeH)*0.8);
   bg.addColorStop(0, '#0a1530'); bg.addColorStop(0.5, '#030818'); bg.addColorStop(1, '#000');
   ctx.fillStyle = bg; ctx.fillRect(0, 0, scopeW, scopeH);
-
-  BG_STARS.forEach(s => {
-    const pos = getAltAz(s.ra, s.dec, state.currentTime);
-    if (pos.alt < -5) return;
-    const pt = scopeProject(pos.alt, pos.az);
-    if (!pt.visible) return;
-    ctx.fillStyle = `rgba(220,235,255,${s.alpha})`;
-    ctx.beginPath(); ctx.arc(pt.x, pt.y, Math.max(0.4, 1.7 - s.mag*0.28), 0, Math.PI*2); ctx.fill();
-  });
-
+  BG_STARS.forEach(s => { const pos = getAltAz(s.ra, s.dec, state.currentTime); if (pos.alt < -5) return; const pt = scopeProject(pos.alt, pos.az); if (!pt.visible) return; ctx.fillStyle = `rgba(220,235,255,${s.alpha})`; ctx.beginPath(); ctx.arc(pt.x, pt.y, Math.max(0.4, 1.7 - s.mag*0.28), 0, Math.PI*2); ctx.fill(); });
   ctx.strokeStyle = 'rgba(150,180,255,0.10)'; ctx.lineWidth = 1;
-  for (let alt = 0; alt <= 80; alt += 20) {
-    ctx.beginPath(); let st = false;
-    for (let az = 0; az <= 360; az += 2) {
-      const pt = scopeProject(alt, az);
-      if (!pt.visible) { st = false; continue; }
-      if (!st) { ctx.moveTo(pt.x, pt.y); st = true; } else ctx.lineTo(pt.x, pt.y);
-    }
-    ctx.stroke();
-  }
-  for (let az = 0; az < 360; az += 30) {
-    ctx.beginPath(); let st = false;
-    for (let alt = 0; alt <= 85; alt += 2) {
-      const pt = scopeProject(alt, az);
-      if (!pt.visible) { st = false; continue; }
-      if (!st) { ctx.moveTo(pt.x, pt.y); st = true; } else ctx.lineTo(pt.x, pt.y);
-    }
-    ctx.stroke();
-  }
-
+  for (let alt = 0; alt <= 80; alt += 20) { ctx.beginPath(); let st = false; for (let az = 0; az <= 360; az += 2) { const pt = scopeProject(alt, az); if (!pt.visible) { st = false; continue; } if (!st) { ctx.moveTo(pt.x, pt.y); st = true; } else ctx.lineTo(pt.x, pt.y); } ctx.stroke(); }
+  for (let az = 0; az < 360; az += 30) { ctx.beginPath(); let st = false; for (let alt = 0; alt <= 85; alt += 2) { const pt = scopeProject(alt, az); if (!pt.visible) { st = false; continue; } if (!st) { ctx.moveTo(pt.x, pt.y); st = true; } else ctx.lineTo(pt.x, pt.y); } ctx.stroke(); }
   ctx.strokeStyle = 'rgba(120,160,255,0.55)'; ctx.lineWidth = 2;
   ctx.shadowColor = 'rgba(120,160,255,0.6)'; ctx.shadowBlur = 8;
   ctx.beginPath(); let hs = false;
-  for (let az = 0; az <= 360; az += 2) {
-    const pt = scopeProject(0, az);
-    if (!pt.visible) { hs = false; continue; }
-    if (!hs) { ctx.moveTo(pt.x, pt.y); hs = true; } else ctx.lineTo(pt.x, pt.y);
-  }
+  for (let az = 0; az <= 360; az += 2) { const pt = scopeProject(0, az); if (!pt.visible) { hs = false; continue; } if (!hs) { ctx.moveTo(pt.x, pt.y); hs = true; } else ctx.lineTo(pt.x, pt.y); }
   ctx.stroke(); ctx.shadowBlur = 0;
-
   const dirs = [{l:'N',az:0},{l:'E',az:90},{l:'S',az:180},{l:'O',az:270}];
   ctx.font = 'bold 18px Orbitron'; ctx.textAlign = 'center';
-  dirs.forEach(d => {
-    const pt = scopeProject(0, d.az);
-    if (!pt.visible) return;
-    ctx.fillStyle = '#d4af37'; ctx.shadowColor = '#d4af37'; ctx.shadowBlur = 8;
-    ctx.fillText(d.l, pt.x, pt.y - 10); ctx.shadowBlur = 0;
-  });
-
+  dirs.forEach(d => { const pt = scopeProject(0, d.az); if (!pt.visible) return; ctx.fillStyle = '#d4af37'; ctx.shadowColor = '#d4af37'; ctx.shadowBlur = 8; ctx.fillText(d.l, pt.x, pt.y - 10); ctx.shadowBlur = 0; });
   STARS.forEach(s => {
-    const pos = getAltAz(s.ra, s.dec, state.currentTime);
-    if (pos.alt < -5) return;
-    const pt = scopeProject(pos.alt, pos.az);
-    if (!pt.visible) return;
+    const pos = getAltAz(s.ra, s.dec, state.currentTime); if (pos.alt < -5) return;
+    const pt = scopeProject(pos.alt, pos.az); if (!pt.visible) return;
     const size = Math.max(1, 4 - s.mag*0.9);
     ctx.fillStyle = s.mag < 1 ? '#fff' : '#ffeedd';
     ctx.beginPath(); ctx.arc(pt.x, pt.y, size, 0, Math.PI*2); ctx.fill();
-    if (s.mag < 1.8) {
-      ctx.fillStyle = '#c9d1e3'; ctx.font = '11px Inter'; ctx.textAlign = 'left';
-      ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 3;
-      ctx.fillText(s.n, pt.x+9, pt.y+4); ctx.shadowBlur = 0;
-    }
+    if (s.mag < 1.8) { ctx.fillStyle = '#c9d1e3'; ctx.font = '11px Inter'; ctx.textAlign = 'left'; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 3; ctx.fillText(s.n, pt.x+9, pt.y+4); ctx.shadowBlur = 0; }
   });
-
   calcPlanetsPrecise(state.currentTime).forEach(p => {
     if (p.alt < -5) return;
-    const pt = scopeProject(p.alt, p.az);
-    if (!pt.visible) return;
+    const pt = scopeProject(p.alt, p.az); if (!pt.visible) return;
     const pc = p.color || '#d4af37';
     const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, 22);
     glow.addColorStop(0, pc); glow.addColorStop(0.4, pc+'99'); glow.addColorStop(1, 'transparent');
@@ -4101,12 +4001,9 @@ function scopeDraw() {
     ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 3;
     ctx.fillText(p.s + ' ' + p.n, pt.x+11, pt.y+4); ctx.shadowBlur = 0;
   });
-
   Object.values(MESSIER).forEach(m => {
-    const pos = getAltAz(m.ra, m.dec, state.currentTime);
-    if (pos.alt < -5) return;
-    const pt = scopeProject(pos.alt, pos.az);
-    if (!pt.visible) return;
+    const pos = getAltAz(m.ra, m.dec, state.currentTime); if (pos.alt < -5) return;
+    const pt = scopeProject(pos.alt, pos.az); if (!pt.visible) return;
     ctx.beginPath();
     if (m.type === 'Galassia') ctx.ellipse(pt.x, pt.y, 7, 4, 0, 0, Math.PI*2);
     else if (m.type === 'Nebulosa') ctx.rect(pt.x-5, pt.y-5, 10, 10);
@@ -4116,344 +4013,148 @@ function scopeDraw() {
     ctx.fillStyle = '#8bd3ff'; ctx.font = '10px Inter'; ctx.textAlign = 'left';
     ctx.fillText(m.n.split(' ')[0], pt.x+8, pt.y-4);
   });
-
-  const hudAz = document.getElementById('scopeHudAz');
-  if (hudAz) hudAz.innerText = scopeState.mountAz.toFixed(1) + '°';
-  const hudAlt = document.getElementById('scopeHudAlt');
-  if (hudAlt) hudAlt.innerText = scopeState.mountAlt.toFixed(1) + '°';
-  const hudFov = document.getElementById('scopeHudFov');
-  if (hudFov) hudFov.innerText = Math.round(scopeState.fov) + '°';
+  const hudAz = document.getElementById('scopeHudAz'); if (hudAz) hudAz.innerText = scopeState.mountAz.toFixed(1) + '°';
+  const hudAlt = document.getElementById('scopeHudAlt'); if (hudAlt) hudAlt.innerText = scopeState.mountAlt.toFixed(1) + '°';
+  const hudFov = document.getElementById('scopeHudFov'); if (hudFov) hudFov.innerText = Math.round(scopeState.fov) + '°';
   const hudTrack = document.getElementById('scopeHudTrack');
-  if (hudTrack) {
-    hudTrack.innerText = scopeState.tracking ? '● TRACKING ON' : '○ TRACKING OFF';
-    hudTrack.style.color = scopeState.tracking ? 'var(--ok)' : 'var(--muted)';
-  }
+  if (hudTrack) { hudTrack.innerText = scopeState.tracking ? '● TRACKING ON' : '○ TRACKING OFF'; hudTrack.style.color = scopeState.tracking ? 'var(--ok)' : 'var(--muted)'; }
 }
-
 function scopeDrawOverlay() {
   if (!scopeOverlayCtx) return;
   const ctx = scopeOverlayCtx;
   ctx.clearRect(0, 0, scopeW, scopeH);
   const t = performance.now() / 1000;
   const now = performance.now();
-
   const mPt = scopeProject(scopeState.mountAlt, scopeState.mountAz);
-
   if (scopeState.connectFlashStart > 0 && mPt.visible) {
     const elapsed = now - scopeState.connectFlashStart;
     if (elapsed < 2500) {
-      for (let i = 0; i < 3; i++) {
-        const phase = ((elapsed / 2500) + i / 3) % 1;
-        const radius = 30 + phase * 140;
-        const alpha = (1 - phase) * 0.85;
-        ctx.strokeStyle = `rgba(74,222,128,${alpha})`;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.arc(mPt.x, mPt.y, radius, 0, Math.PI*2);
-        ctx.stroke();
-      }
+      for (let i = 0; i < 3; i++) { const phase = ((elapsed / 2500) + i / 3) % 1; const radius = 30 + phase * 140; const alpha = (1 - phase) * 0.85; ctx.strokeStyle = `rgba(74,222,128,${alpha})`; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(mPt.x, mPt.y, radius, 0, Math.PI*2); ctx.stroke(); }
     }
   }
-
   if (mPt.visible) {
-    ctx.save();
-    ctx.shadowColor = '#ff4466'; ctx.shadowBlur = 10;
-    ctx.strokeStyle = '#ff4466'; ctx.lineWidth = 1.6;
-
-    ctx.save();
-    ctx.translate(mPt.x, mPt.y);
-    ctx.rotate(t * 0.4);
-    ctx.setLineDash([6, 5]);
-    ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI*2); ctx.stroke();
-    ctx.restore();
-
-    ctx.beginPath();
-    ctx.moveTo(mPt.x-18, mPt.y); ctx.lineTo(mPt.x-6, mPt.y);
-    ctx.moveTo(mPt.x+6, mPt.y);  ctx.lineTo(mPt.x+18, mPt.y);
-    ctx.moveTo(mPt.x, mPt.y-18); ctx.lineTo(mPt.x, mPt.y-6);
-    ctx.moveTo(mPt.x, mPt.y+6);  ctx.lineTo(mPt.x, mPt.y+18);
-    ctx.stroke();
-
+    ctx.save(); ctx.shadowColor = '#ff4466'; ctx.shadowBlur = 10; ctx.strokeStyle = '#ff4466'; ctx.lineWidth = 1.6;
+    ctx.save(); ctx.translate(mPt.x, mPt.y); ctx.rotate(t * 0.4); ctx.setLineDash([6, 5]); ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+    ctx.beginPath(); ctx.moveTo(mPt.x-18, mPt.y); ctx.lineTo(mPt.x-6, mPt.y); ctx.moveTo(mPt.x+6, mPt.y); ctx.lineTo(mPt.x+18, mPt.y); ctx.moveTo(mPt.x, mPt.y-18); ctx.lineTo(mPt.x, mPt.y-6); ctx.moveTo(mPt.x, mPt.y+6); ctx.lineTo(mPt.x, mPt.y+18); ctx.stroke();
     ctx.lineWidth = 1;
-    for (let i = 0; i < 4; i++) {
-      const a = (i * Math.PI/2) + t * 0.3;
-      ctx.beginPath();
-      ctx.moveTo(mPt.x + Math.cos(a)*22, mPt.y + Math.sin(a)*22);
-      ctx.lineTo(mPt.x + Math.cos(a)*28, mPt.y + Math.sin(a)*28);
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = '#ff4466';
-    ctx.beginPath(); ctx.arc(mPt.x, mPt.y, 2.2, 0, Math.PI*2); ctx.fill();
+    for (let i = 0; i < 4; i++) { const a = (i * Math.PI/2) + t * 0.3; ctx.beginPath(); ctx.moveTo(mPt.x + Math.cos(a)*22, mPt.y + Math.sin(a)*22); ctx.lineTo(mPt.x + Math.cos(a)*28, mPt.y + Math.sin(a)*28); ctx.stroke(); }
+    ctx.fillStyle = '#ff4466'; ctx.beginPath(); ctx.arc(mPt.x, mPt.y, 2.2, 0, Math.PI*2); ctx.fill();
     ctx.restore();
-
-    ctx.save();
-    ctx.fillStyle = '#ff4466';
-    ctx.font = 'bold 10px Orbitron';
-    ctx.textAlign = 'left';
-    ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 4;
-    ctx.fillText('MOUNT', mPt.x + 32, mPt.y + 3);
-    ctx.restore();
+    ctx.save(); ctx.fillStyle = '#ff4466'; ctx.font = 'bold 10px Orbitron'; ctx.textAlign = 'left'; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 4; ctx.fillText('MOUNT', mPt.x + 32, mPt.y + 3); ctx.restore();
   }
-
   if (scopeState.target) {
     const tPos = getAltAz(scopeState.target.ra, scopeState.target.dec, state.currentTime);
     const tPt = scopeProject(tPos.alt, tPos.az);
     if (tPt.visible) {
-      let baseColor = '#4ade80';
-      let shadowColor = '#4ade80';
-      let shadowBlur = 14;
+      let baseColor = '#4ade80'; let shadowColor = '#4ade80'; let shadowBlur = 14;
       const flashElapsed = now - scopeState.syncFlashStart;
-      if (scopeState.syncFlashStart > 0 && flashElapsed < 1200) {
-        const p = flashElapsed / 1200;
-        baseColor = scopeInterpColor('#d4af37', '#4ade80', p);
-        shadowColor = baseColor;
-        shadowBlur = 20 + Math.sin(flashElapsed / 60) * 10;
-      } else if (scopeState.synced) {
-        shadowBlur = 22 + Math.sin(t * 4) * 4;
-      }
-
+      if (scopeState.syncFlashStart > 0 && flashElapsed < 1200) { const p = flashElapsed / 1200; baseColor = scopeInterpColor('#d4af37', '#4ade80', p); shadowColor = baseColor; shadowBlur = 20 + Math.sin(flashElapsed / 60) * 10; }
+      else if (scopeState.synced) { shadowBlur = 22 + Math.sin(t * 4) * 4; }
       const pulse = 1 + Math.sin(t * 3) * 0.08;
-      ctx.save();
-      ctx.strokeStyle = baseColor;
-      ctx.shadowColor = shadowColor;
-      ctx.shadowBlur = shadowBlur;
-
-      ctx.lineWidth = 1.8;
-      ctx.beginPath(); ctx.arc(tPt.x, tPt.y, 24 * pulse, 0, Math.PI*2); ctx.stroke();
-
-      const b = 20, l = 9;
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
+      ctx.save(); ctx.strokeStyle = baseColor; ctx.shadowColor = shadowColor; ctx.shadowBlur = shadowBlur;
+      ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(tPt.x, tPt.y, 24 * pulse, 0, Math.PI*2); ctx.stroke();
+      const b = 20, l = 9; ctx.lineWidth = 2.2; ctx.beginPath();
       ctx.moveTo(tPt.x-b, tPt.y-b+l); ctx.lineTo(tPt.x-b, tPt.y-b); ctx.lineTo(tPt.x-b+l, tPt.y-b);
       ctx.moveTo(tPt.x+b-l, tPt.y-b); ctx.lineTo(tPt.x+b, tPt.y-b); ctx.lineTo(tPt.x+b, tPt.y-b+l);
       ctx.moveTo(tPt.x-b, tPt.y+b-l); ctx.lineTo(tPt.x-b, tPt.y+b); ctx.lineTo(tPt.x-b+l, tPt.y+b);
       ctx.moveTo(tPt.x+b-l, tPt.y+b); ctx.lineTo(tPt.x+b, tPt.y+b); ctx.lineTo(tPt.x+b, tPt.y+b-l);
       ctx.stroke();
-
-      ctx.save();
-      ctx.translate(tPt.x, tPt.y);
-      ctx.rotate(-t * 0.6);
-      ctx.lineWidth = 1;
-      for (let i = 0; i < 8; i++) {
-        const a = i * Math.PI/4;
-        ctx.beginPath();
-        ctx.moveTo(Math.cos(a)*14, Math.sin(a)*14);
-        ctx.lineTo(Math.cos(a)*17, Math.sin(a)*17);
-        ctx.stroke();
-      }
+      ctx.save(); ctx.translate(tPt.x, tPt.y); ctx.rotate(-t * 0.6); ctx.lineWidth = 1;
+      for (let i = 0; i < 8; i++) { const a = i * Math.PI/4; ctx.beginPath(); ctx.moveTo(Math.cos(a)*14, Math.sin(a)*14); ctx.lineTo(Math.cos(a)*17, Math.sin(a)*17); ctx.stroke(); }
       ctx.restore();
-
-      ctx.fillStyle = baseColor;
-      ctx.beginPath(); ctx.arc(tPt.x, tPt.y, 2, 0, Math.PI*2); ctx.fill();
-
-      if (scopeState.synced) {
-        ctx.restore(); ctx.save();
-        ctx.fillStyle = '#4ade80';
-        ctx.font = 'bold 9px Orbitron';
-        ctx.textAlign = 'left';
-        ctx.shadowColor = '#4ade80'; ctx.shadowBlur = 8;
-        ctx.fillText('✓ SYNCED', tPt.x + 28, tPt.y + 18);
-        ctx.restore();
-      } else {
-        ctx.restore();
-      }
-
-      ctx.save();
-      ctx.fillStyle = baseColor;
-      ctx.font = 'bold 11px Orbitron';
-      ctx.textAlign = 'left';
-      ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 4;
-      ctx.fillText(scopeState.target.name.toUpperCase(), tPt.x + 28, tPt.y + 3);
-      ctx.restore();
+      ctx.fillStyle = baseColor; ctx.beginPath(); ctx.arc(tPt.x, tPt.y, 2, 0, Math.PI*2); ctx.fill();
+      if (scopeState.synced) { ctx.restore(); ctx.save(); ctx.fillStyle = '#4ade80'; ctx.font = 'bold 9px Orbitron'; ctx.textAlign = 'left'; ctx.shadowColor = '#4ade80'; ctx.shadowBlur = 8; ctx.fillText('✓ SYNCED', tPt.x + 28, tPt.y + 18); ctx.restore(); }
+      else ctx.restore();
+      ctx.save(); ctx.fillStyle = baseColor; ctx.font = 'bold 11px Orbitron'; ctx.textAlign = 'left'; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 4; ctx.fillText(scopeState.target.name.toUpperCase(), tPt.x + 28, tPt.y + 3); ctx.restore();
     }
   }
 }
-
-function scopeHexToRgb(hex) {
-  const h = hex.replace('#', '');
-  return { r: parseInt(h.substr(0,2),16), g: parseInt(h.substr(2,2),16), b: parseInt(h.substr(4,2),16) };
-}
-function scopeRgbToHex(r, g, b) {
-  return '#' + [r,g,b].map(x => Math.round(x).toString(16).padStart(2,'0')).join('');
-}
-function scopeInterpColor(c1, c2, t) {
-  const a = scopeHexToRgb(c1), b = scopeHexToRgb(c2);
-  return scopeRgbToHex(a.r + (b.r-a.r)*t, a.g + (b.g-a.g)*t, a.b + (b.b-a.b)*t);
-}
-
+function scopeHexToRgb(hex) { const h = hex.replace('#', ''); return { r: parseInt(h.substr(0,2),16), g: parseInt(h.substr(2,2),16), b: parseInt(h.substr(4,2),16) }; }
+function scopeRgbToHex(r, g, b) { return '#' + [r,g,b].map(x => Math.round(x).toString(16).padStart(2,'0')).join(''); }
+function scopeInterpColor(c1, c2, t) { const a = scopeHexToRgb(c1), b = scopeHexToRgb(c2); return scopeRgbToHex(a.r + (b.r-a.r)*t, a.g + (b.g-a.g)*t, a.b + (b.b-a.b)*t); }
 let scopeAnimActive = false;
 function scopeOverlayLoop() {
   if (!scopeAnimActive) return;
-  if (document.getElementById('tab-scope').classList.contains('active')) {
-    scopeDrawOverlay();
-  }
+  if (document.getElementById('tab-scope').classList.contains('active')) scopeDrawOverlay();
   requestAnimationFrame(scopeOverlayLoop);
 }
-
 function scopeUpdateUI() {
   const rd = altAzToRaDec(scopeState.mountAlt, scopeState.mountAz);
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
-  set('scopeRa', formatRA(rd.ra));
-  set('scopeDec', formatDec(rd.dec));
-  set('scopeAlt', scopeState.mountAlt.toFixed(1)+'°');
-  set('scopeAz', scopeState.mountAz.toFixed(1)+'°');
+  set('scopeRa', formatRA(rd.ra)); set('scopeDec', formatDec(rd.dec));
+  set('scopeAlt', scopeState.mountAlt.toFixed(1)+'°'); set('scopeAz', scopeState.mountAz.toFixed(1)+'°');
   set('scopeRateDisplay', scopeState.rate + 'X');
 }
-
 function scopeZoomIn() { scopeState.fov = clamp(scopeState.fov - 10, 10, 150); scopeDraw(); }
 function scopeZoomOut() { scopeState.fov = clamp(scopeState.fov + 10, 10, 150); scopeDraw(); }
 function scopeRecenter() { scopeState.camAlt = scopeState.mountAlt; scopeState.camAz = scopeState.mountAz; scopeDraw(); }
-
 function isInArrowZone(pos) {
-  const pad = 14;
-  const sz = 54 + pad * 2;
-  const W = scopeW, H = scopeH;
+  const pad = 14; const sz = 54 + pad * 2; const W = scopeW, H = scopeH;
   if (pos.y < sz && Math.abs(pos.x - W/2) < sz/2) return true;
   if (pos.y > H - sz && Math.abs(pos.x - W/2) < sz/2) return true;
   if (pos.x > W - sz && Math.abs(pos.y - H/2) < sz/2) return true;
   if (pos.x < sz && Math.abs(pos.y - H/2) < sz/2) return true;
   return false;
 }
-
 function scopeAttachEvents() {
   if (!scopeCanvasEl || scopeCanvasEl._events) return;
   scopeCanvasEl._events = true;
-
-  const getPos = (e) => {
-    const rect = scopeCanvasEl.getBoundingClientRect();
-    const cx = e.touches ? e.touches[0].clientX : e.clientX;
-    const cy = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: cx - rect.left, y: cy - rect.top };
-  };
-
+  const getPos = (e) => { const rect = scopeCanvasEl.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; return { x: cx - rect.left, y: cy - rect.top }; };
   const onStart = (e) => {
-    const pos = getPos(e);
-    if (isInArrowZone(pos)) return;
+    const pos = getPos(e); if (isInArrowZone(pos)) return;
     const mPt = scopeProject(scopeState.mountAlt, scopeState.mountAz);
     const distToMount = mPt.visible ? Math.hypot(pos.x - mPt.x, pos.y - mPt.y) : 999;
-
-    if (distToMount < SCOPE_MOUNT_GRAB_RADIUS && scopeState.connected && !scopeState.isParked) {
-      scopeDragMode = 'mount';
-      scopeCanvasEl.style.cursor = 'grabbing';
-    } else {
-      scopeDragMode = 'pan';
-      scopeCanvasEl.style.cursor = 'grabbing';
-    }
-    scopeIsDragging = true;
-    scopeDragMoved = false;
-    scopeDragStartX = pos.x; scopeDragStartY = pos.y;
-    scopeLastX = pos.x; scopeLastY = pos.y;
+    if (distToMount < SCOPE_MOUNT_GRAB_RADIUS && scopeState.connected && !scopeState.isParked) { scopeDragMode = 'mount'; scopeCanvasEl.style.cursor = 'grabbing'; }
+    else { scopeDragMode = 'pan'; scopeCanvasEl.style.cursor = 'grabbing'; }
+    scopeIsDragging = true; scopeDragMoved = false; scopeDragStartX = pos.x; scopeDragStartY = pos.y; scopeLastX = pos.x; scopeLastY = pos.y;
     e.preventDefault();
   };
-
   const onMove = (e) => {
     const pos = getPos(e);
-
     const tooltip = document.getElementById('scopeTooltip');
-    if (tooltip && !scopeIsDragging) {
-      const sky = scopeUnproject(pos.x, pos.y);
-      tooltip.style.left = pos.x + 'px';
-      tooltip.style.top = pos.y + 'px';
-      tooltip.innerText = `AZ ${sky.az.toFixed(1)}° · ALT ${sky.alt.toFixed(1)}°`;
-      tooltip.classList.add('show');
-    }
-
+    if (tooltip && !scopeIsDragging) { const sky = scopeUnproject(pos.x, pos.y); tooltip.style.left = pos.x + 'px'; tooltip.style.top = pos.y + 'px'; tooltip.innerText = `AZ ${sky.az.toFixed(1)}° · ALT ${sky.alt.toFixed(1)}°`; tooltip.classList.add('show'); }
     if (!scopeIsDragging) return;
     const dx = pos.x - scopeLastX, dy = pos.y - scopeLastY;
     if (Math.abs(pos.x - scopeDragStartX) > 5 || Math.abs(pos.y - scopeDragStartY) > 5) scopeDragMoved = true;
-
-    if (scopeDragMode === 'mount' && scopeDragMoved) {
-      const sky = scopeUnproject(pos.x, pos.y);
-      if (sky.alt > 0) {
-        scopeState.tracking = false;
-        scopeState.trackingTarget = false;
-        scopeState.synced = false;
-        stopTrackingLoop();
-        scopeState.mountAlt = sky.alt;
-        scopeState.mountAz = sky.az;
-        scopeUpdateUI(); scopeDraw();
-      }
-      return;
-    }
-
-    if (scopeDragMode === 'pan' && scopeDragMoved) {
-      const f = scopeState.fov / 120;
-      scopeState.camAz = norm360(scopeState.camAz - dx * 0.4 * f);
-      scopeState.camAlt = clamp(scopeState.camAlt + dy * 0.4 * f, 0, 89);
-      scopeLastX = pos.x; scopeLastY = pos.y;
-      scopeDraw();
-    }
+    if (scopeDragMode === 'mount' && scopeDragMoved) { const sky = scopeUnproject(pos.x, pos.y); if (sky.alt > 0) { scopeState.tracking = false; scopeState.trackingTarget = false; scopeState.synced = false; stopTrackingLoop(); scopeState.mountAlt = sky.alt; scopeState.mountAz = sky.az; scopeUpdateUI(); scopeDraw(); } return; }
+    if (scopeDragMode === 'pan' && scopeDragMoved) { const f = scopeState.fov / 120; scopeState.camAz = norm360(scopeState.camAz - dx * 0.4 * f); scopeState.camAlt = clamp(scopeState.camAlt + dy * 0.4 * f, 0, 89); scopeLastX = pos.x; scopeLastY = pos.y; scopeDraw(); }
   };
-
   const onEnd = (e) => {
     if (!scopeIsDragging) return;
     const pos = getPos(e.changedTouches ? e.changedTouches[0] : e);
     if (!scopeDragMoved) {
-      if (isInArrowZone(pos)) {
-        scopeIsDragging = false;
-        scopeDragMode = null;
-        scopeCanvasEl.style.cursor = 'grab';
-        return;
-      }
+      if (isInArrowZone(pos)) { scopeIsDragging = false; scopeDragMode = null; scopeCanvasEl.style.cursor = 'grab'; return; }
       const mPt = scopeProject(scopeState.mountAlt, scopeState.mountAz);
       const distToMount = mPt.visible ? Math.hypot(pos.x - mPt.x, pos.y - mPt.y) : 999;
-
       if (distToMount > SCOPE_MOUNT_GRAB_RADIUS) {
         let closest = null, minD = 40;
-        const checkObj = (obj, type) => {
-          const p = getAltAz(obj.ra, obj.dec, state.currentTime);
-          if (p.alt < 0) return;
-          const pt = scopeProject(p.alt, p.az);
-          if (!pt.visible) return;
-          const dist = Math.hypot(pos.x - pt.x, pos.y - pt.y);
-          if (dist < minD) { minD = dist; closest = {...obj, type}; }
-        };
+        const checkObj = (obj, type) => { const p = getAltAz(obj.ra, obj.dec, state.currentTime); if (p.alt < 0) return; const pt = scopeProject(p.alt, p.az); if (!pt.visible) return; const dist = Math.hypot(pos.x - pt.x, pos.y - pt.y); if (dist < minD) { minD = dist; closest = {...obj, type}; } };
         STARS.forEach(s => checkObj(s, 'Stella'));
         calcPlanetsPrecise(state.currentTime).forEach(p => checkObj(p, p.isSun ? 'Sole' : (p.isMoon ? 'Luna' : 'Pianeta')));
         Object.values(MESSIER).forEach(m => checkObj(m, m.type));
         NEBULAE_EXTRA.forEach(n => checkObj(n, 'Nebulosa'));
-
-        if (closest) {
-          const extra = { mag: closest.mag, dist: closest.dist };
-          scopeSelectTarget(closest.n, closest.n, closest.type, closest.ra, closest.dec, extra);
-          scopeLog(`Oggetto selezionato: ${closest.n} (nessuno slew)`, 'ok');
-        } else {
-          scopeLog('Nessun oggetto vicino al click. Slewing NON avviato.', 'warn');
-        }
+        if (closest) { const extra = { mag: closest.mag, dist: closest.dist }; scopeSelectTarget(closest.n, closest.n, closest.type, closest.ra, closest.dec, extra); scopeLog(`Oggetto selezionato: ${closest.n}`, 'ok'); }
+        else scopeLog('Nessun oggetto vicino al click.', 'warn');
       }
     }
-    scopeIsDragging = false;
-    scopeDragMode = null;
-    scopeCanvasEl.style.cursor = 'grab';
+    scopeIsDragging = false; scopeDragMode = null; scopeCanvasEl.style.cursor = 'grab';
   };
-
   scopeCanvasEl.addEventListener('mousedown', onStart);
   window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseup', onEnd);
-  scopeCanvasEl.addEventListener('mouseleave', () => {
-    const tooltip = document.getElementById('scopeTooltip');
-    if (tooltip) tooltip.classList.remove('show');
-  });
+  scopeCanvasEl.addEventListener('mouseleave', () => { const tooltip = document.getElementById('scopeTooltip'); if (tooltip) tooltip.classList.remove('show'); });
   scopeCanvasEl.addEventListener('touchstart', onStart, {passive: false});
   scopeCanvasEl.addEventListener('touchmove', onMove, {passive: false});
   scopeCanvasEl.addEventListener('touchend', onEnd);
-  scopeCanvasEl.addEventListener('wheel', e => {
-    e.preventDefault();
-    scopeState.fov = clamp(scopeState.fov + (e.deltaY < 0 ? -8 : 8), 10, 150);
-    scopeDraw();
-  }, {passive: false});
+  scopeCanvasEl.addEventListener('wheel', e => { e.preventDefault(); scopeState.fov = clamp(scopeState.fov + (e.deltaY < 0 ? -8 : 8), 10, 150); scopeDraw(); }, {passive: false});
 }
-
 function scopeInit() {
   scopeCanvasEl = document.getElementById('scopeCanvas');
   scopeOverlayEl = document.getElementById('scopeOverlayCanvas');
   if (!scopeCanvasEl || !scopeOverlayEl) return;
   scopeCtx = scopeCanvasEl.getContext('2d');
   scopeOverlayCtx = scopeOverlayEl.getContext('2d');
-  loadScopePositions();
-  scopeResize();
-  scopeUpdateUI();
+  loadScopePositions(); scopeResize(); scopeUpdateUI();
   if (!scopeCanvasEl._logShown) {
     scopeLog('Sistema pronto.', '');
     scopeLog(`HOME: Alt ${scopeState.homeAlt.toFixed(1)}° Az ${scopeState.homeAz.toFixed(1)}°`, '');
@@ -4462,19 +4163,48 @@ function scopeInit() {
   }
   window.removeEventListener('resize', scopeResize);
   window.addEventListener('resize', scopeResize);
-  scopeAttachEvents();
-  scopeBuildCatalog();
+  scopeAttachEvents(); scopeBuildCatalog();
   if (!scopeAnimActive) { scopeAnimActive = true; requestAnimationFrame(scopeOverlayLoop); }
 }
-
 setInterval(() => {
   if (scopeState.connected && scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) {
-    scopeBuildCatalog();
-    scopeDraw();
+    scopeBuildCatalog(); scopeDraw();
     if (scopeState.target) scopeRefreshTargetData();
     scopeUpdateUI();
   }
 }, 5000);
+
+/* ============================================================
+   AUTO-REFRESH "STASERA" — controlla ogni minuto se è cambiata
+   la data di riferimento (1 ora dopo l'alba → nuova notte)
+   ============================================================ */
+let _lastTonightRefDate = null;
+(function initTonightRefWatcher() {
+  _lastTonightRefDate = null; // inizializza al primo check
+})();
+setInterval(() => {
+  try {
+    const refDate = getTonightReferenceDate();
+    const refStr = refDate.getFullYear() + '-' + String(refDate.getMonth()+1).padStart(2,'0') + '-' + String(refDate.getDate()).padStart(2,'0');
+    if (_lastTonightRefDate === null) { _lastTonightRefDate = refStr; return; }
+    if (_lastTonightRefDate !== refStr) {
+      _lastTonightRefDate = refStr;
+      // La notte di riferimento è cambiata (siamo passati al giorno successivo dopo alba+1h)
+      console.log(`🌙 Notte di riferimento cambiata a ${refStr}: refresh Stasera`);
+      if (document.getElementById('tab-tonight').classList.contains('active')) {
+        // Aggiorna input e dati
+        const now = new Date();
+        document.getElementById('date').value = refStr;
+        const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+        document.getElementById('time').value = timeStr;
+        readInputs();
+        _planetCache.key = null;
+        state.planets = calcPlanetsPrecise(state.currentTime);
+        renderTonight();
+      }
+    }
+  } catch(e) { console.warn('Tonight watcher:', e); }
+}, 60000); // Controlla ogni minuto
 
 /* ============================================================
    SERVICE WORKER & INIT
@@ -4501,16 +4231,14 @@ window.onload = async () => {
   }
   const savedAllSky = localStorage.getItem('egastro_allsky_url');
   if (savedAllSky) document.getElementById('allsky-url').value = savedAllSky;
-
   populateProvinces();
-  loadConstellations().then(() => {
-    applyConstellationMeta();
-    rebuildCatalog();
-  });
-
+  loadConstellations().then(() => { applyConstellationMeta(); rebuildCatalog(); });
   updateAll();
   checkGPSAvailability();
   updateInfoStrip();
+  // Inizializza il watcher della notte
+  const refDate = getTonightReferenceDate();
+  _lastTonightRefDate = refDate.getFullYear() + '-' + String(refDate.getMonth()+1).padStart(2,'0') + '-' + String(refDate.getDate()).padStart(2,'0');
 };
 </script>
 </body>
