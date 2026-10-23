@@ -2361,7 +2361,7 @@ function renderQuality() {
 
 /* ============================================================
    ALLSKY/NINA/LOGO/PREVIEW
-============================================================ */
+============================================================
 /* ============================================================
    FIX: FUNZIONI MANCANTI (Posizioni Salvate + Catalogo Stelle)
    ============================================================ */
@@ -2525,6 +2525,35 @@ async function loadConstellations() {
   };
   window.drawMap._wrappedForConstStars = true;
 })();
+
+/* ============================================================
+   FIX: VIA LATTEA MIGLIORATA (Mappa Cielo)
+   ============================================================ */
+window.drawMilkyWay = function(cx, cy, isNight) {
+  ctx.save();
+  let seed = 777;
+  const rand = () => { seed = (seed*9301+49297)%233280; return seed/233280; };
+  const ngpRa = 192.86, ngpDec = 27.13;
+  for (let i = 0; i < 1000; i++) {
+    const l = rand()*360, b = (rand()-0.5)*20; const bR = rad(b), lR = rad(l);
+    const sinDec = Math.sin(rad(ngpDec))*Math.sin(bR) + Math.cos(rad(ngpDec))*Math.cos(bR)*Math.cos(lR);
+    const dec = deg(Math.asin(sinDec));
+    const yv = Math.cos(bR)*Math.sin(lR); const xv = Math.cos(rad(ngpDec))*Math.sin(bR) - Math.sin(rad(ngpDec))*Math.cos(bR)*Math.cos(lR);
+    const ra = norm360(ngpRa + deg(Math.atan2(yv, xv))); const pos = getAltAz(ra, dec, state.currentTime);
+    if (!isAboveHorizon(pos.alt)) continue;
+    const pt = project(pos.alt, pos.az); if (!pt.visible) continue;
+    
+    const isDust = i % 3 === 0;
+    const baseAlpha = isNight ? 0.08 : 0.06;
+    const alpha = (baseAlpha + rand()*0.06) * (isNight ? 1.0 : 0.7);
+    ctx.fillStyle = isDust 
+      ? `rgba(200, 170, 180, ${alpha})` 
+      : `rgba(160, 200, 255, ${alpha})`;
+    const size = 8 + rand()*25;
+    ctx.beginPath(); ctx.arc(pt.x, pt.y, size, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+};
 
 let autoTimer = null;
 function loadAllSky() {
@@ -2803,9 +2832,37 @@ function scopeDrawConstellations(ctx) {
   });
   ctx.restore();
 }
+function scopeDrawMilkyWay() {
+  const ctx = scopeCtx;
+  ctx.save();
+  let seed = 777;
+  const rand = () => { seed = (seed*9301+49297)%233280; return seed/233280; };
+  const ngpRa = 192.86, ngpDec = 27.13;
+  for (let i = 0; i < 800; i++) {
+    const l = rand()*360, b = (rand()-0.5)*20; const bR = rad(b), lR = rad(l);
+    const sinDec = Math.sin(rad(ngpDec))*Math.sin(bR) + Math.cos(rad(ngpDec))*Math.cos(bR)*Math.cos(lR);
+    const dec = deg(Math.asin(sinDec));
+    const yv = Math.cos(bR)*Math.sin(lR); const xv = Math.cos(rad(ngpDec))*Math.sin(bR) - Math.sin(rad(ngpDec))*Math.cos(bR)*Math.cos(lR);
+    const ra = norm360(ngpRa + deg(Math.atan2(yv, xv))); const pos = getAltAz(ra, dec, state.currentTime);
+    if (pos.alt < -5) continue;
+    const pt = scopeProject(pos.alt, pos.az); if (!pt.visible) continue;
+    
+    const isDust = i % 3 === 0;
+    const alpha = 0.06 + rand()*0.06;
+    ctx.fillStyle = isDust 
+      ? `rgba(200, 170, 180, ${alpha})` 
+      : `rgba(160, 200, 255, ${alpha})`;
+    const size = 6 + rand()*20;
+    ctx.beginPath(); ctx.arc(pt.x, pt.y, size, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+}
 function scopeDraw() {
   if (!scopeCtx) return; const ctx = scopeCtx, cx = scopeW/2, cy = scopeH/2; ctx.clearRect(0, 0, scopeW, scopeH);
   const bg = ctx.createRadialGradient(cx, cy, 10, cx, cy, Math.max(scopeW, scopeH)*0.8); bg.addColorStop(0, '#0a1530'); bg.addColorStop(0.5, '#030818'); bg.addColorStop(1, '#000'); ctx.fillStyle = bg; ctx.fillRect(0, 0, scopeW, scopeH);
+  
+  scopeDrawMilkyWay();
+
   BG_STARS.forEach(s => { const pos = getAltAz(s.ra, s.dec, state.currentTime); if (pos.alt < -5) return; const pt = scopeProject(pos.alt, pos.az); if (!pt.visible) return; ctx.fillStyle = `rgba(220,235,255,${s.alpha})`; ctx.beginPath(); ctx.arc(pt.x, pt.y, Math.max(0.4, 1.7-s.mag*0.28), 0, Math.PI*2); ctx.fill(); });
   ctx.strokeStyle = 'rgba(150,180,255,0.10)'; ctx.lineWidth = 1;
   for (let alt=0; alt<=80; alt+=20) { ctx.beginPath(); let st = false; for (let az=0; az<=360; az+=2) { const pt = scopeProject(alt,az); if (!pt.visible) { st=false; continue; } if (!st) { ctx.moveTo(pt.x,pt.y); st=true; } else ctx.lineTo(pt.x,pt.y); } ctx.stroke(); }
@@ -2855,6 +2912,48 @@ setInterval(() => { if (scopeState.connected && scopeCanvasEl && document.getEle
    ============================================================ */
 const lvState = { active: false, stream: null, videoEl: null, canvasEl: null, ctx: null, camAlt: 30, camAz: 180, fov: 65, showLabels: true, showConstellations: true, showMilkyWay: true, showLandscape: true, showMeteors: true, showCamera: true, showGrid: false, calAz: 0, calAlt: 0, hasOrientation: false, animFrame: null, rafRunning: false, lastOrientationTime: 0, lastRenderTime: 0, visibleObjects: [], selectedObj: null, lockedObj: null, dragActive: false, dragLastX: 0, dragLastY: 0, dragStartX: 0, dragStartY: 0, dragMoved: false, baseTime: new Date(), sliderOffset: 0, realtimeTimer: null, centerAnim: null, sideMenuOpen: false };
 
+function saveLvSettings() {
+  try {
+    const s = {
+      showLabels: lvState.showLabels,
+      showConstellations: lvState.showConstellations,
+      showMilkyWay: lvState.showMilkyWay,
+      showLandscape: lvState.showLandscape,
+      showMeteors: lvState.showMeteors,
+      showCamera: lvState.showCamera,
+      showGrid: lvState.showGrid
+    };
+    localStorage.setItem('egastro_lv_settings', JSON.stringify(s));
+  } catch(e) {}
+}
+function loadLvSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('egastro_lv_settings') || '{}');
+    if (saved.showLabels !== undefined) lvState.showLabels = saved.showLabels;
+    if (saved.showConstellations !== undefined) lvState.showConstellations = saved.showConstellations;
+    if (saved.showMilkyWay !== undefined) lvState.showMilkyWay = saved.showMilkyWay;
+    if (saved.showLandscape !== undefined) lvState.showLandscape = saved.showLandscape;
+    if (saved.showMeteors !== undefined) lvState.showMeteors = saved.showMeteors;
+    if (saved.showCamera !== undefined) lvState.showCamera = saved.showCamera;
+    if (saved.showGrid !== undefined) lvState.showGrid = saved.showGrid;
+  } catch(e) {}
+}
+function updateLvMenuUI() {
+  const map = {
+    'mi-labels': lvState.showLabels,
+    'mi-const': lvState.showConstellations,
+    'mi-mw': lvState.showMilkyWay,
+    'mi-land': lvState.showLandscape,
+    'mi-meteors': lvState.showMeteors,
+    'mi-cam': lvState.showCamera,
+    'mi-grid': lvState.showGrid
+  };
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('lv-menu-active', map[id]);
+  });
+}
+
 const LV_MILKY_WAY_POINTS = (function() {
   let seed = 24680; const rand = () => { seed = (seed*9301+49297)%233280; return seed/233280; }; const pts = [];
   const galToEq = (l,b) => { const lR = rad(l), bR = rad(b); const cb = Math.cos(bR), sb = Math.sin(bR), cl = Math.cos(lR), sl = Math.sin(lR); const x = cb*cl, y = cb*sl, z = sb; return { ra: norm360(deg(Math.atan2(-0.8734370902*x + -0.4448296300*y + -0.1980763734*z, -0.0548755604*x + 0.4941094279*y + -0.8676661490*z))), dec: deg(Math.asin(clamp(-0.4838350155*x + 0.7469822445*y + 0.4559837762*z, -1, 1))) }; };
@@ -2880,6 +2979,8 @@ function lvUpdateMeteors(dt) { const sky = lvGetSkyColors(); if (sky.sunAlt > -8
 function lvDrawMeteors(ctx, W, H, now) { lvMeteorState.meteors.forEach(m => { const pr = m.age/m.life, td = m.length*Math.sin(pr*Math.PI); const eRA = norm360(m.startRA + td*Math.cos(rad(m.direction))/Math.max(0.2, Math.cos(rad(m.startDec)))); const eDec = clamp(m.startDec + td*Math.sin(rad(m.direction)), -89, 89); const sp = getAltAz(m.startRA, m.startDec, now), ep = getAltAz(eRA, eDec, now); if (sp.alt < 0 && ep.alt < 0) return; const p1 = lvProject(sp.alt, sp.az, W, H), p2 = lvProject(ep.alt, ep.az, W, H); if (!p1.visible && !p2.visible) return; const a = Math.sin(pr*Math.PI)*m.brightness; const g = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(0.4,`rgba(255,255,220,${a})`); g.addColorStop(0.7,`rgba(255,250,200,${a*0.6})`); g.addColorStop(1,'rgba(255,255,255,0)'); ctx.save(); ctx.strokeStyle = g; ctx.lineWidth = m.trailWidth; ctx.lineCap = 'round'; ctx.shadowColor = 'rgba(255,255,220,0.8)'; ctx.shadowBlur = 10; ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke(); ctx.restore(); }); }
 
 async function openLiveView() {
+  loadLvSettings();
+  updateLvMenuUI();
   readInputs(); lvState.baseTime = new Date(state.baseTime); lvState.sliderOffset = 0; document.getElementById('lv-slider').value = 0; document.querySelectorAll('.lv-time-quick button').forEach(b => b.classList.toggle('active', b.dataset.off === '0'));
   document.getElementById('lv-menu').classList.remove('open'); document.getElementById('lv-menu-toggle').classList.remove('open'); lvState.sideMenuOpen = false; closeLvPopup();
   const modal = document.getElementById('lv-modal'); modal.classList.add('open'); lvState.active = true;
@@ -2889,7 +2990,7 @@ async function openLiveView() {
   try { if (modal.requestFullscreen) await modal.requestFullscreen(); } catch(e) {}
   let ok = true; try { if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') { ok = (await DeviceOrientationEvent.requestPermission()) === 'granted'; } } catch(e) { ok = false; }
   if (ok) { window.addEventListener('deviceorientationabsolute', lvOnOrientation, true); window.addEventListener('deviceorientation', lvOnOrientation, true); if (se) se.textContent = '● Giroscopio ATTIVO'; } else if (se) se.textContent = '⚠️ Giroscopio OFF';
-  if (lvState.showCamera) { try { lvState.stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1280 }, height:{ ideal:720 } }, audio:false }); lvState.videoEl.srcObject = lvState.stream; await lvState.videoEl.play().catch(() => {}); lvState.videoEl.style.display = 'block'; } catch(e) { lvState.showCamera = false; lvState.videoEl.style.display = 'none'; if (se) se.textContent = '⚠️ Camera OFF (HTTPS)'; } }
+  if (lvState.showCamera) { try { lvState.stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:'environment' }, width:{ ideal:1280 }, height:{ ideal:720 } }, audio:false }); lvState.videoEl.srcObject = lvState.stream; await lvState.videoEl.play().catch(() => {}); lvState.videoEl.style.display = 'block'; } catch(e) { lvState.showCamera = false; lvState.videoEl.style.display = 'none'; if (se) se.textContent = '⚠️ Camera OFF (HTTPS)'; updateLvMenuUI(); } }
   lvResizeCanvas(); window.addEventListener('resize', lvResizeCanvas); window.addEventListener('orientationchange', lvResizeCanvas);
   lvAttachInteractions(); lvStartRealtimeTick(); lvUpdateTimeDisplay(); lvState.rafRunning = true; requestAnimationFrame(lvRenderLoop);
 }
@@ -2959,14 +3060,20 @@ function lvRenderLoop(rafTime) {
   lvState.animFrame = requestAnimationFrame(lvRenderLoop);
 }
 function lvDrawMilkyWay(ctx, W, H, now, sky) {
-  let v = 0; if (sky.sunAlt < -8) v = clamp((-sky.sunAlt-8)/10, 0, 1); if (sky.moonBoost > 0) v *= (1-sky.moonBoost*0.7); if (v <= 0.02) return;
+  let v = 0; if (sky.sunAlt < -8) v = clamp((-sky.sunAlt-8)/10, 0, 1);
+  if (sky.moonBoost > 0) v *= (1-sky.moonBoost*0.8);
+  if (v <= 0.02) return;
   ctx.save();
-  LV_MILKY_WAY_POINTS.forEach(p => {
+  LV_MILKY_WAY_POINTS.forEach((p, i) => {
     const pos = getAltAz(p.ra, p.dec, now); if (pos.alt < -2) return;
     const pt = lvProject(pos.alt, pos.az, W, H); if (!pt.visible) return;
-    ctx.globalAlpha = p.alpha * v;
+    
+    const isDust = i % 3 === 0;
+    const baseAlpha = isDust ? 0.08 : 0.06;
+    ctx.globalAlpha = p.alpha * v * (baseAlpha / 0.1);
+    const color = isDust ? '200, 170, 180' : '160, 200, 255';
+    ctx.fillStyle = `rgba(${color}, 1)`;
     const sz = p.size * 4;
-    ctx.fillStyle = `rgba(215,220,245,1)`;
     ctx.beginPath(); ctx.arc(pt.x, pt.y, sz, 0, Math.PI*2); ctx.fill();
   });
   ctx.restore();
@@ -3009,7 +3116,9 @@ function lvDrawConstellations(ctx, W, H, now) {
           ctx.fillStyle = 'rgba(160,200,255,0.6)';
           ctx.font = '11px Inter';
           ctx.textAlign = 'center';
-          ctx.fillText(c.name, pt.x, pt.y + 15);
+          let tx = Math.max(30, Math.min(W - 30, pt.x));
+          let ty = Math.max(20, Math.min(H - 20, pt.y + 15));
+          ctx.fillText(c.name, tx, ty);
         }
       }
     }
@@ -3061,9 +3170,12 @@ function lvDrawSelectionReticle(ctx, W, H, now, t) {
   const b = br+8, bl = 10; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(pt.x-b, pt.y-b+bl); ctx.lineTo(pt.x-b, pt.y-b); ctx.lineTo(pt.x-b+bl, pt.y-b); ctx.moveTo(pt.x+b-bl, pt.y-b); ctx.lineTo(pt.x+b, pt.y-b); ctx.lineTo(pt.x+b, pt.y-b+bl); ctx.moveTo(pt.x-b, pt.y+b-bl); ctx.lineTo(pt.x-b, pt.y+b); ctx.lineTo(pt.x-b+bl, pt.y+b); ctx.moveTo(pt.x+b-bl, pt.y+b); ctx.lineTo(pt.x+b, pt.y+b); ctx.lineTo(pt.x+b, pt.y+b-bl); ctx.stroke();
   ctx.fillStyle = col; ctx.beginPath(); ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI*2); ctx.fill(); ctx.restore();
   ctx.save(); const label = (obj.s?obj.s+' ':'') + (obj.n || obj.name); ctx.font = 'bold 12px Orbitron'; const m = ctx.measureText(label); const lw = m.width+20, lh = 24; let lx = pt.x-lw/2, ly = pt.y-br-36;
-  if (lx < 4) lx = 4; if (lx+lw > W-4) lx = W-4-lw; if (ly < 4) ly = pt.y+br+12; ctx.fillStyle = 'rgba(4,6,11,0.92)'; ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.shadowColor = gc; ctx.shadowBlur = 8;
+  if (lx < 4) lx = 4; if (lx+lw > W-4) lx = W-4-lw; if (ly < 4) ly = pt.y+br+12;
+  ctx.fillStyle = 'rgba(4,6,11,0.92)'; ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.shadowColor = gc; ctx.shadowBlur = 8;
   const lr = 8; ctx.beginPath(); ctx.moveTo(lx+lr,ly); ctx.lineTo(lx+lw-lr,ly); ctx.quadraticCurveTo(lx+lw,ly,lx+lw,ly+lr); ctx.lineTo(lx+lw,ly+lh-lr); ctx.quadraticCurveTo(lx+lw,ly+lh,lx+lw-lr,ly+lh); ctx.lineTo(lx+lr,ly+lh); ctx.quadraticCurveTo(lx,ly+lh,lx,ly+lh-lr); ctx.lineTo(lx,ly+lr); ctx.quadraticCurveTo(lx,ly,lx+lr,ly); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowBlur = 0; ctx.fillText(label, pt.x, ly+lh/2+1); ctx.restore();
+  ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowBlur = 0; 
+  ctx.fillText(label, lx + lw/2, ly + lh/2 + 1); 
+  ctx.restore();
 }
 function lvAttachInteractions() {
   if (!lvState.canvasEl || lvState.canvasEl._att) return; lvState.canvasEl._att = true; const cv = lvState.canvasEl;
@@ -3093,13 +3205,13 @@ function centerOnObject() {
 }
 function releaseLock() { if (!lvState.lockedObj) return; lvState.lockedObj = null; document.getElementById('lv-release').classList.remove('show'); lvState.selectedObj = null; closeLvPopup(); }
 function toggleSideMenu() { lvState.sideMenuOpen = !lvState.sideMenuOpen; document.getElementById('lv-menu').classList.toggle('open', lvState.sideMenuOpen); document.getElementById('lv-menu-toggle').classList.toggle('open', lvState.sideMenuOpen); }
-function lvToggleLabels() { lvState.showLabels = !lvState.showLabels; document.getElementById('mi-labels').classList.toggle('lv-menu-active', lvState.showLabels); }
-function lvToggleConstellations() { lvState.showConstellations = !lvState.showConstellations; document.getElementById('mi-const').classList.toggle('lv-menu-active', lvState.showConstellations); }
-function lvToggleMilkyWay() { lvState.showMilkyWay = !lvState.showMilkyWay; document.getElementById('mi-mw').classList.toggle('lv-menu-active', lvState.showMilkyWay); }
-function lvToggleLandscape() { lvState.showLandscape = !lvState.showLandscape; document.getElementById('mi-land').classList.toggle('lv-menu-active', lvState.showLandscape); }
-function lvToggleMeteors() { lvState.showMeteors = !lvState.showMeteors; document.getElementById('mi-meteors').classList.toggle('lv-menu-active', lvState.showMeteors); if (!lvState.showMeteors) lvMeteorState.meteors = []; }
-async function lvToggleCamera() { lvState.showCamera = !lvState.showCamera; document.getElementById('mi-cam').classList.toggle('lv-menu-active', lvState.showCamera); const v = lvState.videoEl; if (!v) return; if (lvState.showCamera) { try { lvState.stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:'environment' } }, audio:false }); v.srcObject = lvState.stream; v.style.display = 'block'; } catch(e) { lvState.showCamera = false; v.style.display = 'none'; document.getElementById('mi-cam').classList.remove('lv-menu-active'); } } else { if (lvState.stream) { lvState.stream.getTracks().forEach(t => t.stop()); lvState.stream = null; } v.srcObject = null; v.style.display = 'none'; } }
-function lvToggleGrid() { lvState.showGrid = !lvState.showGrid; document.getElementById('mi-grid').classList.toggle('lv-menu-active', lvState.showGrid); }
+function lvToggleLabels() { lvState.showLabels = !lvState.showLabels; document.getElementById('mi-labels').classList.toggle('lv-menu-active', lvState.showLabels); saveLvSettings(); }
+function lvToggleConstellations() { lvState.showConstellations = !lvState.showConstellations; document.getElementById('mi-const').classList.toggle('lv-menu-active', lvState.showConstellations); saveLvSettings(); }
+function lvToggleMilkyWay() { lvState.showMilkyWay = !lvState.showMilkyWay; document.getElementById('mi-mw').classList.toggle('lv-menu-active', lvState.showMilkyWay); saveLvSettings(); }
+function lvToggleLandscape() { lvState.showLandscape = !lvState.showLandscape; document.getElementById('mi-land').classList.toggle('lv-menu-active', lvState.showLandscape); saveLvSettings(); }
+function lvToggleMeteors() { lvState.showMeteors = !lvState.showMeteors; document.getElementById('mi-meteors').classList.toggle('lv-menu-active', lvState.showMeteors); if (!lvState.showMeteors) lvMeteorState.meteors = []; saveLvSettings(); }
+async function lvToggleCamera() { lvState.showCamera = !lvState.showCamera; document.getElementById('mi-cam').classList.toggle('lv-menu-active', lvState.showCamera); saveLvSettings(); const v = lvState.videoEl; if (!v) return; if (lvState.showCamera) { try { lvState.stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:'environment' } }, audio:false }); v.srcObject = lvState.stream; v.style.display = 'block'; } catch(e) { lvState.showCamera = false; v.style.display = 'none'; document.getElementById('mi-cam').classList.remove('lv-menu-active'); } } else { if (lvState.stream) { lvState.stream.getTracks().forEach(t => t.stop()); lvState.stream = null; } v.srcObject = null; v.style.display = 'none'; } }
+function lvToggleGrid() { lvState.showGrid = !lvState.showGrid; document.getElementById('mi-grid').classList.toggle('lv-menu-active', lvState.showGrid); saveLvSettings(); }
 function lvZoomIn() { lvState.fov = clamp(lvState.fov-5, 25, 110); document.getElementById('lv-hud-fov').textContent = Math.round(lvState.fov)+'°'; }
 function lvZoomOut() { lvState.fov = clamp(lvState.fov+5, 25, 110); document.getElementById('lv-hud-fov').textContent = Math.round(lvState.fov)+'°'; }
 function lvResetView() { lvState.camAlt = 30; lvState.camAz = 180; lvState.fov = 65; document.getElementById('lv-hud-fov').textContent = '65°'; lvShowToast('🔄 Vista ripristinata'); }
