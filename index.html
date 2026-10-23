@@ -2420,114 +2420,29 @@ async function loadStarsCatalog() {
 }
 
 /* ============================================================
-   FIX: LOAD CONSTELLATIONS ROBUSTO (sovrascrive parte2)
+   FIX: COLORI STELLE PER TIPOLOGIA
    ============================================================ */
-async function loadConstellations() {
-  const urls = [
-    'https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/data/constellations.lines.json',
-    'https://raw.githubusercontent.com/ofrohn/d3-celestial/master/data/constellations.lines.json',
-    'https://cdn.statically.io/gh/ofrohn/d3-celestial/master/data/constellations.lines.json',
-    'https://unpkg.com/d3-celestial@latest/data/constellations.lines.json'
-  ];
-  try {
-    const cached = localStorage.getItem('egastro_constellations_v3');
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed) && parsed.length > 20) {
-        CONSTELLATIONS = parsed;
-        applyConstellationMeta();
-        console.log(`✅ ${parsed.length} costellazioni da cache locale`);
-        if (typeof rebuildCatalog === 'function') rebuildCatalog();
-        if (typeof drawMap === 'function' && document.getElementById('tab-sky')?.classList.contains('active')) drawMap();
-        return;
-      }
+window.getStarColorByName = function(name) {
+  if (typeof STAR_FACTS !== 'undefined' && STAR_FACTS[name] && STAR_FACTS[name].temp) {
+    const tStr = STAR_FACTS[name].temp.replace(/\./g, '').replace(' K', '').trim();
+    const t = parseFloat(tStr);
+    if (!isNaN(t)) {
+      if (t >= 10000) return '#9bb0ff'; // Azzurro
+      if (t >= 7500) return '#aabfff';  // Bianco-azzurro
+      if (t >= 6000) return '#f8f7ff';  // Bianco
+      if (t >= 5000) return '#fff4ea';  // Giallo-bianco
+      if (t >= 3500) return '#ffd2a1';  // Arancione
+      return '#ffcc6f';                 // Rosso
     }
-  } catch(e) {}
-  const fetchWithTimeout = async (url, ms) => {
-    if (typeof AbortController !== 'undefined') {
-      const controller = new AbortController();
-      const tid = setTimeout(() => controller.abort(), ms);
-      try { const res = await fetch(url, { signal: controller.signal }); clearTimeout(tid); return res; }
-      catch(e) { clearTimeout(tid); throw e; }
-    }
-    return fetch(url);
-  };
-  for (let i = 0; i < urls.length; i++) {
-    const url = urls[i];
-    try {
-      console.log(`🌌 Tentativo ${i+1}/${urls.length}: ${url}`);
-      const res = await fetchWithTimeout(url, 10000);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      if (!data || !data.features || data.features.length < 20) throw new Error('Formato non valido');
-      const loaded = data.features.map(f => {
-        const segments = (f.geometry && f.geometry.coordinates) || [];
-        const stars = []; const starKeyToIdx = new Map();
-        const addStar = (ra, dec) => {
-          const key = ra.toFixed(4) + ',' + dec.toFixed(4);
-          if (starKeyToIdx.has(key)) return starKeyToIdx.get(key);
-          const idx = stars.length; stars.push({ ra, dec, mag: 3 }); starKeyToIdx.set(key, idx); return idx;
-        };
-        const lines = segments.map(seg => seg.map(pt => addStar(pt[0], pt[1])));
-        return {
-          name: (f.properties && f.properties.name) || f.id,
-          abbr: f.id, stars, lines, area: '—', season: '—',
-          desc: 'Costellazione ' + ((f.properties && f.properties.name) || f.id)
-        };
-      });
-      if (loaded.length > 20) {
-        CONSTELLATIONS = loaded;
-        applyConstellationMeta();
-        try { localStorage.setItem('egastro_constellations_v3', JSON.stringify(loaded)); } catch(e) {}
-        console.log(`✅ Caricate ${loaded.length} costellazioni da ${url}`);
-        if (typeof rebuildCatalog === 'function') rebuildCatalog();
-        if (typeof drawMap === 'function' && document.getElementById('tab-sky')?.classList.contains('active')) drawMap();
-        if (typeof renderTonight === 'function' && document.getElementById('tab-tonight')?.classList.contains('active')) renderTonight();
-        return;
-      }
-    } catch(e) { console.warn(`⚠️ Fallito ${url}: ${e.message}`); }
   }
-  console.warn(`⚠️ Tutti i tentativi falliti. Uso ${CONSTELLATIONS.length} costellazioni di fallback.`);
-  const msg = document.getElementById('msg-coord');
-  if (msg) { msg.innerText = '⚠️ Costellazioni non scaricate (rete/CORS). Uso fallback locale.'; msg.style.color = 'var(--warn)'; }
-}
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  const colors = ['#9bb0ff', '#aabfff', '#cad7ff', '#f8f7ff', '#fff4ea', '#ffd2a1', '#ffcc6f'];
+  return colors[Math.abs(hash) % colors.length];
+};
 
 /* ============================================================
-   FIX: WRAP drawMap → aggiunge stelle costellazioni in mappa cielo
-   ============================================================ */
-(function wrapDrawMapForConstellationStars() {
-  if (typeof drawMap !== 'function' || drawMap._wrappedForConstStars) return;
-  const _origDrawMap = drawMap;
-  window.drawMap = function() {
-    _origDrawMap();
-    try {
-      const cb = document.getElementById('filtroCostellazioni');
-      if (!cb || !cb.checked) return;
-      const canvas = document.getElementById('skyCanvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const isNight = document.body.classList.contains('night-mode');
-      const starColor = isNight ? 'rgba(255,160,160,0.65)' : 'rgba(180,210,255,0.7)';
-      CONSTELLATIONS.forEach(c => {
-        if (!c.stars) return;
-        c.stars.forEach(s => {
-          const pos = getAltAz(s.ra, s.dec, state.currentTime);
-          if (!isAboveHorizon(pos.alt)) return;
-          const pt = project(pos.alt, pos.az);
-          if (!pt.visible) return;
-          ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 1.3, 0, Math.PI * 2);
-          ctx.fillStyle = starColor;
-          ctx.fill();
-        });
-      });
-    } catch(e) {}
-  };
-  window.drawMap._wrappedForConstStars = true;
-})();
-
-/* ============================================================
-   FIX: VIA LATTEA MIGLIORATA (Mappa Cielo)
+   FIX: VIA LATTEA TRASPARENTE (Mappa Cielo)
    ============================================================ */
 window.drawMilkyWay = function(cx, cy, isNight) {
   ctx.save();
@@ -2544,8 +2459,7 @@ window.drawMilkyWay = function(cx, cy, isNight) {
     const pt = project(pos.alt, pos.az); if (!pt.visible) continue;
     
     const isDust = i % 3 === 0;
-    const baseAlpha = isNight ? 0.08 : 0.06;
-    const alpha = (baseAlpha + rand()*0.06) * (isNight ? 1.0 : 0.7);
+    const alpha = (isNight ? 0.025 : 0.015) + rand()*0.02; 
     ctx.fillStyle = isDust 
       ? `rgba(200, 170, 180, ${alpha})` 
       : `rgba(160, 200, 255, ${alpha})`;
@@ -2554,6 +2468,79 @@ window.drawMilkyWay = function(cx, cy, isNight) {
   }
   ctx.restore();
 };
+
+/* ============================================================
+   FIX: WRAPPER DRAW MAP (Colori stelle + Puntini costellazioni + Saturno)
+   ============================================================ */
+(function applyMapFixes() {
+  if (typeof drawMap !== 'function' || drawMap._fixedForColors) return;
+  const _origDrawMap = drawMap;
+  
+  window.drawMap = function() {
+    _origDrawMap(); // Disegna la mappa originale (inclusa Via Lattea e Costellazioni)
+    
+    try {
+      const isNight = document.body.classList.contains('night-mode');
+      const canvas = document.getElementById('skyCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      
+      // 1. Ridisegna le stelle principali con i colori corretti
+      if (document.getElementById('filtroStelle').checked) {
+        STARS.forEach(s => {
+          const pos = getAltAz(s.ra, s.dec, state.currentTime);
+          if (!isAboveHorizon(pos.alt)) return;
+          const pt = project(pos.alt, pos.az);
+          if (!pt.visible) return;
+          const size = Math.max(1, 4 - s.mag*0.9);
+          const col = isNight ? (s.mag < 1 ? '#ff9999' : '#cc6666') : getStarColorByName(s.n);
+          
+          if (s.mag < 1.2) {
+            const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, size*4);
+            glow.addColorStop(0, col); glow.addColorStop(0.3, col + 'aa'); glow.addColorStop(1, 'transparent');
+            ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(pt.x, pt.y, size*4, 0, Math.PI*2); ctx.fill();
+          }
+          ctx.beginPath(); ctx.arc(pt.x, pt.y, size, 0, Math.PI*2); ctx.fillStyle = col; ctx.fill();
+        });
+      }
+      
+      // 2. Aggiungi i puntini sui vertici delle costellazioni
+      if (document.getElementById('filtroCostellazioni').checked) {
+        CONSTELLATIONS.forEach(c => {
+          if (!c.stars) return;
+          c.stars.forEach(s => {
+            const pos = getAltAz(s.ra, s.dec, state.currentTime);
+            if (!isAboveHorizon(pos.alt)) return;
+            const pt = project(pos.alt, pos.az);
+            if (!pt.visible) return;
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 1.4, 0, Math.PI * 2);
+            ctx.fillStyle = isNight ? 'rgba(255,180,180,0.6)' : 'rgba(200,220,255,0.7)';
+            ctx.fill();
+          });
+        });
+      }
+      
+      // 3. Aggiungi anelli a Saturno
+      if (document.getElementById('filtroPianeti').checked) {
+        calcPlanetsPrecise(state.currentTime).forEach(p => {
+          if (p.n !== 'Saturno') return;
+          const pos = p.alt !== undefined ? p : getAltAz(p.ra, p.dec, state.currentTime);
+          if (!isAboveHorizon(pos.alt)) return;
+          const pt = project(pos.alt, pos.az);
+          if (!pt.visible) return;
+          
+          ctx.beginPath();
+          ctx.ellipse(pt.x, pt.y, 15, 5, Math.PI / 6, 0, Math.PI * 2);
+          ctx.strokeStyle = isNight ? '#ff9999' : '#f4e4a1';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+        });
+      }
+    } catch(e) { console.error("Errore nell'override di drawMap:", e); }
+  };
+  window.drawMap._fixedForColors = true;
+})();
 
 let autoTimer = null;
 function loadAllSky() {
@@ -2848,7 +2835,7 @@ function scopeDrawMilkyWay() {
     const pt = scopeProject(pos.alt, pos.az); if (!pt.visible) continue;
     
     const isDust = i % 3 === 0;
-    const alpha = 0.06 + rand()*0.06;
+    const alpha = 0.03 + rand()*0.02; 
     ctx.fillStyle = isDust 
       ? `rgba(200, 170, 180, ${alpha})` 
       : `rgba(160, 200, 255, ${alpha})`;
@@ -2875,8 +2862,16 @@ function scopeDraw() {
   for (let az=0; az<=360; az+=2) { const pt = scopeProject(0,az); if (!pt.visible) { hs=false; continue; } if (!hs) { ctx.moveTo(pt.x,pt.y); hs=true; } else ctx.lineTo(pt.x,pt.y); }
   ctx.stroke(); ctx.shadowBlur = 0;
   [{l:'N',az:0},{l:'E',az:90},{l:'S',az:180},{l:'O',az:270}].forEach(d => { const pt = scopeProject(0,d.az); if (!pt.visible) return; ctx.fillStyle = '#d4af37'; ctx.font = 'bold 18px Orbitron'; ctx.textAlign = 'center'; ctx.shadowColor = '#d4af37'; ctx.shadowBlur = 8; ctx.fillText(d.l, pt.x, pt.y-10); ctx.shadowBlur = 0; });
-  STARS.forEach(s => { const pos = getAltAz(s.ra, s.dec, state.currentTime); if (pos.alt < -5) return; const pt = scopeProject(pos.alt, pos.az); if (!pt.visible) return; const size = Math.max(1, 4-s.mag*0.9); ctx.fillStyle = s.mag < 1 ? '#fff' : '#ffeedd'; ctx.beginPath(); ctx.arc(pt.x,pt.y,size,0,Math.PI*2); ctx.fill(); if (s.mag < 1.8) { ctx.fillStyle = '#c9d1e3'; ctx.font = '11px Inter'; ctx.textAlign = 'left'; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 3; ctx.fillText(s.n, pt.x+9, pt.y+4); ctx.shadowBlur = 0; } });
-  calcPlanetsPrecise(state.currentTime).forEach(p => { if (p.alt < -5) return; const pt = scopeProject(p.alt, p.az); if (!pt.visible) return; const pc = p.color||'#d4af37'; const glow = ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,22); glow.addColorStop(0,pc); glow.addColorStop(0.4,pc+'99'); glow.addColorStop(1,'transparent'); ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(pt.x,pt.y,22,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(pt.x,pt.y,6.5,0,Math.PI*2); ctx.fillStyle=pc; ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=1.3; ctx.stroke(); ctx.fillStyle='#f3e5ab'; ctx.font='bold 12px Inter'; ctx.textAlign='left'; ctx.shadowColor='rgba(0,0,0,0.9)'; ctx.shadowBlur=3; ctx.fillText(p.s+' '+p.n, pt.x+11, pt.y+4); ctx.shadowBlur=0; });
+  STARS.forEach(s => { const pos = getAltAz(s.ra, s.dec, state.currentTime); if (pos.alt < -5) return; const pt = scopeProject(pos.alt, pos.az); if (!pt.visible) return; const size = Math.max(1, 4-s.mag*0.9); ctx.fillStyle = getStarColorByName(s.n); ctx.beginPath(); ctx.arc(pt.x,pt.y,size,0,Math.PI*2); ctx.fill(); if (s.mag < 1.8) { ctx.fillStyle = '#c9d1e3'; ctx.font = '11px Inter'; ctx.textAlign = 'left'; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 3; ctx.fillText(s.n, pt.x+9, pt.y+4); ctx.shadowBlur = 0; } });
+  calcPlanetsPrecise(state.currentTime).forEach(p => { if (p.alt < -5) return; const pt = scopeProject(p.alt, p.az); if (!pt.visible) return; const pc = p.color||'#d4af37'; const glow = ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,22); glow.addColorStop(0,pc); glow.addColorStop(0.4,pc+'99'); glow.addColorStop(1,'transparent'); ctx.fillStyle=glow; ctx.beginPath(); ctx.arc(pt.x,pt.y,22,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(pt.x,pt.y,6.5,0,Math.PI*2); ctx.fillStyle=pc; ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=1.3; ctx.stroke(); ctx.fillStyle='#f3e5ab'; ctx.font='bold 12px Inter'; ctx.textAlign='left'; ctx.shadowColor='rgba(0,0,0,0.9)'; ctx.shadowBlur=3; ctx.fillText(p.s+' '+p.n, pt.x+11, pt.y+4); ctx.shadowBlur=0; 
+    if (p.n === 'Saturno') {
+      ctx.beginPath();
+      ctx.ellipse(pt.x, pt.y, 14, 5, Math.PI / 6, 0, Math.PI * 2);
+      ctx.strokeStyle = '#f4e4a1';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  });
   Object.values(MESSIER).forEach(m => { const pos = getAltAz(m.ra, m.dec, state.currentTime); if (pos.alt < -5) return; const pt = scopeProject(pos.alt, pos.az); if (!pt.visible) return; ctx.beginPath(); if (m.type==='Galassia') ctx.ellipse(pt.x,pt.y,7,4,0,0,Math.PI*2); else if (m.type==='Nebulosa') ctx.rect(pt.x-5,pt.y-5,10,10); else ctx.arc(pt.x,pt.y,6,0,Math.PI*2); ctx.fillStyle='#8bd3ff'; ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.stroke(); ctx.fillStyle='#8bd3ff'; ctx.font='10px Inter'; ctx.textAlign='left'; ctx.fillText(m.n.split(' ')[0], pt.x+8, pt.y-4); });
   const hAz = document.getElementById('scopeHudAz'); if (hAz) hAz.innerText = scopeState.mountAz.toFixed(1)+'°'; const hAlt = document.getElementById('scopeHudAlt'); if (hAlt) hAlt.innerText = scopeState.mountAlt.toFixed(1)+'°'; const hFov = document.getElementById('scopeHudFov'); if (hFov) hFov.innerText = Math.round(scopeState.fov)+'°'; const hT = document.getElementById('scopeHudTrack'); if (hT) { hT.innerText = scopeState.tracking ? '● TRACKING ON' : '○ TRACKING OFF'; hT.style.color = scopeState.tracking ? 'var(--ok)' : 'var(--muted)'; }
 }
@@ -2910,7 +2905,7 @@ setInterval(() => { if (scopeState.connected && scopeCanvasEl && document.getEle
 /* ============================================================
    LIVE VIEW
    ============================================================ */
-const lvState = { active: false, stream: null, videoEl: null, canvasEl: null, ctx: null, camAlt: 30, camAz: 180, fov: 65, showLabels: true, showConstellations: true, showMilkyWay: true, showLandscape: true, showMeteors: true, showCamera: true, showGrid: false, calAz: 0, calAlt: 0, hasOrientation: false, animFrame: null, rafRunning: false, lastOrientationTime: 0, lastRenderTime: 0, visibleObjects: [], selectedObj: null, lockedObj: null, dragActive: false, dragLastX: 0, dragLastY: 0, dragStartX: 0, dragStartY: 0, dragMoved: false, baseTime: new Date(), sliderOffset: 0, realtimeTimer: null, centerAnim: null, sideMenuOpen: false };
+const lvState = { active: false, stream: null, videoEl: null, canvasEl: null, ctx: null, camAlt: 30, camAz: 180, fov: 65, showLabels: true, showConstellations: true, showMilkyWay: true, showLandscape: true, showMeteors: true, showCamera: false, showGrid: false, calAz: 0, calAlt: 0, hasOrientation: false, animFrame: null, rafRunning: false, lastOrientationTime: 0, lastRenderTime: 0, visibleObjects: [], selectedObj: null, lockedObj: null, dragActive: false, dragLastX: 0, dragLastY: 0, dragStartX: 0, dragStartY: 0, dragMoved: false, baseTime: new Date(), sliderOffset: 0, realtimeTimer: null, centerAnim: null, sideMenuOpen: false };
 
 function saveLvSettings() {
   try {
@@ -3014,7 +3009,48 @@ function lvProject(alt, az, W, H) { const cx = W/2, cy = H/2, altR = rad(alt), a
 const LV_SKY_PRESETS = [{alt:90,zen:[40,100,200],hor:[140,190,240]},{alt:30,zen:[40,100,200],hor:[140,190,240]},{alt:10,zen:[55,110,195],hor:[180,210,235]},{alt:4,zen:[75,100,175],hor:[250,175,115]},{alt:0,zen:[85,85,145],hor:[255,130,70]},{alt:-3,zen:[50,55,105],hor:[200,90,60]},{alt:-6,zen:[28,33,75],hor:[120,60,60]},{alt:-9,zen:[16,22,55],hor:[65,45,70]},{alt:-12,zen:[10,15,40],hor:[32,30,58]},{alt:-15,zen:[6,9,25],hor:[16,20,42]},{alt:-18,zen:[3,5,16],hor:[9,12,26]},{alt:-90,zen:[2,3,10],hor:[5,8,18]}];
 function lvGetSkyColors() { const sunAlt = getSunAltitude(state.currentTime); let p1 = LV_SKY_PRESETS[0], p2 = LV_SKY_PRESETS[LV_SKY_PRESETS.length-1]; for (let i=0; i<LV_SKY_PRESETS.length-1; i++) { if (sunAlt <= LV_SKY_PRESETS[i].alt && sunAlt >= LV_SKY_PRESETS[i+1].alt) { p1 = LV_SKY_PRESETS[i]; p2 = LV_SKY_PRESETS[i+1]; break; } } const r = p1.alt - p2.alt, t = r > 0 ? clamp((p1.alt-sunAlt)/r, 0, 1) : 0; const L = (a,b) => a+(b-a)*t; let zen = [L(p1.zen[0],p2.zen[0]), L(p1.zen[1],p2.zen[1]), L(p1.zen[2],p2.zen[2])]; let hor = [L(p1.hor[0],p2.hor[0]), L(p1.hor[1],p2.hor[1]), L(p1.hor[2],p2.hor[2])]; let mb = 0; if (sunAlt < -6) { const m = getExactMoonData(state.currentTime); const mp = calcPlanetsPrecise(state.currentTime).find(p => p.isMoon); if (mp && mp.alt > 0) mb = (m.illumPct/100)*0.3*Math.min(1, mp.alt/30); } const app = (c) => [Math.min(255,c[0]+mb*60), Math.min(255,c[1]+mb*55), Math.min(255,c[2]+mb*45)]; return { zenith: app(zen), horizon: app(hor), sunAlt, isNight: sunAlt < -14, isDeepNight: sunAlt < -18, moonBoost: mb }; }
 function lvDrawDynamicSky(ctx, W, H) { const { zenith, horizon, sunAlt } = lvGetSkyColors(); const g = ctx.createLinearGradient(0, 0, 0, H); for (let i=0; i<=16; i++) { const t = i/16; const altS = lvState.camAlt + lvState.fov/2 - t*lvState.fov; const ratio = Math.pow(clamp(clamp(altS, -5, 90)/90, 0, 1), 0.55); const r = Math.round(horizon[0]*(1-ratio) + zenith[0]*ratio); const gg = Math.round(horizon[1]*(1-ratio) + zenith[1]*ratio); const b = Math.round(horizon[2]*(1-ratio) + zenith[2]*ratio); const baseA = lvState.showCamera ? 0.32 : 0.92; let gb = 0; if (sunAlt > -10 && sunAlt < 15) { const p = Math.max(0, 1-Math.abs(altS)/25); gb = p*0.15; } g.addColorStop(t, `rgba(${r},${gg},${b},${Math.min(1, baseA+gb)})`); } ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
-function lvDrawLandscape(ctx, W, H, focal, horizonY) { if (horizonY < -300 || horizonY > H+400) return; const sky = lvGetSkyColors(); const amb = clamp((sky.sunAlt+20)/30, 0.02, 1); const ppd = focal * Math.PI / 180; LV_MOUNTAIN_LAYERS.forEach(layer => { ctx.save(); const df = layer.baseColor; const dayC = [140,150,165], nightC = [15,18,28]; const r = Math.round(nightC[0]*(1-amb) + dayC[0]*amb*df); const g = Math.round(nightC[1]*(1-amb) + dayC[1]*amb*df); const b = Math.round(nightC[2]*(1-amb) + dayC[2]*amb*df); ctx.fillStyle = `rgb(${r},${g},${b})`; ctx.beginPath(); ctx.moveTo(-20, H+40); const step = 3; for (let x=-20; x<=W+step; x+=step) { const sx = x-W/2; const ao = Math.atan(sx/focal); const az = norm360(lvState.camAz + deg(ao)); const idx = Math.round(az*2) % 720; const h = layer.profile[idx]; ctx.lineTo(x, horizonY - h*layer.peakAlt*ppd); } ctx.lineTo(W+20, H+40); ctx.closePath(); ctx.fill(); ctx.restore(); }); if (horizonY > -100 && horizonY < H+100) { const hz = sky.horizon; const hg = ctx.createLinearGradient(0, horizonY-70, 0, horizonY+30); hg.addColorStop(0, `rgba(${hz[0]},${hz[1]},${hz[2]},0)`); hg.addColorStop(0.55, `rgba(${hz[0]},${hz[1]},${hz[2]},0.2)`); hg.addColorStop(1, `rgba(${hz[0]},${hz[1]},${hz[2]},0.02)`); ctx.fillStyle = hg; ctx.fillRect(0, horizonY-70, W, 100); } }
+function lvDrawLandscape(ctx, W, H, focal, horizonY) { 
+  if (horizonY < -300 || horizonY > H+400) return; 
+  const sky = lvGetSkyColors(); 
+  const amb = clamp((sky.sunAlt+20)/30, 0.02, 1); 
+  const ppd = focal * Math.PI / 180; 
+  
+  const baseAlpha = lvState.showCamera ? 0.25 : 1.0;
+
+  LV_MOUNTAIN_LAYERS.forEach(layer => { 
+    ctx.save(); 
+    ctx.globalAlpha = baseAlpha;
+    const df = layer.baseColor; const dayC = [140,150,165], nightC = [15,18,28]; 
+    const r = Math.round(nightC[0]*(1-amb) + dayC[0]*amb*df); 
+    const g = Math.round(nightC[1]*(1-amb) + dayC[1]*amb*df); 
+    const b = Math.round(nightC[2]*(1-amb) + dayC[2]*amb*df); 
+    ctx.fillStyle = `rgb(${r},${g},${b})`; 
+    ctx.beginPath(); ctx.moveTo(-20, H+40); 
+    const step = 3; 
+    for (let x=-20; x<=W+step; x+=step) { 
+      const sx = x-W/2; const ao = Math.atan(sx/focal); const az = norm360(lvState.camAz + deg(ao)); 
+      const idx = Math.round(az*2) % 720; 
+      const h = layer.profile[idx]; 
+      ctx.lineTo(x, horizonY - h*layer.peakAlt*ppd); 
+    } 
+    ctx.lineTo(W+20, H+40); 
+    ctx.closePath(); 
+    ctx.fill(); 
+    ctx.restore(); 
+  }); 
+  if (horizonY > -100 && horizonY < H+100) { 
+    ctx.save();
+    ctx.globalAlpha = baseAlpha;
+    const hz = sky.horizon; 
+    const hg = ctx.createLinearGradient(0, horizonY-70, 0, horizonY+30); 
+    hg.addColorStop(0, `rgba(${hz[0]},${hz[1]},${hz[2]},0)`); 
+    hg.addColorStop(0.55, `rgba(${hz[0]},${hz[1]},${hz[2]},0.2)`); 
+    hg.addColorStop(1, `rgba(${hz[0]},${hz[1]},${hz[2]},0.02)`); 
+    ctx.fillStyle = hg; 
+    ctx.fillRect(0, horizonY-70, W, 100); 
+    ctx.restore();
+  } 
+}
 
 function lvDrawCardinalPoints(ctx, W, H) {
   const dirs = [{l:'N',a:0},{l:'NE',a:45},{l:'E',a:90},{l:'SE',a:135},{l:'S',a:180},{l:'SO',a:225},{l:'O',a:270},{l:'NO',a:315}];
@@ -3069,8 +3105,7 @@ function lvDrawMilkyWay(ctx, W, H, now, sky) {
     const pt = lvProject(pos.alt, pos.az, W, H); if (!pt.visible) return;
     
     const isDust = i % 3 === 0;
-    const baseAlpha = isDust ? 0.08 : 0.06;
-    ctx.globalAlpha = p.alpha * v * (baseAlpha / 0.1);
+    ctx.globalAlpha = p.alpha * v * 0.4; // Molto più trasparente
     const color = isDust ? '200, 170, 180' : '160, 200, 255';
     ctx.fillStyle = `rgba(${color}, 1)`;
     const sz = p.size * 4;
@@ -3113,12 +3148,15 @@ function lvDrawConstellations(ctx, W, H, now) {
       if (pos.alt > -2) {
         const pt = lvProject(pos.alt, pos.az, W, H);
         if (pt.visible) {
-          ctx.fillStyle = 'rgba(160,200,255,0.6)';
-          ctx.font = '11px Inter';
+          ctx.fillStyle = 'rgba(200,220,255,0.8)';
+          ctx.font = 'bold 12px Orbitron';
           ctx.textAlign = 'center';
           let tx = Math.max(30, Math.min(W - 30, pt.x));
           let ty = Math.max(20, Math.min(H - 20, pt.y + 15));
+          ctx.shadowColor = 'rgba(0,0,0,0.8)';
+          ctx.shadowBlur = 4;
           ctx.fillText(c.name, tx, ty);
+          ctx.shadowBlur = 0;
         }
       }
     }
@@ -3135,8 +3173,9 @@ function lvDrawStars(ctx, W, H, now, t, sky) {
     lvState.visibleObjects.push({ obj:s, x:pt.x, y:pt.y, kind:'star', alt:pos.alt });
     const seed = s.seed ?? ((Math.abs(s.ra)+Math.abs(s.dec))%100); const tw = 0.85 + 0.15*Math.sin(t*2+seed); const sz = Math.max(1.0, 4.5-s.mag*0.95) * tw;
     ctx.save(); ctx.globalAlpha = (s.mag<1.5?1:0.85)*dv;
-    if (s.mag < 1.5) { const gl = ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,sz*6); const col = s.mag<0.5?'rgba(200,220,255,':(s.mag<1?'rgba(255,245,220,':'rgba(255,230,210,'); gl.addColorStop(0,col+'0.9)'); gl.addColorStop(0.3,col+'0.35)'); gl.addColorStop(1,col+'0)'); ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(pt.x,pt.y,sz*6,0,Math.PI*2); ctx.fill(); }
-    ctx.fillStyle = s.mag<0.5?'#ffffff':(s.mag<1?'#fff8e7':'#ffeecc'); ctx.beginPath(); ctx.arc(pt.x, pt.y, sz, 0, Math.PI*2); ctx.fill(); ctx.restore();
+    const col = getStarColorByName(s.n);
+    if (s.mag < 1.5) { const gl = ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,sz*6); gl.addColorStop(0, col + 'e6'); gl.addColorStop(0.3, col + '59'); gl.addColorStop(1, 'transparent'); ctx.fillStyle=gl; ctx.beginPath(); ctx.arc(pt.x,pt.y,sz*6,0,Math.PI*2); ctx.fill(); }
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(pt.x, pt.y, sz, 0, Math.PI*2); ctx.fill(); ctx.restore();
     if (lvState.showLabels && s.mag < 1.8 && dv > 0.5 && !s.isCatalog) { ctx.save(); ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.font = 'bold 12px Inter'; ctx.textAlign = 'left'; ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = 6; ctx.fillText(s.n, pt.x+12, pt.y+4); ctx.restore(); }
   });
 }
@@ -3146,7 +3185,15 @@ function lvDrawPlanets(ctx, W, H, now, sky) {
     lvState.visibleObjects.push({ obj:p, x:pt.x, y:pt.y, kind:'planet', alt:p.alt }); const pc = p.color || '#d4af37';
     if (p.isSun) { const it = clamp((p.alt+3)/15, 0, 1), gr = 30+it*30; const gl = ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,gr); gl.addColorStop(0,'rgba(255,240,120,1)'); gl.addColorStop(0.3,'rgba(255,220,80,0.7)'); gl.addColorStop(0.6,'rgba(255,180,60,0.35)'); gl.addColorStop(1,'transparent'); ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(pt.x,pt.y,gr,0,Math.PI*2); ctx.fill(); ctx.save(); ctx.fillStyle = '#fff4c0'; ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 20; ctx.beginPath(); ctx.arc(pt.x,pt.y,10+it*4,0,Math.PI*2); ctx.fill(); ctx.restore(); }
     else if (p.isMoon) { const md = getExactMoonData(now); const gl = ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,32); gl.addColorStop(0,'rgba(243,229,171,0.65)'); gl.addColorStop(1,'transparent'); ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(pt.x,pt.y,32,0,Math.PI*2); ctx.fill(); drawMoonPhase(ctx, pt.x, pt.y, 11, md.illumPct, md.isWaxing, false); }
-    else { const gl = ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,24); gl.addColorStop(0,pc); gl.addColorStop(0.4,pc+'99'); gl.addColorStop(1,'transparent'); ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(pt.x,pt.y,24,0,Math.PI*2); ctx.fill(); ctx.fillStyle = pc; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(pt.x,pt.y,7,0,Math.PI*2); ctx.fill(); ctx.stroke(); }
+    else { const gl = ctx.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,24); gl.addColorStop(0,pc); gl.addColorStop(0.4,pc+'99'); gl.addColorStop(1,'transparent'); ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(pt.x,pt.y,24,0,Math.PI*2); ctx.fill(); ctx.fillStyle = pc; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(pt.x,pt.y,7,0,Math.PI*2); ctx.fill(); ctx.stroke(); 
+      if (p.n === 'Saturno') {
+        ctx.beginPath();
+        ctx.ellipse(pt.x, pt.y, 14, 5, Math.PI / 6, 0, Math.PI * 2);
+        ctx.strokeStyle = '#f4e4a1';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
     if (lvState.showLabels) { ctx.save(); ctx.fillStyle = '#f3e5ab'; ctx.font = 'bold 13px Inter'; ctx.textAlign = 'left'; ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = 6; ctx.fillText((p.s||'')+' '+p.n, pt.x+16, pt.y+4); ctx.restore(); }
   });
 }
