@@ -1,4 +1,4 @@
-const CACHE_NAME = 'egastro-v1.0.9';
+const CACHE_NAME = 'egastro-v1.1.0';
 
 const PRECACHE_URLS = [
   './',
