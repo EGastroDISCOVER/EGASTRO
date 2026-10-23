@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#d4af37">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="8.0.0">
+<meta name="app-version" content="8.0.4">
 <meta name="app-name" content="EGastro DISCOVER">
 <link rel="manifest" href="./manifest.json">
 <title>EGastro DISCOVER v8</title>
@@ -81,12 +81,13 @@
   th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
   td:last-child { text-align: right; color: var(--accent2); font-weight: 600; }
   .astro-icons { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; text-align: center; }
-  .astro-icon-box { background: var(--bg2); padding: 20px; border-radius: 16px; border: 1px solid var(--line); }
+  .astro-icon-box { background: var(--bg2); padding: 20px; border-radius: 16px; border: 1px solid var(--line); transition: all 0.2s; }
+  .astro-icon-box:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--glow); }
   .astro-icon-box svg { width: 80px; height: 80px; margin-bottom: 10px; filter: drop-shadow(0 0 10px var(--glow)); }
   .astro-icon-title { font-family: 'Orbitron', sans-serif; color: var(--accent2); font-size: 16px; font-weight: bold; }
   .skymap-layout { display: flex; gap: 20px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
-  .skymap-wrapper { position: relative; width: 100%; max-width: 640px; flex: 1 1 640px; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px var(--line); background: #000; }
-  .skymap-container { position: relative; width: 100%; aspect-ratio: 1/1; }
+  .skymap-wrapper { position: relative; width: 100%; max-width: 640px; flex: 1 1 640px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px var(--line); background: #000; overflow: hidden; }
+  .skymap-container { position: relative; width: 100%; aspect-ratio: 1/1; overflow: hidden; }
   canvas#skyCanvas { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
   canvas#skyCanvas:active { cursor: grabbing; }
   .map-side-controls { display: flex; flex-direction: column; gap: 10px; background: var(--bg2); border: 1px solid var(--line); border-radius: 16px; padding: 15px; min-width: 170px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -115,8 +116,8 @@
   .time-quick-btns { display: flex; gap: 6px; flex-wrap: wrap; }
   .time-quick-btns button { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg2); color: var(--accent); font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
   .time-quick-btns button:hover { background: var(--accent); color: #000; }
-  #preview-modal, #cat-detail-modal, #solar-modal { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.92); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px; }
-  #preview-modal.open, #cat-detail-modal.open, #solar-modal.open { display: flex; }
+  #preview-modal, #cat-detail-modal, #solar-modal, #moon-modal { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.92); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 20px; }
+  #preview-modal.open, #cat-detail-modal.open, #solar-modal.open, #moon-modal.open { display: flex; }
   .preview-box, .detail-box { position: relative; width: min(92vw, 720px); max-height: 88vh; overflow-y: auto; background: var(--card); border: 2px solid var(--accent); border-radius: 16px; padding: 24px; box-shadow: 0 0 60px var(--glow); }
   .close-btn { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #000; border: none; font-size: 22px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px var(--glow); line-height: 1; z-index: 10; display: flex; align-items: center; justify-content: center; }
   #preview-modal .preview-title { font-family: 'Orbitron', sans-serif; color: var(--accent); margin-bottom: 12px; font-size: 16px; }
@@ -125,13 +126,15 @@
   .preview-quickbar { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
   .preview-quickbar input { flex: 1; min-width: 200px; padding: 10px; }
   .preview-quickbar .btn { padding: 10px 18px; }
-  #cat-detail-modal h3, #solar-modal h3 { font-family: 'Orbitron', sans-serif; color: var(--accent2); font-size: 20px; margin-bottom: 6px; padding-right: 40px; }
-  #cat-detail-modal .detail-sub, #solar-modal .detail-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-  #cat-detail-modal .detail-grid, #solar-modal .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-  #cat-detail-modal .detail-row, #solar-modal .detail-row { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
-  #cat-detail-modal .detail-row .dl, #solar-modal .detail-row .dl { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-  #cat-detail-modal .detail-row .dv, #solar-modal .detail-row .dv { color: var(--text); font-weight: 600; margin-top: 2px; }
-  #cat-detail-modal .detail-actions, #solar-modal .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  #cat-detail-modal h3, #solar-modal h3, #moon-modal h3 { font-family: 'Orbitron', sans-serif; color: var(--accent2); font-size: 20px; margin-bottom: 6px; padding-right: 40px; }
+  #cat-detail-modal .detail-sub, #solar-modal .detail-sub, #moon-modal .detail-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  #cat-detail-modal .detail-grid, #solar-modal .detail-grid, #moon-modal .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  #cat-detail-modal .detail-row, #solar-modal .detail-row, #moon-modal .detail-row { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+  #cat-detail-modal .detail-row .dl, #solar-modal .detail-row .dl, #moon-modal .detail-row .dl { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  #cat-detail-modal .detail-row .dv, #solar-modal .detail-row .dv, #moon-modal .detail-row .dv { color: var(--text); font-weight: 600; margin-top: 2px; }
+  #cat-detail-modal .detail-actions, #solar-modal .detail-actions, #moon-modal .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .btn-web-info { background: linear-gradient(135deg, #1e3a8a, #7c3aed) !important; color: #fff !important; border: 1px solid #7c3aed !important; font-weight: 700; }
+  .btn-web-info:hover { filter: brightness(1.25); box-shadow: 0 0 18px rgba(124,58,237,0.5); }
   .tonight-summary { background: var(--bg2); border: 1px solid var(--accent); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; }
   .tonight-summary .big-time { font-family: 'Orbitron', sans-serif; font-size: 28px; color: var(--accent2); font-weight: 900; text-shadow: 0 0 15px var(--glow); }
   .tonight-summary .location { font-size: 13px; color: var(--muted); margin-top: 5px; }
@@ -184,16 +187,7 @@
   .obs-chart-wrap { margin-top: 20px; background: #05070c; border: 1px solid var(--line); border-radius: 12px; padding: 14px 14px 10px; }
   .obs-chart-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
   .obs-chart-title .sub { font-family: 'Inter', sans-serif; font-size: 10px; color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 500; }
-  /* FIX: regola generica per QUALSIASI canvas dentro .obs-chart-wrap, non solo #obsChartCanvas */
-  .obs-chart-wrap canvas, #obsChartCanvas {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 800 / 180;
-    max-height: 220px;
-    display: block;
-    border-radius: 8px;
-    background: #000;
-  }
+  .obs-chart-wrap canvas, #obsChartCanvas { width: 100%; height: auto; aspect-ratio: 800 / 180; max-height: 220px; display: block; border-radius: 8px; background: #000; }
   .obs-chart-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10px; color: var(--muted); margin-top: 8px; font-weight: 600; }
   .obs-chart-legend span { display: inline-flex; align-items: center; gap: 4px; }
   .obs-chart-legend i { width: 12px; height: 10px; display: inline-block; border-radius: 2px; border: 1px solid rgba(255,255,255,0.15); }
@@ -204,7 +198,6 @@
   /* ============ TELESCOPIO UI ============ */
   .scope-layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 15px; align-items: start; }
   .scope-left-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-  /* HUD spostato FUORI dal riquadro mappa */
   .scope-hud-outside {
     display: flex;
     gap: 18px;
@@ -221,19 +214,28 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     order: -1;
   }
-  .scope-hud-outside span { white-space: nowrap; }
-  .scope-hud-outside b { color: var(--accent); }
+  .scope-hud-outside span { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .scope-hud-outside b {
+    color: var(--accent);
+    display: inline-block;
+    min-width: 62px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .scope-hud-outside #scopeHudTrack {
+    display: inline-block;
+    min-width: 90px;
+    text-align: center;
+  }
 
   .scope-map-wrap { position: relative; background: #000; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); height: 620px; }
   #scopeCanvas, #scopeOverlayCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   #scopeCanvas { cursor: grab; touch-action: none; background: #000; }
   #scopeCanvas:active { cursor: grabbing; }
   #scopeOverlayCanvas { pointer-events: none; }
-  /* Vecchio .scope-hud mantenuto in CSS per sicurezza, non più usato in HTML */
   .scope-hud { position: absolute; top: 10px; left: 10px; background: rgba(4,6,11,.8); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 11px; font-family: 'Orbitron'; color: var(--accent2); display: flex; gap: 12px; pointer-events: none; backdrop-filter: blur(4px); z-index: 5; flex-wrap: wrap; max-width: calc(100% - 20px); }
   .scope-hud b { color: var(--accent); }
 
-  /* MODIFICA: frecce direzionali più grandi (54px invece di 42px) per area di touch più ampia */
   .edge-arrow { position: absolute; width: 54px; height: 54px; background: rgba(13,18,28,.88); border: 1.5px solid var(--accent); border-radius: 50%; color: var(--accent); font-size: 22px; display: grid; place-items: center; cursor: pointer; pointer-events: auto; z-index: 15; transition: .1s; backdrop-filter: blur(4px); user-select: none; box-shadow: 0 0 12px rgba(212,175,55,0.35); }
   .edge-arrow:active { background: var(--accent); color: #000; transform: scale(.92); }
   .edge-n { top: 8px; left: 50%; transform: translateX(-50%); }
@@ -356,7 +358,6 @@
   .scope-zoom button { width: 34px; height: 34px; border-radius: 50%; background: rgba(13,18,28,.9); border: 1px solid var(--accent); color: var(--accent); font-size: 16px; font-weight: bold; cursor: pointer; display: grid; place-items: center; }
   .scope-zoom button:hover { background: var(--accent); color: #000; }
 
-  /* STOP DI EMERGENZA (basso sinistra mappa telescopio) */
   .scope-emergency-stop {
     position: absolute;
     bottom: 15px;
@@ -455,16 +456,12 @@
   .map-tooltip { position: absolute; pointer-events: none; z-index: 30; background: rgba(4,6,11,.92); border: 1px solid var(--accent); border-radius: 6px; padding: 4px 8px; font-size: 10px; font-family: 'Orbitron'; color: var(--accent2); transform: translate(12px,12px); opacity: 0; transition: opacity .12s; white-space: nowrap; }
   .map-tooltip.show { opacity: 1; }
 
-  /* Popup oggetto mappa cielo */
   #skyObjectPopup {
     display: none;
     background: var(--card);
-    border: 1.5px solid var(--accent);
-    border-radius: 16px;
-    margin-top: 15px;
+    border-top: 1.5px solid var(--accent);
     padding: 20px;
     animation: slideUp 0.35s ease;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px var(--glow);
   }
   #skyObjectPopup.open { display: block; }
   #skyObjectPopup .popup-title { font-family: 'Orbitron'; color: var(--accent2); font-size: 18px; margin-bottom: 6px; font-weight: bold; }
@@ -475,6 +472,25 @@
   #skyObjectPopup .popup-row .v { color: var(--text); font-weight: 600; margin-top: 2px; }
   #skyObjectPopup .popup-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
 
+  .skymap-info-strip {
+    display: flex; flex-wrap: wrap; gap: 6px 18px;
+    justify-content: space-between; align-items: center;
+    padding: 10px 14px;
+    background: linear-gradient(90deg, rgba(212,175,55,0.12), rgba(212,175,55,0.02));
+    border-bottom: 1px solid var(--accent);
+    min-height: 48px;
+  }
+  .strip-item { display: flex; flex-direction: column; gap: 2px; min-width: 60px; }
+  .strip-item .k { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .strip-item .v { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--accent2); font-weight: 700; white-space: nowrap; }
+  .strip-item .v.ok   { color: var(--ok); }
+  .strip-item .v.bad  { color: var(--bad); }
+  .strip-item .v.warn { color: var(--warn); }
+  @media (max-width: 600px) {
+    .skymap-info-strip { gap: 4px 10px; padding: 8px 10px; }
+    .strip-item .v { font-size: 11px; }
+  }
+
   @media (max-width: 900px) {
     .scope-layout { grid-template-columns: 1fr; }
     .scope-map-wrap { height: 480px; }
@@ -483,7 +499,7 @@
     .scope-target-data-row { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 600px) {
-    #cat-detail-modal .detail-grid, #solar-modal .detail-grid { grid-template-columns: 1fr; }
+    #cat-detail-modal .detail-grid, #solar-modal .detail-grid, #moon-modal .detail-grid { grid-template-columns: 1fr; }
     .time-slider-inline { flex-wrap: wrap; }
     .time-display-inline { width: 100%; text-align: center; margin-top: 5px; }
     .target-actions-row { grid-template-columns: 1fr; }
@@ -540,8 +556,8 @@
             <option value="">-- Seleziona una città --</option>
           </select>
         </div>
-        <div><label>Latitudine</label><input type="number" id="lat" value="41.9028" step="0.0001"></div>
-        <div><label>Longitudine</label><input type="number" id="lon" value="12.4964" step="0.0001"></div>
+        <div><label>Latitudine</label><input type="number" id="lat" value="41.0723" step="0.0001"></div>
+        <div><label>Longitudine</label><input type="number" id="lon" value="14.3329" step="0.0001"></div>
         <div><label>Data (Inizio)</label><input type="date" id="date"></div>
         <div><label>Ora Locale</label><input type="time" id="time" step="1"></div>
       </div>
@@ -554,19 +570,22 @@
       <div class="grid" id="sky-quality-grid" style="margin-top:20px;"></div>
     </div>
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid var(--line);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid var(--line); flex-wrap:wrap; gap:10px;">
         <h2 style="margin:0; padding:0; border:none;">☀️ Dati Solari e Lunari</h2>
-        <button class="btn btn-ghost" onclick="openSolarModal()" style="padding:8px 16px; font-size:13px;">Attività Solare</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-ghost" onclick="openSolarModal()" style="padding:8px 16px; font-size:13px;">☀️ Attività Solare</button>
+          <button class="btn btn-ghost" onclick="openMoonModal()" style="padding:8px 16px; font-size:13px;">🌙 Dati Lunari</button>
+        </div>
       </div>
       <div class="astro-icons">
-        <div class="astro-icon-box">
+        <div class="astro-icon-box" onclick="openSolarModal()" style="cursor:pointer;" title="Clicca per i dettagli solari">
           <svg id="icon-sun" viewBox="0 0 100 100" fill="none">
             <circle cx="50" cy="50" r="20" fill="#ffcc00" />
             <path d="M50 10V20M50 80V90M10 50H20M80 50H90M21.7 21.7L28.3 28.3M71.7 71.7L78.3 78.3M21.7 78.3L28.3 71.7M71.7 28.3L78.3 21.7" stroke="#ffcc00" stroke-width="4" stroke-linecap="round"/>
           </svg>
           <div class="astro-icon-title">Sole</div>
         </div>
-        <div class="astro-icon-box">
+        <div class="astro-icon-box" onclick="openMoonModal()" style="cursor:pointer;" title="Clicca per i dettagli lunari">
           <svg id="icon-moon" viewBox="0 0 100 100" fill="none">
             <circle cx="50" cy="50" r="30" fill="#1a1a1a" stroke="#d4af37" stroke-width="1.5"/>
             <path id="moon-phase-path" d="" fill="#f3e5ab" />
@@ -586,7 +605,7 @@
     <div class="card">
       <h2>🌌 Mappa del Cielo Interattiva</h2>
       <div id="info-panel">
-        <h3 id="info-title">Oggetto</h3>
+        <h3 id="info-title">📍 Nessun oggetto selezionato</h3>
         <p>RA: <strong id="info-ra">--</strong> | Dec: <strong id="info-dec">--</strong></p>
         <p>Altitudine: <strong id="info-alt">--</strong> | Azimuth: <strong id="info-az">--</strong></p>
       </div>
@@ -602,7 +621,16 @@
       </div>
       <div class="skymap-layout">
         <div class="skymap-wrapper">
+          <div class="skymap-info-strip" id="skymapInfoStrip">
+            <div class="strip-item"><span class="k">Oggetto</span><span class="v" id="stripObjName">Nessun oggetto</span></div>
+            <div class="strip-item"><span class="k">Tipo</span><span class="v" id="stripObjType">—</span></div>
+            <div class="strip-item"><span class="k">RA / Dec</span><span class="v" id="stripObjRaDec">—</span></div>
+            <div class="strip-item"><span class="k">Alt / Az</span><span class="v" id="stripObjAltAz">—</span></div>
+            <div class="strip-item"><span class="k">Visibilità</span><span class="v" id="stripObjVis">—</span></div>
+          </div>
+
           <div class="skymap-container"><canvas id="skyCanvas" width="1000" height="1000"></canvas></div>
+
           <div class="time-slider-inline">
             <input type="range" id="timeSlider" min="-1440" max="1440" value="0" step="10" oninput="onSliderChange()">
             <div class="time-display-inline" id="sliderTimeDisplay">Ora attuale</div>
@@ -620,6 +648,18 @@
               <button onclick="setTimeOffset(1440)">+24h</button>
             </div>
           </div>
+
+          <div id="skyObjectPopup">
+            <div class="popup-title" id="skyPopupTitle">Oggetto</div>
+            <div class="popup-sub" id="skyPopupSub">—</div>
+            <div class="popup-grid" id="skyPopupGrid"></div>
+            <div id="skyPopupChart"></div>
+            <div class="popup-actions">
+              <button class="btn" onclick="sendSkyTargetToTelescope()">🔭 Invia al Telescopio</button>
+              <button class="btn btn-web-info" onclick="openWebInfoFromSky()">🔎 Info Web</button>
+              <button class="btn btn-ghost" onclick="closeSkyObjectPopup()">Chiudi</button>
+            </div>
+          </div>
         </div>
         <div class="map-side-controls">
           <div class="side-title">Mappa</div>
@@ -633,18 +673,6 @@
           <button class="map-btn" onclick="lookAtObject('Polaris')">⭐ Punta Nord</button>
           <button class="map-btn" onclick="lookAtObject('Sirio')">⭐ Punta Sirio</button>
           <button class="map-btn" onclick="toggleAutoRotate()" id="autoRotBtn">🔄 Auto-ruota</button>
-        </div>
-      </div>
-
-      <!-- POPUP OGGETTO SELEZIONATO (subito sotto la mappa) -->
-      <div id="skyObjectPopup">
-        <div class="popup-title" id="skyPopupTitle">Oggetto</div>
-        <div class="popup-sub" id="skyPopupSub">—</div>
-        <div class="popup-grid" id="skyPopupGrid"></div>
-        <div id="skyPopupChart"></div>
-        <div class="popup-actions">
-          <button class="btn" onclick="sendSkyTargetToTelescope()">🔭 Invia al Telescopio</button>
-          <button class="btn btn-ghost" onclick="closeSkyObjectPopup()">Chiudi</button>
         </div>
       </div>
 
@@ -752,7 +780,6 @@
   <div id="tab-scope" class="tab-content">
     <div class="scope-layout">
       <div class="scope-left-col">
-        <!-- HUD FUORI DAL RIQUADRO MAPPA -->
         <div class="scope-hud-outside">
           <span>AZ <b id="scopeHudAz">--</b></span>
           <span>ALT <b id="scopeHudAlt">--</b></span>
@@ -950,6 +977,7 @@
     <div class="detail-actions">
       <button class="btn" onclick="catDetailGoto()">🗺️ Vai alla Mappa</button>
       <button class="btn btn-ghost" onclick="catDetailGotoTelescope()">🔭 Invia al Telescopio</button>
+      <button class="btn btn-web-info" onclick="openWebInfoFromDetail()">🔎 Info Web</button>
     </div>
   </div>
 </div>
@@ -957,12 +985,26 @@
 <div id="solar-modal" onclick="if(event.target===this)closeSolarModal()">
   <div class="detail-box">
     <button class="close-btn" onclick="closeSolarModal()">×</button>
-    <h3>☀️ Attività Solare</h3>
-    <div class="detail-sub">Dati calcolati e link ufficiali</div>
+    <h3>☀️ Dati Solari Completi</h3>
+    <div class="detail-sub">Posizione, distanza, orari crepuscolari e ciclo solare</div>
     <div class="detail-grid" id="solar-detail-grid"></div>
     <div class="detail-actions">
       <a href="https://www.swpc.noaa.gov/" target="_blank" class="btn" style="text-decoration:none; text-align:center;">NOAA SWPC</a>
       <a href="https://sohowww.nascom.nasa.gov/data/realtime-images.html" target="_blank" class="btn btn-ghost" style="text-decoration:none; text-align:center;">Immagini SOHO</a>
+    </div>
+  </div>
+</div>
+
+<div id="moon-modal" onclick="if(event.target===this)closeMoonModal()">
+  <div class="detail-box">
+    <button class="close-btn" onclick="closeMoonModal()">×</button>
+    <h3>🌙 Dati e Calendario Lunare</h3>
+    <div class="detail-sub">Fase, illuminazione, età e prossime fasi principali</div>
+    <div class="detail-grid" id="moon-detail-grid"></div>
+    <div id="moon-calendar"></div>
+    <div class="detail-actions">
+      <a href="https://theskylive.com/moon-info" target="_blank" class="btn" style="text-decoration:none; text-align:center;">TheSkyLive Luna</a>
+      <a href="https://www.timeanddate.com/moon/phases/" target="_blank" class="btn btn-ghost" style="text-decoration:none; text-align:center;">Calendario Fasi</a>
     </div>
   </div>
 </div>
@@ -972,7 +1014,7 @@
    STATO GLOBALE
    ============================================================ */
 const state = {
-  lat: 41.9028, lon: 12.4964,
+  lat: 41.0723, lon: 14.3329,
   baseTime: new Date(), currentTime: new Date(),
   planets: [], camAlt: 45, camAz: 0, fov: 80,
   clouds: 0, target: null, sqm: 21.0,
@@ -1061,10 +1103,146 @@ const STARS = [
   {n:"Tejat", ra:97.20, dec:22.51, mag:2.87}, {n:"Propus", ra:95.74, dec:22.51, mag:3.28}
 ];
 
+/* ============================================================
+   METADATI COSTELLAZIONI — 88 complete
+   ============================================================ */
+const CONSTELLATION_META = {
+  'And': { it:'Andromeda', area:'722°q', season:'Autunno', desc:'Contiene M31, la galassia più vicina alla Via Lattea visibile a occhio nudo.' },
+  'Ant': { it:'Macchina Pneumatica', area:'239°q', season:'Primavera', desc:'Piccola costellazione australe introdotta nel XVIII secolo.' },
+  'Aps': { it:'Uccello del Paradiso', area:'206°q', season:'Estate', desc:'Piccola costellazione australe vicina al Polo Sud celeste.' },
+  'Aqr': { it:'Acquario', area:'980°q', season:'Autunno', desc:'Costellazione zodiacale; contiene la nebulosa Helix (NGC7293).' },
+  'Aql': { it:'Aquila', area:'652°q', season:'Estate', desc:'Contiene Altair, vertice del Triangolo Estivo.' },
+  'Ara': { it:'Altare', area:'237°q', season:'Estate', desc:'Piccola costellazione australe vicina allo Scorpione.' },
+  'Ari': { it:'Ariete', area:'441°q', season:'Autunno', desc:'Costellazione zodiacale; contiene il punto vernale.' },
+  'Aur': { it:'Auriga', area:'657°q', season:'Inverno', desc:'Contiene Capella, la sesta stella più luminosa del cielo.' },
+  'Boo': { it:'Boote', area:'907°q', season:'Primavera', desc:'Contiene Arturo, la stella più luminosa dell\'emisfero nord.' },
+  'Cae': { it:'Bulino', area:'125°q', season:'Inverno', desc:'Piccolissima costellazione australe dall\'aspetto di una linea.' },
+  'Cam': { it:'Giraffa', area:'757°q', season:'Inverno', desc:'Costellazione boreale molto estesa ma povera di stelle brillanti.' },
+  'Cap': { it:'Capricorno', area:'414°q', season:'Autunno', desc:'Costellazione zodiacale dal caratteristico aspetto a triangolo.' },
+  'Car': { it:'Carena', area:'494°q', season:'Estate', desc:'Contiene Canopo, la seconda stella più luminosa del cielo.' },
+  'Cas': { it:'Cassiopea', area:'598°q', season:'Autunno', desc:'Ha la caratteristica forma a W.' },
+  'Cen': { it:'Centauro', area:'1.060°q', season:'Primavera', desc:'Contiene Alpha Centauri, il sistema stellare più vicino al Sole.' },
+  'Cep': { it:'Cefeo', area:'588°q', season:'Autunno', desc:'Costellazione boreale ricca di stelle variabili.' },
+  'Cet': { it:'Balena', area:'1.231°q', season:'Autunno', desc:'Contiene Mira, prototipo delle variabili pulsanti.' },
+  'Cha': { it:'Camaleonte', area:'132°q', season:'Estate', desc:'Piccola costellazione australe vicina al Polo Sud celeste.' },
+  'Cir': { it:'Compasso', area:'93°q', season:'Estate', desc:'Piccola costellazione australe tra Centauro e Mosca.' },
+  'CMa': { it:'Cane Maggiore', area:'380°q', season:'Inverno', desc:'Contiene Sirio, la stella più luminosa del cielo notturno.' },
+  'CMi': { it:'Cane Minore', area:'183°q', season:'Inverno', desc:'Contiene Procyon, una delle stelle più vicine al Sole.' },
+  'Cnc': { it:'Cancro', area:'506°q', season:'Primavera', desc:'Costellazione zodiacale; contiene l\'ammasso del Presepe (M44).' },
+  'Col': { it:'Colomba', area:'270°q', season:'Inverno', desc:'Piccola costellazione australe ai piedi del Cane Maggiore.' },
+  'Com': { it:'Chioma di Berenice', area:'386°q', season:'Primavera', desc:'Ricca di galassie; contiene M64 (Occhio Nero).' },
+  'CrA': { it:'Corona Australe', area:'128°q', season:'Estate', desc:'Piccola costellazione australe a forma di semicerchio.' },
+  'CrB': { it:'Corona Boreale', area:'179°q', season:'Estate', desc:'Piccola costellazione a forma di semicerchio.' },
+  'Crt': { it:'Cratere', area:'282°q', season:'Primavera', desc:'Piccola costellazione dal profilo a coppa.' },
+  'Cru': { it:'Croce del Sud', area:'68°q', season:'Primavera', desc:'La più piccola delle 88 costellazioni, ma molto nota.' },
+  'Crv': { it:'Corvo', area:'184°q', season:'Primavera', desc:'Piccola costellazione dal profilo inconfondibile.' },
+  'CVn': { it:'Cani da Caccia', area:'465°q', season:'Primavera', desc:'Contiene la galassia Vortice (M51) e il Girasole (M63).' },
+  'Cyg': { it:'Cigno', area:'804°q', season:'Estate', desc:'Forma la Croce del Nord; contiene Deneb.' },
+  'Del': { it:'Delfino', area:'189°q', season:'Estate', desc:'Piccola costellazione a forma di piccolo delfino.' },
+  'Dor': { it:'Pesce Dorato', area:'179°q', season:'Estate', desc:'Contiene gran parte della Grande Nube di Magellano.' },
+  'Dra': { it:'Dragone', area:'1.083°q', season:'Estate', desc:'Costellazione allungata attorno all\'Orsa Minore.' },
+  'Equ': { it:'Cavallino', area:'72°q', season:'Estate', desc:'La seconda costellazione più piccola del cielo.' },
+  'Eri': { it:'Eridano', area:'1.138°q', season:'Inverno', desc:'Costellazione allungata; contiene Achernar.' },
+  'For': { it:'Fornace', area:'398°q', season:'Autunno', desc:'Costellazione australe introdotta da Lacaille nel 1756.' },
+  'Gem': { it:'Gemelli', area:'514°q', season:'Inverno', desc:'Contiene le stelle Castore e Polluce.' },
+  'Gru': { it:'Gru', area:'366°q', season:'Autunno', desc:'Costellazione australe dal profilo inconfondibile.' },
+  'Her': { it:'Ercole', area:'1.225°q', season:'Estate', desc:'Contiene M13, il più brillante ammasso globulare dell\'emisfero nord.' },
+  'Hor': { it:'Orologio', area:'249°q', season:'Estate', desc:'Costellazione australe dall\'aspetto allungato.' },
+  'Hya': { it:'Idra', area:'1.303°q', season:'Primavera', desc:'La più estesa delle 88 costellazioni.' },
+  'Hyi': { it:'Idra Maschio', area:'243°q', season:'Estate', desc:'Piccola costellazione australe vicina al Polo Sud celeste.' },
+  'Ind': { it:'Indiano', area:'294°q', season:'Estate', desc:'Costellazione australe tra Gru e Pavone.' },
+  'Lac': { it:'Lucertola', area:'201°q', season:'Autunno', desc:'Piccola costellazione boreale tra Cigno e Andromeda.' },
+  'Leo': { it:'Leone', area:'947°q', season:'Primavera', desc:'Costellazione zodiacale facilmente riconoscibile.' },
+  'Lep': { it:'Lepre', area:'290°q', season:'Inverno', desc:'Piccola costellazione ai piedi di Orione.' },
+  'Lib': { it:'Bilancia', area:'538°q', season:'Primavera', desc:'Costellazione zodiacale; unica a non rappresentare un essere vivente.' },
+  'LMi': { it:'Leone Minore', area:'232°q', season:'Primavera', desc:'Piccola costellazione tra Leone e Orsa Maggiore.' },
+  'Lup': { it:'Lupo', area:'334°q', season:'Primavera', desc:'Costellazione australe ricca di stelle brillanti.' },
+  'Lyn': { it:'Lince', area:'545°q', season:'Inverno', desc:'Costellazione boreale molto estesa ma debole.' },
+  'Lyr': { it:'Lira', area:'286°q', season:'Estate', desc:'Contiene Vega e la nebulosa Anello (M57).' },
+  'Men': { it:'Mensa', area:'153°q', season:'Estate', desc:'Piccola costellazione australe vicina al Polo Sud celeste.' },
+  'Mic': { it:'Microscopio', area:'210°q', season:'Estate', desc:'Piccola costellazione australe introdotta da Lacaille.' },
+  'Mon': { it:'Unicorno', area:'482°q', season:'Inverno', desc:'Ricca di ammassi e nebulose.' },
+  'Mus': { it:'Mosca', area:'138°q', season:'Primavera', desc:'Piccola costellazione australe vicina alla Croce del Sud.' },
+  'Nor': { it:'Squadra', area:'165°q', season:'Estate', desc:'Piccola costellazione australe lungo la Via Lattea.' },
+  'Oct': { it:'Ottante', area:'291°q', season:'Estate', desc:'Contiene il Polo Sud celeste.' },
+  'Oph': { it:'Ofiuco', area:'948°q', season:'Estate', desc:'Costellazione zodiacale del portatore di serpente.' },
+  'Ori': { it:'Orione', area:'594°q', season:'Inverno', desc:'La costellazione più riconoscibile dell\'inverno.' },
+  'Pav': { it:'Pavone', area:'378°q', season:'Estate', desc:'Costellazione australe contenente la stella Peacock.' },
+  'Peg': { it:'Pegaso', area:'1.121°q', season:'Autunno', desc:'Il grande Quadrato di Pegaso.' },
+  'Per': { it:'Perseo', area:'615°q', season:'Inverno', desc:'Contiene la celebre stella variabile Algol.' },
+  'Phe': { it:'Fenice', area:'469°q', season:'Autunno', desc:'Costellazione australe a forma di fenice stilizzata.' },
+  'Pic': { it:'Pittore', area:'247°q', season:'Inverno', desc:'Piccola costellazione australe vicina a Canopo.' },
+  'PsA': { it:'Pesce Australe', area:'245°q', season:'Autunno', desc:'Contiene Fomalhaut, circondata da un disco di polveri.' },
+  'Psc': { it:'Pesci', area:'889°q', season:'Autunno', desc:'Costellazione zodiacale; contiene il punto vernale.' },
+  'Pup': { it:'Poppa', area:'673°q', season:'Inverno', desc:'Una delle tre costellazioni nate dalla nave Argo.' },
+  'Pyx': { it:'Bussola', area:'221°q', season:'Primavera', desc:'Piccola costellazione australe tra Poppa e Idra.' },
+  'Ret': { it:'Reticolo', area:'114°q', season:'Autunno', desc:'Piccola costellazione australe introdotta da Lacaille.' },
+  'Scl': { it:'Scultore', area:'475°q', season:'Autunno', desc:'Contiene il Polo Sud galattico.' },
+  'Sco': { it:'Scorpione', area:'497°q', season:'Estate', desc:'Contiene Antares, la stella più brillante della costellazione.' },
+  'Sct': { it:'Scudo', area:'109°q', season:'Estate', desc:'Piccola costellazione lungo la Via Lattea.' },
+  'Ser': { it:'Serpente', area:'637°q', season:'Estate', desc:'Unica costellazione divisa in due parti (Caput e Cauda).' },
+  'Sex': { it:'Sestante', area:'314°q', season:'Primavera', desc:'Piccola costellazione zodiacale vicina al Leone.' },
+  'Sge': { it:'Freccia', area:'80°q', season:'Estate', desc:'La terza costellazione più piccola del cielo.' },
+  'Sgr': { it:'Sagittario', area:'867°q', season:'Estate', desc:'Contiene il centro della Via Lattea e la nebulosa Laguna.' },
+  'Tau': { it:'Toro', area:'797°q', season:'Inverno', desc:'Contiene Aldebaran e le Pleiadi (M45).' },
+  'Tel': { it:'Telescopio', area:'252°q', season:'Estate', desc:'Piccola costellazione australe introdotta da Lacaille.' },
+  'TrA': { it:'Triangolo Australe', area:'110°q', season:'Estate', desc:'Piccola costellazione australe a forma di triangolo.' },
+  'Tri': { it:'Triangolo', area:'132°q', season:'Autunno', desc:'Piccola costellazione a forma triangolare.' },
+  'Tuc': { it:'Tucano', area:'295°q', season:'Autunno', desc:'Costellazione australe; contiene la Piccola Nube di Magellano.' },
+  'UMa': { it:'Orsa Maggiore', area:'1.280°q', season:'Primavera', desc:'La costellazione più famosa del nord; il Grande Carro.' },
+  'UMi': { it:'Orsa Minore', area:'256°q', season:'Tutto l\'anno', desc:'Contiene la Stella Polare.' },
+  'Vel': { it:'Vele', area:'500°q', season:'Primavera', desc:'Una delle tre costellazioni nate dalla nave Argo.' },
+  'Vir': { it:'Vergine', area:'1.294°q', season:'Primavera', desc:'Ricca di galassie; contiene Spica.' },
+  'Vol': { it:'Pesce Volante', area:'141°q', season:'Inverno', desc:'Piccola costellazione australe vicina a Carina.' },
+  'Vul': { it:'Volpetta', area:'268°q', season:'Estate', desc:'Contiene la nebulosa Manubrio (M27).' }
+};
+
+function applyConstellationMeta() {
+  if (typeof CONSTELLATIONS === 'undefined' || !Array.isArray(CONSTELLATIONS)) return;
+  CONSTELLATIONS.forEach(c => {
+    const meta = CONSTELLATION_META[c.abbr] || Object.values(CONSTELLATION_META).find(m => m.it === c.name);
+    if (!meta) return;
+    if (meta.it) c.name = meta.it;
+    if (!c.area || c.area === '—') c.area = meta.area;
+    if (!c.season || c.season === '—') c.season = meta.season;
+    if (!c.desc || c.desc === '—' || c.desc.startsWith('Costellazione ')) c.desc = meta.desc;
+  });
+}
+
+/* ============================================================
+   STAR FACTS
+   ============================================================ */
 const STAR_FACTS = {
-  "Polaris": { bayer:"α UMi", constellation:"Orsa Minore", dist:"433 anni luce", spec:"F7 Ib", mag:"1.98", temp:"6.000 K", lum:"1.260 L☉", radius:"46 R☉", mass:"5,4 M☉", var:"Cefeide", desc:"Stella Polare." },
-  "Sirio": { bayer:"α CMa", constellation:"Cane Maggiore", dist:"8,6 anni luce", spec:"A1 V", mag:"-1.46", temp:"9.940 K", lum:"25 L☉", radius:"1,7 R☉", mass:"2,0 M☉", var:"Binaria", desc:"La stella più luminosa del cielo." },
-  "Betelgeuse": { bayer:"α Ori", constellation:"Orione", dist:"~642 anni luce", spec:"M1-2 Ia", mag:"0.42", temp:"3.500 K", lum:"90.000 L☉", radius:"900 R☉", mass:"15 M☉", var:"Semi-regolare", desc:"Supergigante rossa." }
+  "Polaris":   { bayer:"α UMi", constellation:"Orsa Minore", dist:"433 a.l.", spec:"F7 Ib", mag:"1.98", temp:"6.000 K", lum:"1.260 L☉", radius:"46 R☉", mass:"5,4 M☉", var:"Cefeide", desc:"Stella Polare, indica il Nord celeste." },
+  "Sirio":     { bayer:"α CMa", constellation:"Cane Maggiore", dist:"8,6 a.l.", spec:"A1 V", mag:"-1.46", temp:"9.940 K", lum:"25 L☉", radius:"1,7 R☉", mass:"2,0 M☉", var:"Binaria", desc:"La stella più luminosa del cielo notturno." },
+  "Betelgeuse":{ bayer:"α Ori", constellation:"Orione", dist:"~642 a.l.", spec:"M1-2 Ia", mag:"0.42", temp:"3.500 K", lum:"90.000 L☉", radius:"900 R☉", mass:"15 M☉", var:"Semi-regolare", desc:"Supergigante rossa, spalla di Orione." },
+  "Rigel":     { bayer:"β Ori", constellation:"Orione", dist:"~860 a.l.", spec:"B8 Ia", mag:"0.13", temp:"11.000 K", lum:"120.000 L☉", radius:"78 R☉", mass:"21 M☉", var:"Semi-regolare", desc:"Supergigante blu, il piede sinistro di Orione." },
+  "Vega":      { bayer:"α Lyr", constellation:"Lira", dist:"25 a.l.", spec:"A0 Va", mag:"0.03", temp:"9.602 K", lum:"40 L☉", radius:"2,8 R☉", mass:"2,1 M☉", var:"—", desc:"Quinta stella più luminosa; vertice del Triangolo Estivo." },
+  "Arturo":    { bayer:"α Boo", constellation:"Boote", dist:"37 a.l.", spec:"K1.5 III", mag:"-0.05", temp:"4.290 K", lum:"170 L☉", radius:"25 R☉", mass:"1,1 M☉", var:"—", desc:"La stella più luminosa dell'emisfero nord." },
+  "Capella":   { bayer:"α Aur", constellation:"Auriga", dist:"43 a.l.", spec:"G8 III + G0 III", mag:"0.08", temp:"5.700 K", lum:"79 L☉", radius:"12 R☉", mass:"2,6 M☉", var:"—", desc:"Sistema quadruplo, la sesta stella più luminosa." },
+  "Aldebaran": { bayer:"α Tau", constellation:"Toro", dist:"65 a.l.", spec:"K5 III", mag:"0.86", temp:"3.910 K", lum:"425 L☉", radius:"44 R☉", mass:"1,2 M☉", var:"—", desc:"Gigante arancione, l'occhio del Toro." },
+  "Procyon":   { bayer:"α CMi", constellation:"Cane Minore", dist:"11,4 a.l.", spec:"F5 IV-V", mag:"0.34", temp:"6.530 K", lum:"6,9 L☉", radius:"2 R☉", mass:"1,5 M☉", var:"—", desc:"Una delle stelle più vicine al Sole." },
+  "Altair":    { bayer:"α Aql", constellation:"Aquila", dist:"17 a.l.", spec:"A7 Vn", mag:"0.76", temp:"7.550 K", lum:"10,6 L☉", radius:"1,8 R☉", mass:"1,8 M☉", var:"—", desc:"Vertice del Triangolo Estivo; ruota molto rapidamente." },
+  "Deneb":     { bayer:"α Cyg", constellation:"Cigno", dist:"~2.600 a.l.", spec:"A2 Ia", mag:"1.25", temp:"8.500 K", lum:"196.000 L☉", radius:"203 R☉", mass:"19 M☉", var:"Alfa Cygni", desc:"Supergigante bianca; vertice del Triangolo Estivo." },
+  "Regolo":    { bayer:"α Leo", constellation:"Leone", dist:"79 a.l.", spec:"B8 IVn", mag:"1.35", temp:"12.460 K", lum:"288 L☉", radius:"3,8 R☉", mass:"3,8 M☉", var:"—", desc:"Il 'piccolo re', la stella più brillante del Leone." },
+  "Spica":     { bayer:"α Vir", constellation:"Vergine", dist:"250 a.l.", spec:"B1 III-IV", mag:"0.97", temp:"22.400 K", lum:"12.100 L☉", radius:"7,5 R☉", mass:"11 M☉", var:"Binaria", desc:"Stella doppia spettroscopica." },
+  "Antares":   { bayer:"α Sco", constellation:"Scorpione", dist:"~550 a.l.", spec:"M1.5 Iab", mag:"0.96", temp:"3.660 K", lum:"75.900 L☉", radius:"680 R☉", mass:"15 M☉", var:"Semi-regolare", desc:"Il 'rivale di Marte', supergigante rossa." },
+  "Pollux":    { bayer:"β Gem", constellation:"Gemelli", dist:"34 a.l.", spec:"K0 III", mag:"1.14", temp:"4.865 K", lum:"43 L☉", radius:"9 R☉", mass:"1,9 M☉", var:"—", desc:"Gigante arancione, uno dei Gemelli." },
+  "Castore":   { bayer:"α Gem", constellation:"Gemelli", dist:"51 a.l.", spec:"A1 V", mag:"1.58", temp:"9.800 K", lum:"30 L☉", radius:"2,4 R☉", mass:"2,2 M☉", var:"Binaria", desc:"Sistema sestuplo." },
+  "Fomalhaut": { bayer:"α PsA", constellation:"Pesce Australe", dist:"25 a.l.", spec:"A3 V", mag:"1.17", temp:"8.590 K", lum:"16,6 L☉", radius:"1,8 R☉", mass:"1,9 M☉", var:"—", desc:"Circondata da un disco di polveri." },
+  "Canopo":    { bayer:"α Car", constellation:"Carena", dist:"310 a.l.", spec:"A9 II", mag:"-0.74", temp:"7.350 K", lum:"15.100 L☉", radius:"71 R☉", mass:"8 M☉", var:"—", desc:"Seconda stella più luminosa del cielo." },
+  "Achernar":  { bayer:"α Eri", constellation:"Eridano", dist:"139 a.l.", spec:"B6 Vpe", mag:"0.46", temp:"15.000 K", lum:"3.150 L☉", radius:"7 R☉", mass:"6,7 M☉", var:"—", desc:"Stella azzurra dalla forma molto schiacciata." },
+  "Rigil Kent":{ bayer:"α Cen", constellation:"Centauro", dist:"4,37 a.l.", spec:"G2 V + K1 V", mag:"-0.27", temp:"5.790 K", lum:"1,5 L☉", radius:"1,2 R☉", mass:"1,1 M☉", var:"Binaria", desc:"Sistema stellare più vicino al Sole." },
+  "Acrux":     { bayer:"α Cru", constellation:"Croce del Sud", dist:"320 a.l.", spec:"B0.5 IV", mag:"0.77", temp:"28.000 K", lum:"25.000 L☉", radius:"7 R☉", mass:"18 M☉", var:"Binaria", desc:"La stella più meridionale della Croce del Sud." },
+  "Bellatrix": { bayer:"γ Ori", constellation:"Orione", dist:"250 a.l.", spec:"B2 III", mag:"1.64", temp:"21.500 K", lum:"9.200 L☉", radius:"6 R☉", mass:"8,6 M☉", var:"—", desc:"'La guerriera', spalla sinistra di Orione." },
+  "Alnilam":   { bayer:"ε Ori", constellation:"Orione", dist:"~2.000 a.l.", spec:"B0 Ia", mag:"1.69", temp:"27.000 K", lum:"537.000 L☉", radius:"24 R☉", mass:"40 M☉", var:"Alfa Cygni", desc:"La stella centrale della Cintura di Orione." },
+  "Dubhe":     { bayer:"α UMa", constellation:"Orsa Maggiore", dist:"123 a.l.", spec:"K0 III", mag:"1.79", temp:"4.660 K", lum:"316 L☉", radius:"30 R☉", mass:"4,3 M☉", var:"—", desc:"La punta del Grande Carro." },
+  "Alioth":    { bayer:"ε UMa", constellation:"Orsa Maggiore", dist:"83 a.l.", spec:"A1 III-IVp", mag:"1.77", temp:"9.020 K", lum:"108 L☉", radius:"4 R☉", mass:"2,9 M☉", var:"—", desc:"La stella più brillante dell'Orsa Maggiore." },
+  "Alkaid":    { bayer:"η UMa", constellation:"Orsa Maggiore", dist:"104 a.l.", spec:"B3 V", mag:"1.86", temp:"16.820 K", lum:"700 L☉", radius:"3,4 R☉", mass:"6,1 M☉", var:"—", desc:"L'ultima stella del timone del Grande Carro." },
+  "Kochab":    { bayer:"β UMi", constellation:"Orsa Minore", dist:"131 a.l.", spec:"K4 III", mag:"2.08", temp:"4.030 K", lum:"390 L☉", radius:"42 R☉", mass:"2,2 M☉", var:"—", desc:"Una delle due stelle guardiane del polo nord celeste." },
+  "Algol":     { bayer:"β Per", constellation:"Perseo", dist:"93 a.l.", spec:"B8 V", mag:"2.09", temp:"13.000 K", lum:"182 L☉", radius:"3,5 R☉", mass:"3,2 M☉", var:"Eclissante", desc:"La 'stella del diavolo', prototipo delle binarie a eclisse." },
+  "Mirach":    { bayer:"β And", constellation:"Andromeda", dist:"197 a.l.", spec:"M0 III", mag:"2.07", temp:"3.800 K", lum:"1.900 L☉", radius:"100 R☉", mass:"3,5 M☉", var:"Semi-regolare", desc:"Gigante rossa nella costellazione di Andromeda." },
+  "Alphard":   { bayer:"α Hya", constellation:"Idra", dist:"177 a.l.", spec:"K3 II-III", mag:"2.00", temp:"4.120 K", lum:"780 L☉", radius:"50 R☉", mass:"3 M☉", var:"—", desc:"'Il solitario', unica stella brillante dell'Idra." }
 };
 function getStarInfo(star) {
   return STAR_FACTS[star.n] || {
@@ -1078,29 +1256,62 @@ function getStarInfo(star) {
    MESSIER
    ============================================================ */
 const MESSIER = {
-  "M1": {n:"M1 Granchio", ra:83.63, dec:22.01, type:"Nebulosa", mag:8.4, dist:"6.500 a.l.", desc:"Resto di supernova."},
-  "M8": {n:"M8 Laguna", ra:270.90, dec:-24.38, type:"Nebulosa", mag:6.0, dist:"4.100 a.l.", desc:"Nebulosa diffusa."},
-  "M13": {n:"M13 Ercole", ra:250.42, dec:36.46, type:"Ammasso", mag:5.8, dist:"25.100 a.l.", desc:"Ammasso globulare."},
-  "M31": {n:"M31 Andromeda", ra:10.68, dec:41.26, type:"Galassia", mag:3.4, dist:"2,5 M a.l.", desc:"Grande galassia spirale."},
-  "M42": {n:"M42 Orione", ra:83.82, dec:-5.39, type:"Nebulosa", mag:4.0, dist:"1.344 a.l.", desc:"La nebulosa più famosa."},
-  "M45": {n:"M45 Pleiadi", ra:56.75, dec:24.11, type:"Ammasso", mag:1.6, dist:"444 a.l.", desc:"L'ammasso aperto più famoso."},
-  "M51": {n:"M51 Vortice", ra:202.47, dec:47.19, type:"Galassia", mag:8.4, dist:"23 M a.l.", desc:"Galassia spirale."},
-  "M57": {n:"M57 Anello", ra:283.39, dec:33.02, type:"Nebulosa", mag:8.8, dist:"2.300 a.l.", desc:"Nebulosa planetaria."},
-  "M81": {n:"M81 Bode", ra:148.80, dec:69.06, type:"Galassia", mag:6.9, dist:"12 M a.l.", desc:"Galassia spirale."},
-  "M104": {n:"M104 Sombrero", ra:189.99, dec:-11.62, type:"Galassia", mag:8.0, dist:"29 M a.l.", desc:"Galassia vista di taglio."}
+  "M1":   {n:"M1 Granchio", ra:83.63, dec:22.01, type:"Nebulosa", mag:8.4, dist:"6.500 a.l.", desc:"Resto di supernova del 1054."},
+  "M2":   {n:"M2", ra:323.36, dec:-0.82, type:"Ammasso", mag:6.5, dist:"55.000 a.l.", desc:"Ammasso globulare in Acquario."},
+  "M3":   {n:"M3", ra:205.55, dec:28.38, type:"Ammasso", mag:6.2, dist:"33.900 a.l.", desc:"Ammasso globulare in Cani da Caccia."},
+  "M4":   {n:"M4", ra:245.90, dec:-26.53, type:"Ammasso", mag:5.9, dist:"7.200 a.l.", desc:"Ammasso globulare in Scorpione."},
+  "M5":   {n:"M5", ra:229.64, dec:2.08, type:"Ammasso", mag:5.6, dist:"24.500 a.l.", desc:"Ammasso globulare in Serpente."},
+  "M6":   {n:"M6 Farfalla", ra:265.07, dec:-32.22, type:"Ammasso", mag:4.2, dist:"1.600 a.l.", desc:"Ammasso aperto a forma di farfalla in Scorpione."},
+  "M7":   {n:"M7 Tolomeo", ra:268.46, dec:-34.79, type:"Ammasso", mag:3.3, dist:"980 a.l.", desc:"Ammasso aperto noto fin dall'antichità."},
+  "M8":   {n:"M8 Laguna", ra:270.90, dec:-24.38, type:"Nebulosa", mag:6.0, dist:"4.100 a.l.", desc:"Nebulosa diffusa in Sagittario."},
+  "M11":  {n:"M11 Anatre Selvatiche", ra:282.77, dec:-6.27, type:"Ammasso", mag:6.3, dist:"6.200 a.l.", desc:"Ammasso aperto in Scudo."},
+  "M13":  {n:"M13 Ercole", ra:250.42, dec:36.46, type:"Ammasso", mag:5.8, dist:"25.100 a.l.", desc:"Ammasso globulare in Ercole."},
+  "M15":  {n:"M15", ra:322.49, dec:12.17, type:"Ammasso", mag:6.2, dist:"33.600 a.l.", desc:"Ammasso globulare in Pegaso."},
+  "M16":  {n:"M16 Aquila", ra:274.70, dec:-13.78, type:"Nebulosa", mag:6.0, dist:"7.000 a.l.", desc:"Nebulosa Aquila, con i Pilastri della Creazione."},
+  "M17":  {n:"M17 Cigno", ra:275.20, dec:-16.17, type:"Nebulosa", mag:6.0, dist:"5.500 a.l.", desc:"Nebulosa Omega (o Cigno)."},
+  "M20":  {n:"M20 Trifida", ra:270.67, dec:-23.03, type:"Nebulosa", mag:6.3, dist:"5.200 a.l.", desc:"Nebulosa Trifida in Sagittario."},
+  "M22":  {n:"M22", ra:279.10, dec:-23.90, type:"Ammasso", mag:5.1, dist:"10.400 a.l.", desc:"Ammasso globulare in Sagittario."},
+  "M27":  {n:"M27 Manubrio", ra:299.90, dec:22.72, type:"Nebulosa", mag:7.4, dist:"1.360 a.l.", desc:"Nebulosa planetaria in Volpetta."},
+  "M31":  {n:"M31 Andromeda", ra:10.68, dec:41.26, type:"Galassia", mag:3.4, dist:"2,5 M a.l.", desc:"La grande galassia spirale di Andromeda."},
+  "M32":  {n:"M32", ra:10.67, dec:40.87, type:"Galassia", mag:8.1, dist:"2,5 M a.l.", desc:"Galassia satellite di M31."},
+  "M33":  {n:"M33 Triangolo", ra:23.46, dec:30.66, type:"Galassia", mag:5.7, dist:"2,7 M a.l.", desc:"Galassia spirale nella costellazione del Triangolo."},
+  "M35":  {n:"M35", ra:92.27, dec:24.33, type:"Ammasso", mag:5.3, dist:"2.800 a.l.", desc:"Ammasso aperto in Gemelli."},
+  "M42":  {n:"M42 Orione", ra:83.82, dec:-5.39, type:"Nebulosa", mag:4.0, dist:"1.344 a.l.", desc:"La nebulosa più famosa del cielo."},
+  "M44":  {n:"M44 Presepe", ra:130.10, dec:19.98, type:"Ammasso", mag:3.7, dist:"577 a.l.", desc:"Ammasso del Presepe in Cancro."},
+  "M45":  {n:"M45 Pleiadi", ra:56.75, dec:24.11, type:"Ammasso", mag:1.6, dist:"444 a.l.", desc:"L'ammasso aperto più famoso."},
+  "M51":  {n:"M51 Vortice", ra:202.47, dec:47.19, type:"Galassia", mag:8.4, dist:"23 M a.l.", desc:"Galassia spirale in Cani da Caccia."},
+  "M57":  {n:"M57 Anello", ra:283.39, dec:33.02, type:"Nebulosa", mag:8.8, dist:"2.300 a.l.", desc:"Nebulosa planetaria in Lira."},
+  "M63":  {n:"M63 Girasole", ra:198.84, dec:42.03, type:"Galassia", mag:8.6, dist:"27 M a.l.", desc:"Galassia spirale in Cani da Caccia."},
+  "M64":  {n:"M64 Occhio Nero", ra:194.18, dec:21.68, type:"Galassia", mag:8.5, dist:"17 M a.l.", desc:"Galassia Occhio Nero in Chioma di Berenice."},
+  "M65":  {n:"M65", ra:169.73, dec:13.09, type:"Galassia", mag:9.3, dist:"35 M a.l.", desc:"Galassia del Tripletto del Leone."},
+  "M66":  {n:"M66", ra:170.06, dec:12.99, type:"Galassia", mag:8.9, dist:"36 M a.l.", desc:"Galassia del Tripletto del Leone."},
+  "M78":  {n:"M78", ra:86.69, dec:0.08, type:"Nebulosa", mag:8.3, dist:"1.600 a.l.", desc:"Nebulosa a riflessione in Orione."},
+  "M81":  {n:"M81 Bode", ra:148.80, dec:69.06, type:"Galassia", mag:6.9, dist:"12 M a.l.", desc:"Galassia spirale in Orsa Maggiore."},
+  "M82":  {n:"M82 Sigaro", ra:148.97, dec:69.68, type:"Galassia", mag:8.4, dist:"12 M a.l.", desc:"Galassia con intensa formazione stellare."},
+  "M83":  {n:"M83 Girandola Australe", ra:204.25, dec:-29.87, type:"Galassia", mag:7.5, dist:"15 M a.l.", desc:"Galassia spirale in Idra."},
+  "M87":  {n:"M87", ra:187.71, dec:12.39, type:"Galassia", mag:8.6, dist:"53 M a.l.", desc:"Galassia ellittica gigante in Vergine."},
+  "M92":  {n:"M92", ra:259.28, dec:43.14, type:"Ammasso", mag:6.4, dist:"26.700 a.l.", desc:"Ammasso globulare in Ercole."},
+  "M97":  {n:"M97 Gufo", ra:168.70, dec:55.02, type:"Nebulosa", mag:9.9, dist:"2.600 a.l.", desc:"Nebulosa planetaria in Orsa Maggiore."},
+  "M101": {n:"M101 Girandola", ra:210.80, dec:54.35, type:"Galassia", mag:7.9, dist:"21 M a.l.", desc:"Galassia spirale in Orsa Maggiore."},
+  "M104": {n:"M104 Sombrero", ra:189.99, dec:-11.62, type:"Galassia", mag:8.0, dist:"29 M a.l.", desc:"Galassia vista di taglio in Vergine."},
+  "M106": {n:"M106", ra:184.74, dec:47.30, type:"Galassia", mag:8.4, dist:"24 M a.l.", desc:"Galassia spirale in Cani da Caccia."}
 };
 
 const NEBULAE_EXTRA = [
-  {n:"Nebulosa Velo (NGC6960)", ra:311.5, dec:30.7, type:"Nebulosa", mag:7.0, dist:"2.400 a.l.", desc:"Resto di supernova."},
-  {n:"Nebulosa Nord America (NGC7000)", ra:314.7, dec:44.3, type:"Nebulosa", mag:4.0, dist:"2.600 a.l.", desc:"Nebulosa a emissione."},
-  {n:"Nebulosa California (NGC1499)", ra:60.8, dec:36.4, type:"Nebulosa", mag:6.0, dist:"1.000 a.l.", desc:"Grande nebulosa."},
-  {n:"Nebulosa Rosetta (NGC2237)", ra:97.9, dec:5.0, type:"Nebulosa", mag:6.0, dist:"5.200 a.l.", desc:"Nebulosa a emissione."},
-  {n:"Nebulosa Cuore (IC1805)", ra:38.3, dec:61.3, type:"Nebulosa", mag:6.5, dist:"7.500 a.l.", desc:"Grande nebulosa."},
-  {n:"Nebulosa Helix (NGC7293)", ra:337.4, dec:-20.8, type:"Nebulosa", mag:7.3, dist:"700 a.l.", desc:"Nebulosa planetaria vicina."}
+  {n:"Nebulosa Velo (NGC6960)", ra:311.5, dec:30.7, type:"Nebulosa", mag:7.0, dist:"2.400 a.l.", desc:"Resto di supernova in Cigno."},
+  {n:"Nebulosa Nord America (NGC7000)", ra:314.7, dec:44.3, type:"Nebulosa", mag:4.0, dist:"2.600 a.l.", desc:"Nebulosa a emissione in Cigno."},
+  {n:"Nebulosa California (NGC1499)", ra:60.8, dec:36.4, type:"Nebulosa", mag:6.0, dist:"1.000 a.l.", desc:"Grande nebulosa a emissione in Perseo."},
+  {n:"Nebulosa Rosetta (NGC2237)", ra:97.9, dec:5.0, type:"Nebulosa", mag:6.0, dist:"5.200 a.l.", desc:"Nebulosa a emissione in Unicorno."},
+  {n:"Nebulosa Cuore (IC1805)", ra:38.3, dec:61.3, type:"Nebulosa", mag:6.5, dist:"7.500 a.l.", desc:"Grande nebulosa in Cassiopea."},
+  {n:"Nebulosa Helix (NGC7293)", ra:337.4, dec:-20.8, type:"Nebulosa", mag:7.3, dist:"700 a.l.", desc:"Nebulosa planetaria vicina in Acquario."},
+  {n:"Nebulosa Cono (NGC2264)", ra:100.24, dec:9.89, type:"Nebulosa", mag:3.9, dist:"2.700 a.l.", desc:"Regione di formazione stellare in Unicorno."},
+  {n:"Nebulosa Cocoon (IC5146)", ra:328.33, dec:47.27, type:"Nebulosa", mag:7.2, dist:"3.300 a.l.", desc:"Nebulosa a riflessione in Cigno."},
+  {n:"Nebulosa Bolla (NGC7635)", ra:350.20, dec:61.20, type:"Nebulosa", mag:10.0, dist:"11.000 a.l.", desc:"Bolla cosmica in Cassiopea."},
+  {n:"Nebulosa Pacman (NGC281)", ra:13.30, dec:56.62, type:"Nebulosa", mag:7.4, dist:"9.500 a.l.", desc:"Regione HII in Cassiopea."}
 ];
 
 /* ============================================================
-   COSTELLAZIONI (fallback, poi caricate dal server)
+   COSTELLAZIONI
    ============================================================ */
 let CONSTELLATIONS = [
   {name:"Orsa Maggiore", stars:[{ra:165.93,dec:61.75},{ra:165.46,dec:56.38},{ra:178.46,dec:53.69},{ra:183.86,dec:57.03},{ra:193.51,dec:55.96},{ra:200.98,dec:54.93},{ra:206.88,dec:49.31}], area:"1.280°q", season:"Primavera", desc:"La costellazione più famosa."},
@@ -1151,6 +1362,7 @@ async function loadConstellations() {
       });
       if (loaded.length > 20) {
         CONSTELLATIONS = loaded;
+        applyConstellationMeta();
         console.log(`✅ Caricate ${loaded.length} costellazioni dal server`);
         if (typeof rebuildCatalog === 'function') rebuildCatalog();
         return;
@@ -1375,7 +1587,7 @@ function switchTab(id, btn) {
   document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'tab-sky') { readInputs(); state.planets = calcPlanetsPrecise(state.currentTime); document.getElementById('timeSlider').value = 0; onSliderChange(); resetView(); }
+  if (id === 'tab-sky') { readInputs(); state.planets = calcPlanetsPrecise(state.currentTime); document.getElementById('timeSlider').value = 0; onSliderChange(); resetView(); updateInfoStrip(); }
   if (id === 'tab-tonight') { readInputs(); _planetCache.key = null; state.planets = calcPlanetsPrecise(state.currentTime); renderTonight(); }
   if (id === 'tab-catalog') renderCatalog();
   if (id === 'tab-scope') scopeInit();
@@ -1413,6 +1625,83 @@ function loadCity() {
   document.getElementById('msg-coord').innerText = `📍 ${city} selezionata`;
   document.getElementById('msg-coord').className = "msg success";
   updateAll();
+}
+
+/* ============================================================
+   WEB INFO — Sinbad/Wikipedia/Google
+   ============================================================ */
+const WIKI_MAP = {
+  'Sole': 'Sole',
+  'Luna': 'Luna',
+  'Mercurio': 'Mercurio_(astronomia)',
+  'Venere': 'Venere_(astronomia)',
+  'Marte': 'Marte_(astronomia)',
+  'Giove': 'Giove_(astronomia)',
+  'Saturno': 'Saturno_(astronomia)',
+  'Urano': 'Urano_(astronomia)',
+  'Nettuno': 'Nettuno_(astronomia)'
+};
+const STAR_INTL = {
+  'Sirio': 'Sirius', 'Arturo': 'Arcturus', 'Regolo': 'Regulus',
+  'Canopo': 'Canopus', 'Achernar': 'Achernar', 'Fomalhaut': 'Fomalhaut',
+  'Antares': 'Antares', 'Betelgeuse': 'Betelgeuse', 'Rigel': 'Rigel',
+  'Vega': 'Vega', 'Deneb': 'Deneb', 'Altair': 'Altair',
+  'Capella': 'Capella', 'Aldebaran': 'Aldebaran', 'Procyon': 'Procyon',
+  'Pollux': 'Pollux', 'Castore': 'Castor', 'Spica': 'Spica',
+  'Polaris': 'Polaris', 'Kochab': 'Kochab', 'Dubhe': 'Dubhe',
+  'Algol': 'Algol', 'Mirach': 'Mirach', 'Alphard': 'Alphard'
+};
+
+function openObjectWebInfo(name, type, cat) {
+  if (!name) return;
+  const n = String(name);
+  const t = String(type || '');
+  const c = String(cat || '');
+
+  // Pianeti, Sole, Luna → Wikipedia IT
+  const isSolar = t.includes('Pianeta') || t === 'Stella (Sole)' || t === 'Satellite naturale' || t === 'Satellite' ||
+                  Object.values(PLANET_IT).includes(n) || n === 'Sole' || n === 'Luna';
+  if (isSolar) {
+    const wikiName = WIKI_MAP[n] || n;
+    window.open('https://it.wikipedia.org/wiki/' + encodeURIComponent(wikiName), '_blank');
+    return;
+  }
+
+  // Costellazioni → Wikipedia IT
+  if (c === 'constellation' || t === 'Costellazione') {
+    window.open('https://it.wikipedia.org/wiki/' + encodeURIComponent(n), '_blank');
+    return;
+  }
+
+  // Stelle e oggetti deep-sky → SIMBAD
+  let simbadId = n;
+  const m = n.match(/^(M\d+)/);
+  if (m) simbadId = m[1];
+  const ngc = n.match(/\((NGC\d+|IC\d+)\)/);
+  if (ngc) simbadId = ngc[1];
+  simbadId = STAR_INTL[simbadId] || simbadId;
+
+  window.open('https://simbad.cds.unistra.fr/simbad/sim-id?Ident=' + encodeURIComponent(simbadId) + '&submit=submit+id', '_blank');
+}
+
+function openWebInfoFromDetail() {
+  const it = state.catalogDetailObj;
+  if (!it) { alert('Nessun oggetto selezionato.'); return; }
+  openObjectWebInfo(it.name, it.type, it.cat);
+}
+
+function openWebInfoFromSky() {
+  const obj = state.skyObject || state.target;
+  if (!obj) { alert('Nessun oggetto selezionato.'); return; }
+  let type = obj.type;
+  if (!type) {
+    if (obj.isSun) type = 'Stella (Sole)';
+    else if (obj.isMoon) type = 'Satellite';
+    else if (obj.n && Object.values(PLANET_IT).includes(obj.n)) type = 'Pianeta';
+    else if (obj.mag !== undefined) type = 'Stella';
+    else type = 'Oggetto';
+  }
+  openObjectWebInfo(obj.n || obj.name, type, obj.cat || '');
 }
 
 /* ============================================================
@@ -1539,20 +1828,27 @@ async function getIPLocation() {
 
 async function getLocation() {
   const msg = document.getElementById('msg-coord');
-  msg.innerText = "📡 Rilevamento..."; msg.className = "msg"; msg.style.color = "var(--accent)";
+  msg.innerText = "📡 Rilevamento GPS in corso..."; msg.className = "msg"; msg.style.color = "var(--accent)";
   await ensureLocationPermission();
   if (navigator.geolocation) {
     try {
-      const pos = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: false, timeout: 15000 }));
+      const pos = await new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }));
       applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS', pos.coords.accuracy);
       fetchWeather(); return;
-    } catch (err) { msg.innerText = "⚠️ GPS non disponibile, provo via IP..."; }
+    } catch (err) {
+      msg.innerText = "⚠️ GPS non disponibile, provo via IP (approssimativo)...";
+    }
   }
   try {
     const loc = await getIPLocation();
-    if (loc) { applyCoordinates(loc.lat, loc.lon, loc.city || 'IP', null); fetchWeather(); return; }
+    if (loc) {
+      applyCoordinates(loc.lat, loc.lon, loc.city || 'IP', null);
+      msg.innerHTML = `📍 <strong style="color:var(--warn);">Posizione IP approssimativa</strong> — provider: ${loc.city || 'sconosciuto'}. Non è GPS reale. Se impreciso, inserisci lat/lon manualmente o usa "GPS".`;
+      msg.className = "msg"; msg.style.color = "var(--warn)";
+      fetchWeather(); return;
+    }
   } catch (e) {}
-  msg.innerHTML = "⚠️ Impossibile rilevare."; msg.style.color = "var(--warn)";
+  msg.innerHTML = "⚠️ Impossibile rilevare la posizione."; msg.style.color = "var(--warn)";
 }
 
 function toggleGPSLive() {
@@ -1570,7 +1866,7 @@ function toggleGPSLive() {
   state.gpsLiveWatchId = navigator.geolocation.watchPosition(
     (pos) => applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS Live', pos.coords.accuracy),
     (err) => { if (err.code === 1) { document.getElementById('msg-coord').innerText = "❌ Permesso negato."; toggleGPSLive(); } },
-    { enableHighAccuracy: false, timeout: 15000, maximumAge: 5000 }
+    { enableHighAccuracy: true, timeout: 20000, maximumAge: 5000 }
   );
 }
 
@@ -1985,6 +2281,41 @@ canvas.addEventListener('click', e => {
   if (closest) { showSkyObjectPopup(closest); state.target = closest; drawMap(); }
 });
 
+/* ============================================================
+   STRISCIA INFO OGGETTO
+   ============================================================ */
+function updateInfoStrip() {
+  const nameEl = document.getElementById('stripObjName');
+  if (!nameEl) return;
+  const typeEl = document.getElementById('stripObjType');
+  const rdEl   = document.getElementById('stripObjRaDec');
+  const aaEl   = document.getElementById('stripObjAltAz');
+  const vEl    = document.getElementById('stripObjVis');
+  const obj = state.target;
+  if (!obj) {
+    nameEl.innerText = 'Nessun oggetto';
+    typeEl.innerText = '—'; rdEl.innerText = '—';
+    aaEl.innerText  = '—'; vEl.innerText  = '—';
+    vEl.className = 'v';
+    return;
+  }
+  let objType = obj.type;
+  if (!objType) {
+    if (obj.isSun) objType = 'Stella (Sole)';
+    else if (obj.isMoon) objType = 'Satellite';
+    else if (obj.n && Object.values(PLANET_IT).includes(obj.n)) objType = 'Pianeta';
+    else if (obj.mag !== undefined) objType = 'Stella';
+    else objType = 'Oggetto';
+  }
+  const pos = getAltAz(obj.ra, obj.dec, state.currentTime);
+  nameEl.innerText = obj.n || obj.name || 'Oggetto';
+  typeEl.innerText = objType;
+  rdEl.innerText   = `${obj.ra.toFixed(1)}° / ${obj.dec.toFixed(1)}°`;
+  aaEl.innerText   = `${pos.alt.toFixed(1)}° / ${pos.az.toFixed(1)}°`;
+  vEl.innerText    = pos.alt > 0 ? '✅ Sopra orizzonte' : '❌ Sotto orizzonte';
+  vEl.className    = 'v ' + (pos.alt > 0 ? 'ok' : 'bad');
+}
+
 function showSkyObjectPopup(obj) {
   state.skyObject = obj;
   state.target = obj;
@@ -2005,14 +2336,13 @@ function showSkyObjectPopup(obj) {
   if (obj.dist) rows += `<div class="popup-row"><div class="k">Distanza</div><div class="v">${obj.dist}</div></div>`;
   if (obj.desc) rows += `<div class="popup-row" style="grid-column:1/-1;"><div class="k">Descrizione</div><div class="v">${obj.desc}</div></div>`;
   grid.innerHTML = rows;
-  // MODIFICA: scroll automatico per mostrare mappa + popup subito sotto la mappa
   setTimeout(() => {
-    const card = document.querySelector('#tab-sky .card');
-    if (card) {
+    const wrapper = document.querySelector('.skymap-wrapper');
+    if (wrapper) {
       const header = document.querySelector('header');
       const headerH = header ? header.offsetHeight : 0;
-      const cardRect = card.getBoundingClientRect();
-      const scrollTarget = window.scrollY + cardRect.top - headerH - 5;
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const scrollTarget = window.scrollY + wrapperRect.top - headerH - 5;
       window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
     }
   }, 100);
@@ -2021,11 +2351,13 @@ function showSkyObjectPopup(obj) {
   setTimeout(() => {
     buildObservationChart(obj.n || obj.name, obj.ra, obj.dec, null, type, 'sky-popup-obs-chart');
   }, 50);
+  updateInfoStrip();
 }
 
 function closeSkyObjectPopup() {
   document.getElementById('skyObjectPopup').classList.remove('open');
   state.skyObject = null;
+  updateInfoStrip();
 }
 
 function sendSkyTargetToTelescope() {
@@ -2043,7 +2375,7 @@ function sendSkyTargetToTelescope() {
 
 function showInfo(obj) {
   const pos = getAltAz(obj.ra, obj.dec, state.currentTime);
-  document.getElementById('info-title').innerText = obj.n;
+  document.getElementById('info-title').innerText = '📍 Oggetto selezionato: ' + obj.n;
   document.getElementById('info-ra').innerText = `${obj.ra.toFixed(2)}°`;
   document.getElementById('info-dec').innerText = `${obj.dec.toFixed(2)}°`;
   document.getElementById('info-alt').innerText = `${pos.alt.toFixed(1)}°`;
@@ -2062,7 +2394,7 @@ function onSliderChange() {
   document.getElementById('sliderTimeDisplay').innerText = `${h}:${min} (${day}) · ${offStr}`;
   _planetCache.key = null;
   state.planets = calcPlanetsPrecise(state.currentTime);
-  if (document.getElementById('tab-sky').classList.contains('active')) { drawMap(); if (state.target) showInfo(state.target); }
+  if (document.getElementById('tab-sky').classList.contains('active')) { drawMap(); if (state.target) showInfo(state.target); updateInfoStrip(); }
   if (document.getElementById('tab-tonight').classList.contains('active')) renderTonight();
   if (scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) { scopeUpdateUI(); scopeDraw(); if (scopeState.target) scopeRefreshTargetData(); }
 }
@@ -2323,14 +2655,15 @@ function reloadPreview() {
   if (url) loadPreviewImage(url);
 }
 function closePreview() { document.getElementById('preview-modal').classList.remove('open'); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePreview(); closeCatDetail(); closeSolarModal(); closeSkyObjectPopup(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePreview(); closeCatDetail(); closeSolarModal(); closeMoonModal(); closeSkyObjectPopup(); } });
 
 /* ============================================================
    SOLAR MODAL
    ============================================================ */
 function openSolarModal() {
   const grid = document.getElementById('solar-detail-grid');
-  let distAU = "—", raSun = "—", decSun = "—", altSun = "—", azSun = "—";
+  let distAU = "—", distKm = "—", raSun = "—", decSun = "—", altSun = "—", azSun = "—";
+  let sunAlt = -90;
   if (typeof Astronomy !== 'undefined') {
     try {
       const obs = new Astronomy.Observer(state.lat, state.lon, 0);
@@ -2338,24 +2671,118 @@ function openSolarModal() {
       const sunEq = Astronomy.Equator(Astronomy.Body.Sun, time, obs, true, true);
       const sunHor = Astronomy.Horizon(time, obs, sunEq.ra, sunEq.dec, 'normal');
       const vec = Astronomy.GeoVector(Astronomy.Body.Sun, time, false);
-      distAU = vec.Length().toFixed(4) + " UA";
+      const dist = vec.Length();
+      distAU = dist.toFixed(4) + " UA";
+      distKm = Math.round(dist * 149597870.7).toLocaleString('it-IT') + " km";
       raSun = (sunEq.ra * 15).toFixed(2) + "°";
       decSun = sunEq.dec.toFixed(2) + "°";
       altSun = sunHor.altitude.toFixed(1) + "°";
       azSun = sunHor.azimuth.toFixed(1) + "°";
+      sunAlt = sunHor.altitude;
     } catch(e) {}
   }
+  const tStd = getSunTimesPure(state.lat, state.lon, state.currentTime, -0.833);
+  const tNaut = getSunTimesPure(state.lat, state.lon, state.currentTime, -12);
+  const tAstro = getSunTimesPure(state.lat, state.lon, state.currentTime, -18);
+  const fmt = d => d ? d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '—';
   const yr = state.currentTime.getFullYear();
   const phase = (yr >= 2024 && yr <= 2026) ? "Massimo Solare (Ciclo 25)" : "Fase di transizione";
+  const stateStr = sunAlt > -0.833 ? "☀️ Giorno" : sunAlt > -6 ? "🌆 Crepuscolo civile" : sunAlt > -12 ? "🌃 Crepuscolo nautico" : sunAlt > -18 ? "🌌 Crepuscolo astronomico" : "🌑 Notte";
   grid.innerHTML = `
-    <div class="detail-row"><div class="dl">Distanza Terra-Sole</div><div class="dv">${distAU}</div></div>
+    <div class="detail-row"><div class="dl">Stato attuale</div><div class="dv">${stateStr}</div></div>
     <div class="detail-row"><div class="dl">Ciclo Solare</div><div class="dv" style="color:var(--warn);">${phase}</div></div>
+    <div class="detail-row"><div class="dl">Distanza Terra-Sole</div><div class="dv">${distAU}</div></div>
+    <div class="detail-row"><div class="dl">Distanza (km)</div><div class="dv">${distKm}</div></div>
     <div class="detail-row"><div class="dl">RA / Dec</div><div class="dv">${raSun} / ${decSun}</div></div>
     <div class="detail-row"><div class="dl">Alt / Az</div><div class="dv">${altSun} / ${azSun}</div></div>
+    <div class="detail-row"><div class="dl">Alba</div><div class="dv">${fmt(tStd?.rise)}</div></div>
+    <div class="detail-row"><div class="dl">Tramonto</div><div class="dv">${fmt(tStd?.set)}</div></div>
+    <div class="detail-row"><div class="dl">Alba Nautica</div><div class="dv">${fmt(tNaut?.rise)}</div></div>
+    <div class="detail-row"><div class="dl">Tramonto Nautico</div><div class="dv">${fmt(tNaut?.set)}</div></div>
+    <div class="detail-row"><div class="dl">Alba Astronomica</div><div class="dv">${fmt(tAstro?.rise)}</div></div>
+    <div class="detail-row"><div class="dl">Tramonto Astronomico</div><div class="dv">${fmt(tAstro?.set)}</div></div>
   `;
   document.getElementById('solar-modal').classList.add('open');
 }
 function closeSolarModal() { document.getElementById('solar-modal').classList.remove('open'); }
+
+/* ============================================================
+   MOON MODAL
+   ============================================================ */
+function getNextMoonPhases(count = 4) {
+  if (typeof Astronomy === 'undefined') return [];
+  const results = [];
+  const targets = [
+    { angle: 0, name: 'Luna Nuova', icon: '🌑' },
+    { angle: 90, name: 'Primo Quarto', icon: '🌓' },
+    { angle: 180, name: 'Luna Piena', icon: '🌕' },
+    { angle: 270, name: 'Ultimo Quarto', icon: '🌗' }
+  ];
+  try {
+    const startTime = new Astronomy.AstroTime(state.currentTime);
+    for (const t of targets) {
+      try {
+        const res = Astronomy.SearchMoonPhase(t.angle, startTime, 40);
+        if (res && res.date) results.push({ ...t, date: res.date });
+      } catch(e) {}
+    }
+  } catch(e) {}
+  return results.sort((a, b) => a.date - b.date).slice(0, count);
+}
+
+function openMoonModal() {
+  const m = getExactMoonData(state.currentTime);
+  const pos = calcSunMoonPrecise(state.currentTime).find(p => p.isMoon);
+  const night = getNightWindow(state.currentTime);
+  const moonTimes = getMoonRiseSet(state.lat, state.lon, night ? night.start : state.currentTime);
+  const fmt = d => d ? d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '—';
+  const fmtDate = d => d ? d.toLocaleDateString('it-IT', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '—';
+
+  let distKm = '—', age = '—', diameter = '—';
+  if (typeof Astronomy !== 'undefined') {
+    try {
+      const time = new Astronomy.AstroTime(state.currentTime);
+      const vec = Astronomy.GeoVector(Astronomy.Body.Moon, time, false);
+      const distAU = vec.Length();
+      distKm = Math.round(distAU * 149597870.7).toLocaleString('it-IT') + ' km';
+      const phaseAngleDeg = Astronomy.MoonPhase(time);
+      age = (phaseAngleDeg / 360 * 29.53).toFixed(1) + ' giorni';
+      const moonRadiusKm = 1737.4;
+      const angularDiameter = 2 * Math.atan(moonRadiusKm / (distAU * 149597870.7));
+      diameter = (angularDiameter * 180 / Math.PI * 60).toFixed(1) + "'";
+    } catch(e) {}
+  }
+
+  const emoji = m.illumPct < 2 ? '🌑' : m.illumPct < 45 ? (m.isWaxing ? '🌒' : '🌘') : m.illumPct < 55 ? (m.isWaxing ? '🌓' : '🌗') : m.illumPct < 98 ? (m.isWaxing ? '🌔' : '🌖') : '🌕';
+
+  const grid = document.getElementById('moon-detail-grid');
+  grid.innerHTML = `
+    <div class="detail-row"><div class="dl">Fase attuale</div><div class="dv">${emoji} ${m.name}</div></div>
+    <div class="detail-row"><div class="dl">Illuminazione</div><div class="dv">${m.illumPct.toFixed(1)}%</div></div>
+    <div class="detail-row"><div class="dl">Età della Luna</div><div class="dv">${age}</div></div>
+    <div class="detail-row"><div class="dl">Distanza Terra-Luna</div><div class="dv">${distKm}</div></div>
+    <div class="detail-row"><div class="dl">Diametro apparente</div><div class="dv">${diameter}</div></div>
+    <div class="detail-row"><div class="dl">RA / Dec</div><div class="dv">${pos ? pos.ra.toFixed(2) + '° / ' + pos.dec.toFixed(2) + '°' : '—'}</div></div>
+    <div class="detail-row"><div class="dl">Alt / Az</div><div class="dv">${pos ? pos.alt.toFixed(1) + '° / ' + pos.az.toFixed(1) + '°' : '—'}</div></div>
+    <div class="detail-row"><div class="dl">Sorge / Tramonta</div><div class="dv">${fmt(moonTimes.rise)} / ${fmt(moonTimes.set)}</div></div>
+  `;
+
+  const cal = document.getElementById('moon-calendar');
+  const phases = getNextMoonPhases(4);
+  if (phases.length > 0) {
+    cal.innerHTML = `
+      <div style="font-family:'Orbitron'; font-size:13px; color:var(--accent); margin:16px 0 10px; text-transform:uppercase; letter-spacing:1px;">📅 Prossime Fasi Lunari</div>
+      <div class="detail-grid">
+        ${phases.map(p => `<div class="detail-row"><div class="dl">${p.icon} ${p.name}</div><div class="dv" style="font-size:12px;">${fmtDate(p.date)}</div></div>`).join('')}
+      </div>
+    `;
+  } else {
+    cal.innerHTML = '';
+  }
+
+  document.getElementById('moon-modal').classList.add('open');
+}
+function closeMoonModal() { document.getElementById('moon-modal').classList.remove('open'); }
 
 /* ============================================================
    CATALOG
@@ -2477,7 +2904,7 @@ function catDetailGoto() {
   readInputs(); _planetCache.key = null; state.planets = calcPlanetsPrecise(state.currentTime);
   const pos = getAltAz(ra, dec, state.currentTime);
   state.camAlt = clamp(pos.alt, 0, 89); state.camAz = pos.az;
-  drawMap(); showInfo(state.target);
+  drawMap(); showInfo(state.target); updateInfoStrip();
 }
 
 function catDetailGotoTelescope() {
@@ -2660,12 +3087,21 @@ const scopeState = {
   parkAlt: 0, parkAz: 0,
   isParked: false,
   tracking: false, trackRate: 'sidereal',
+  trackingTarget: false,   /* ▶ true SOLO dopo GOTO esplicito */
   slewing: false, slewCancelled: false,
   target: null,
   camAlt: 45, camAz: 0, fov: 80,
   rate: 20,
   synced: false, syncFlashStart: 0,
+  connectFlashStart: 0,
   step: 1
+};
+
+/* Velocità di tracking (°/s) per i tre rate */
+const TRACKING_RATES = {
+  sidereal: 15.041 / 3600,
+  solar: 15.000 / 3600,
+  lunar: 14.492 / 3600
 };
 
 let scopeCanvasEl, scopeOverlayEl, scopeCtx, scopeOverlayCtx;
@@ -2676,6 +3112,49 @@ let scopeDragMode = null;
 let edgeMoveInterval = null;
 const SCOPE_MOUNT_GRAB_RADIUS = 34;
 const SLEW_SPEED_DEG = 3.5;
+
+/* Tracking loop continuo
+   - Se trackingTarget === true e target esiste → segue il target (dopo GOTO)
+   - Altrimenti → simula la rotazione terrestre alla velocità impostata
+*/
+let trackingRAF = null;
+let trackingLastTime = 0;
+
+function trackingLoop(time) {
+  if (!trackingRAF) return;
+  if (!scopeState.connected || !scopeState.tracking || scopeState.isParked) {
+    trackingRAF = null;
+    return;
+  }
+  const dt = trackingLastTime ? Math.min((time - trackingLastTime) / 1000, 0.2) : 0;
+  trackingLastTime = time;
+  if (dt > 0 && !scopeState.slewing && document.getElementById('tab-scope').classList.contains('active')) {
+    if (scopeState.trackingTarget && scopeState.target) {
+      /* Segue il target dopo GOTO esplicito */
+      const p = getAltAz(scopeState.target.ra, scopeState.target.dec, state.currentTime);
+      if (p.alt > 0) {
+        scopeState.mountAlt = p.alt;
+        scopeState.mountAz = p.az;
+      }
+    } else {
+      /* Rotazione terrestre alla velocità impostata */
+      const rate = TRACKING_RATES[scopeState.trackRate] || TRACKING_RATES.sidereal;
+      scopeState.mountAz = norm360(scopeState.mountAz + rate * dt);
+    }
+    scopeUpdateUI();
+    scopeDraw();
+  }
+  trackingRAF = requestAnimationFrame(trackingLoop);
+}
+function startTrackingLoop() {
+  if (trackingRAF) return;
+  trackingLastTime = 0;
+  trackingRAF = requestAnimationFrame(trackingLoop);
+}
+function stopTrackingLoop() {
+  if (trackingRAF) cancelAnimationFrame(trackingRAF);
+  trackingRAF = null;
+}
 
 function scopeLog(msg, type = '') {
   const body = document.getElementById('scopeLogBody');
@@ -2705,6 +3184,11 @@ function scopeSetMountType(type) {
 function scopeToggleConnect() {
   if (scopeState.connected) {
     scopeState.connected = false;
+    scopeState.tracking = false;
+    scopeState.trackingTarget = false;
+    stopTrackingLoop();
+    document.getElementById('scopeTrackBtn').innerText = "Track ON";
+    document.getElementById('scopeTrackBtn').className = "triton-btn";
     document.getElementById('scopeConnBadge').innerText = "DISCONNESSO";
     document.getElementById('scopeConnBadge').classList.remove('on');
     scopeLog("Disconnesso.", "warn");
@@ -2712,6 +3196,7 @@ function scopeToggleConnect() {
     scopeLog("Connessione in corso...", "");
     setTimeout(() => {
       scopeState.connected = true;
+      scopeState.connectFlashStart = performance.now();
       document.getElementById('scopeConnBadge').innerText = "CONNESSO";
       document.getElementById('scopeConnBadge').classList.add('on');
       scopeLog(`Connessione stabilita (${scopeState.protocol.toUpperCase()}).`, "ok");
@@ -2726,8 +3211,12 @@ function scopeToggleTracking() {
   const btn = document.getElementById('scopeTrackBtn');
   btn.innerText = scopeState.tracking ? "Track OFF" : "Track ON";
   btn.className = "triton-btn" + (scopeState.tracking ? " active" : "");
-  scopeLog(`Tracking ${scopeState.tracking ? 'ON' : 'OFF'}.`, scopeState.tracking ? "ok" : "warn");
+  const rateName = scopeState.trackRate === 'sidereal' ? 'Siderale' : scopeState.trackRate === 'solar' ? 'Solare' : 'Lunare';
+  const mode = scopeState.trackingTarget ? 'target' : 'rotazione terrestre';
+  scopeLog(`Tracking ${scopeState.tracking ? 'ON' : 'OFF'} (${rateName}, ${mode}).`, scopeState.tracking ? "ok" : "warn");
   scopeUpdateUI();
+  if (scopeState.tracking) startTrackingLoop();
+  else stopTrackingLoop();
 }
 
 function scopeSetTrackRate(rate) {
@@ -2832,7 +3321,9 @@ function scopeManualMove(dir) {
   if (dir.includes('left')) scopeState.mountAz = norm360(scopeState.mountAz - step);
   if (dir.includes('right')) scopeState.mountAz = norm360(scopeState.mountAz + step);
   scopeState.tracking = false;
+  scopeState.trackingTarget = false;
   scopeState.synced = false;
+  stopTrackingLoop();
   document.getElementById('scopeTrackBtn').innerText = "Track ON";
   document.getElementById('scopeTrackBtn').className = "triton-btn";
   scopeUpdateUI(); scopeDraw();
@@ -2842,6 +3333,7 @@ function startEdgeMove(dir) {
   if (!scopeState.connected || scopeState.isParked) return;
   scopeState.movingEdge = dir;
   scopeState.synced = false;
+  scopeState.trackingTarget = false;
   const step = () => {
     if (!scopeState.movingEdge) return;
     const s = scopeState.rate * 0.08;
@@ -2850,6 +3342,7 @@ function startEdgeMove(dir) {
     if (dir === 'E') scopeState.mountAz = norm360(scopeState.mountAz + s);
     if (dir === 'O') scopeState.mountAz = norm360(scopeState.mountAz - s);
     scopeState.tracking = false;
+    stopTrackingLoop();
     document.getElementById('scopeTrackBtn').innerText = "Track ON";
     document.getElementById('scopeTrackBtn').className = "triton-btn";
     scopeUpdateUI(); scopeDraw();
@@ -2874,6 +3367,7 @@ function scopeStopSlewing() {
   if (scopeState.slewing) {
     scopeState.slewCancelled = true;
     scopeState.slewing = false;
+    scopeState.trackingTarget = false;
     scopeLog("Movimento arrestato.", "warn");
     const btn = document.getElementById('scopeStepBtn');
     if (btn && scopeState.target) {
@@ -2886,8 +3380,10 @@ function scopeEmergencyStop() {
   scopeState.slewCancelled = true;
   scopeState.slewing = false;
   stopEdgeMove();
+  stopTrackingLoop();
   scopeState.movingEdge = null;
   scopeState.tracking = false;
+  scopeState.trackingTarget = false;
 
   const trackBtn = document.getElementById('scopeTrackBtn');
   if (trackBtn) { trackBtn.innerText = "Track ON"; trackBtn.className = "triton-btn"; }
@@ -2966,7 +3462,9 @@ function scopePark() {
   scopeMoveToContinuous(() => ({ alt: scopeState.parkAlt, az: scopeState.parkAz }), () => {
     scopeState.isParked = true;
     scopeState.tracking = false;
+    scopeState.trackingTarget = false;
     scopeState.synced = false;
+    stopTrackingLoop();
     document.getElementById('scopeTrackBtn').innerText = "Track ON";
     document.getElementById('scopeTrackBtn').className = "triton-btn";
     document.getElementById('parkOverlay').classList.add('open');
@@ -2990,6 +3488,7 @@ function scopeMeridianFlip() {
   if (scopeState.mountAlt < 0) scopeState.mountAlt = 0;
   if (scopeState.mountAlt > 90) scopeState.mountAlt = 90;
   scopeState.synced = false;
+  scopeState.trackingTarget = false;
   scopeLog("Meridian Flip eseguito (Az +180°, Alt specchiata).", "warn");
   scopeUpdateUI(); scopeDraw();
 }
@@ -3062,10 +3561,12 @@ function scopeStepAction() {
     scopeMoveToContinuous(getTargetCurrentAltAz, () => {
       scopeState.step = 2;
       scopeState.tracking = true;
+      scopeState.trackingTarget = true;   /* ▶ DOPO GOTO segue il target */
       document.getElementById('scopeTrackBtn').innerText = "Track OFF";
       document.getElementById('scopeTrackBtn').className = "triton-btn active";
-      scopeLog(`✓ ${t.name} raggiunto! Tracking ON. Premi CENTER per zoomare la mappa.`, "ok");
+      scopeLog(`✓ ${t.name} raggiunto! Tracking ON (target). Premi CENTER per zoomare la mappa.`, "ok");
       scopeUpdateStepUI();
+      startTrackingLoop();
     });
   } else if (scopeState.step === 2) {
     const btn = document.getElementById('scopeStepBtn');
@@ -3166,6 +3667,8 @@ function scopeSelectTarget(id, name, type, ra, dec, extra = {}) {
   scopeState.target = { id, name, type, ra, dec, mag: extra.mag, dist: extra.dist };
   scopeState.synced = false;
   scopeState.step = 1;
+  /* ▶ NON seguire il target finché non viene fatto GOTO */
+  scopeState.trackingTarget = false;
   document.getElementById('scopeTargetOverlay').classList.add('open');
   document.getElementById('scopeTargetName').innerText = name;
   document.getElementById('scopeTargetMeta').innerText = type;
@@ -3356,6 +3859,7 @@ function scopeCloseTarget() {
   document.getElementById('scopeTargetOverlay').classList.remove('open');
   scopeState.target = null;
   scopeState.synced = false;
+  scopeState.trackingTarget = false;
   scopeState.step = 1;
   scopeBuildCatalog(); scopeDraw();
 }
@@ -3370,7 +3874,7 @@ function scopeGotoMap() {
   readInputs(); _planetCache.key = null; state.planets = calcPlanetsPrecise(state.currentTime);
   const pos = getAltAz(ra, dec, state.currentTime);
   state.camAlt = clamp(pos.alt, 0, 89); state.camAz = pos.az;
-  drawMap(); showInfo(state.target);
+  drawMap(); showInfo(state.target); updateInfoStrip();
 }
 
 function scopeSlewToTarget() {
@@ -3386,12 +3890,14 @@ function scopeSlewToTarget() {
 
   scopeMoveToContinuous(getTargetCurrentAltAz, () => {
     scopeState.tracking = true;
+    scopeState.trackingTarget = true;   /* ▶ DOPO GOTO segue il target */
     document.getElementById('scopeTrackBtn').innerText = "Track OFF";
     document.getElementById('scopeTrackBtn').className = "triton-btn active";
     if (panelBtn) { panelBtn.disabled = false; panelBtn.innerText = '✓ OK'; }
     scopeState.step = 2;
     scopeUpdateStepUI();
-    scopeLog(`✓ ${t.name} raggiunto. Tracking ON.`, "ok");
+    scopeLog(`✓ ${t.name} raggiunto. Tracking ON (target).`, "ok");
+    startTrackingLoop();
     setTimeout(() => { if (panelBtn) { panelBtn.innerText = '🎯 GOTO'; } }, 1800);
   }, 'scopePanelGotoBtn');
 }
@@ -3632,6 +4138,23 @@ function scopeDrawOverlay() {
   const now = performance.now();
 
   const mPt = scopeProject(scopeState.mountAlt, scopeState.mountAz);
+
+  if (scopeState.connectFlashStart > 0 && mPt.visible) {
+    const elapsed = now - scopeState.connectFlashStart;
+    if (elapsed < 2500) {
+      for (let i = 0; i < 3; i++) {
+        const phase = ((elapsed / 2500) + i / 3) % 1;
+        const radius = 30 + phase * 140;
+        const alpha = (1 - phase) * 0.85;
+        ctx.strokeStyle = `rgba(74,222,128,${alpha})`;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(mPt.x, mPt.y, radius, 0, Math.PI*2);
+        ctx.stroke();
+      }
+    }
+  }
+
   if (mPt.visible) {
     ctx.save();
     ctx.shadowColor = '#ff4466'; ctx.shadowBlur = 10;
@@ -3782,7 +4305,6 @@ function scopeZoomIn() { scopeState.fov = clamp(scopeState.fov - 10, 10, 150); s
 function scopeZoomOut() { scopeState.fov = clamp(scopeState.fov + 10, 10, 150); scopeDraw(); }
 function scopeRecenter() { scopeState.camAlt = scopeState.mountAlt; scopeState.camAz = scopeState.mountAz; scopeDraw(); }
 
-/* MODIFICA: helper per rilevare click vicino alle frecce direzionali (buffer di sicurezza) */
 function isInArrowZone(pos) {
   const pad = 14;
   const sz = 54 + pad * 2;
@@ -3807,7 +4329,6 @@ function scopeAttachEvents() {
 
   const onStart = (e) => {
     const pos = getPos(e);
-    // MODIFICA: se il click è nella zona buffer delle frecce, ignora
     if (isInArrowZone(pos)) return;
     const mPt = scopeProject(scopeState.mountAlt, scopeState.mountAz);
     const distToMount = mPt.visible ? Math.hypot(pos.x - mPt.x, pos.y - mPt.y) : 999;
@@ -3846,7 +4367,9 @@ function scopeAttachEvents() {
       const sky = scopeUnproject(pos.x, pos.y);
       if (sky.alt > 0) {
         scopeState.tracking = false;
+        scopeState.trackingTarget = false;
         scopeState.synced = false;
+        stopTrackingLoop();
         scopeState.mountAlt = sky.alt;
         scopeState.mountAz = sky.az;
         scopeUpdateUI(); scopeDraw();
@@ -3864,11 +4387,9 @@ function scopeAttachEvents() {
   };
 
   const onEnd = (e) => {
-    // MODIFICA: se non c'è stato mousedown sul canvas (es. click sulle frecce), esci subito
     if (!scopeIsDragging) return;
     const pos = getPos(e.changedTouches ? e.changedTouches[0] : e);
     if (!scopeDragMoved) {
-      // Ulteriore controllo: se il click è in zona frecce, ignora
       if (isInArrowZone(pos)) {
         scopeIsDragging = false;
         scopeDragMode = null;
@@ -3948,13 +4469,6 @@ function scopeInit() {
 
 setInterval(() => {
   if (scopeState.connected && scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) {
-    if (scopeState.tracking && scopeState.target && !scopeState.slewing) {
-      const p = getAltAz(scopeState.target.ra, scopeState.target.dec, state.currentTime);
-      if (p.alt > 0) {
-        scopeState.mountAlt = p.alt;
-        scopeState.mountAz = p.az;
-      }
-    }
     scopeBuildCatalog();
     scopeDraw();
     if (scopeState.target) scopeRefreshTargetData();
@@ -3989,10 +4503,14 @@ window.onload = async () => {
   if (savedAllSky) document.getElementById('allsky-url').value = savedAllSky;
 
   populateProvinces();
-  loadConstellations().then(() => { rebuildCatalog(); });
+  loadConstellations().then(() => {
+    applyConstellationMeta();
+    rebuildCatalog();
+  });
 
   updateAll();
   checkGPSAvailability();
+  updateInfoStrip();
 };
 </script>
 </body>
