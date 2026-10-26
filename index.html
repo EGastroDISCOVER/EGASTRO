@@ -2775,6 +2775,57 @@ window.addEventListener('load', async () => {
       console.log('✅ Telescopio arrivato!');
     }
   });
+  /* ============================================================
+   PULSANTE DI APERTURA TELESCOPIO (Versione Sicura)
+   ============================================================ */
+(function() {
+  // Assicuriamoci che parta solo quando la pagina è pronta
+  function creaPulsante() {
+    // Se esiste già, non fare nulla (evita duplicati)
+    if (document.getElementById('btn-apri-telescopio')) return;
+
+    // Crea il pulsante
+    const btn = document.createElement('button');
+    btn.id = 'btn-apri-telescopio';
+    btn.innerText = "🔭 Apri App Telescopio";
+    
+    // Stile: Pulsante giallo flottante in basso a destra
+    btn.style.cssText = "position:fixed; bottom:20px; right:20px; z-index:999999; padding:15px 25px; background:#d4af37; color:#000; font-weight:bold; border-radius:50px; border:none; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.6); font-size:16px; font-family:sans-serif; transition: all 0.3s ease;";
+
+    // Effetto Hover
+    btn.onmouseenter = () => { btn.style.transform = 'scale(1.05)'; btn.style.background = '#f3e5ab'; };
+    btn.onmouseleave = () => { btn.style.transform = 'scale(1)'; btn.style.background = '#d4af37'; };
+
+    // Azione al click
+    btn.onclick = function() {
+      // Sostituisci con il tuo URL se diverso
+      const TELESCOPE_APP_URL = 'https://egastrodiscover.github.io/EGASTROmount/'; 
+      
+      // Recupera i dati attuali dell'app madre (se presenti)
+      let url = TELESCOPE_APP_URL;
+      if (window.state && window.state.lat) {
+        url += `?lat=${window.state.lat}&lon=${window.state.lon}`;
+        if (window.state.target && window.state.target.ra) {
+          url += `&targetName=${encodeURIComponent(window.state.target.n)}&targetRa=${window.state.target.ra}&targetDec=${window.state.target.dec}`;
+        }
+      }
+      
+      // Apre l'app del telescopio
+      window.open(url, 'EGASTROmountWindow');
+    };
+
+    // Aggiunge il pulsante alla pagina
+    document.body.appendChild(btn);
+    console.log("✅ Pulsante Telescopio aggiunto con successo!");
+  }
+
+  // Esegue la funzione in sicurezza
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', creaPulsante);
+  } else {
+    creaPulsante();
+  }
+})();
 </script>
 </body>
 </html>
