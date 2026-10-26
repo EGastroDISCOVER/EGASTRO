@@ -2752,85 +2752,74 @@ window.addEventListener('load', async () => {
   populateProvinces(); renderSavedPositions(); await loadConstellations(); await loadStarsCatalog(); updateAll(); checkGPSAvailability(); updateInfoStrip();
   const ref = getTonightReferenceDate(); _lastTonightRefDate = ref.getFullYear()+'-'+String(ref.getMonth()+1).padStart(2,'0')+'-'+String(ref.getDate()).padStart(2,'0');
 });
-  /* ============================================================
-   INTEGRAZIONE CON APP MADRE — aggiunto in fondo
+/* ============================================================
+   INTEGRAZIONE CON APP TELESCOPIO (Cross-Origin via URL + postMessage)
    ============================================================ */
 (function() {
-  const SYNC_CHANNEL_NAME = 'egastro_mount_sync';
-  let mountChannel = null;
+  // URL ESATTO DELLA TUA SECONDA REPOSITORY
+  // Sostituisci 'TUONOME' con il tuo username GitHub (quello che vedi nella barra degli indirizzi)
+  const TELESCOPE_APP_URL = 'https://TUONOME.github.io/EGASTROmount/'; 
+  
+  let telescopeWindow = null;
 
-  try {
-    if ('BroadcastChannel' in window) {
-      mountChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
-      mountChannel.onmessage = (event) => {
-        const msg = event.data;
-        if (msg.type === 'goto_command' && msg.data.target) {
-          console.log('📥 Ricevuto GOTO:', msg.data.target);
-          MS.tRA = msg.data.target.ra * DEG_TO_RAD;
-          MS.tDEC = msg.data.target.dec * DEG_TO_RAD;
-          MS.slewMode = 'goto';
-          MS.slewStartDist = 1;
-          MS.customGotoRate = null;
-          showToast('🎯 GOTO ricevuto da EGastro DISCOVER');
-        }
-      };
+  // Ascolta i messaggi che arrivano dall'app del telescopio
+  window.addEventListener('message', (event) => {
+    // Accetta messaggi solo dal dominio del telescopio
+    if (!event.origin.includes('EGASTROmount')) return; 
+    
+    const msg = event.data;
+    if (msg.type === 'mount_status_update') {
+      console.log('📍 Telescopio dice:', msg.data);
     }
-  } catch(e) { console.warn('BroadcastChannel non supportato', e); }
-
-  function loadSharedData() {
-    const params = new URLSearchParams(window.location.search);
-    const urlLat = parseFloat(params.get('lat'));
-    const urlLon = parseFloat(params.get('lon'));
-    const urlTargetName = params.get('targetName');
-    const urlTargetRa = parseFloat(params.get('targetRa'));
-    const urlTargetDec = parseFloat(params.get('targetDec'));
-
-    if (!isNaN(urlLat) && !isNaN(urlLon)) {
-      MS.gpsLat = urlLat;
-      MS.gpsLon = urlLon;
-      MS.gpsActive = true;
-      console.log('📍 Coordinate da URL:', urlLat, urlLon);
+    if (msg.type === 'goto_completed') {
+      console.log('✅ Telescopio arrivato!');
     }
-    if (urlTargetName && !isNaN(urlTargetRa) && !isNaN(urlTargetDec)) {
-      console.log('🎯 Target da URL:', urlTargetName, urlTargetRa, urlTargetDec);
-      showToast(`🎯 Target: ${urlTargetName}`);
-    }
-
-    try {
-      const raw = localStorage.getItem('egastro_shared_data');
-      if (raw) {
-        const shared = JSON.parse(raw);
-        if (Date.now() - shared.timestamp < 5 * 60 * 1000) {
-          if (shared.lat && shared.lon) {
-            MS.gpsLat = shared.lat;
-            MS.gpsLon = shared.lon;
-            MS.gpsActive = true;
-          }
-          if (shared.target && shared.command === 'goto') {
-            showToast(`🎯 Target: ${shared.target.name}`);
-          }
-        }
-      }
-    } catch(e) { console.warn('Errore localStorage', e); }
-  }
-
-  function broadcastMountStatus() {
-    if (!mountChannel || !MS.connected) return;
-    try {
-      mountChannel.postMessage({
-        type: 'mount_status_update',
-        data: { alt: MS.dec, az: MS.ra, tracking: MS.tracking, connected: MS.connected }
-      });
-    } catch(e) {}
-  }
-
-  window.addEventListener('load', () => {
-    setTimeout(() => loadSharedData(), 500);
   });
 
-  setInterval(() => {
-    if (MS.connected) broadcastMountStatus();
-  }, 2000);
+  // Apre l'app del telescopio passando i dati nell'URL
+  window.openTelescopeApp = function() {
+    const params = new URLSearchParams({
+      lat: state.lat,
+      lon: state.lon,
+      targetName: state.target ? state.target.n : '',
+      targetRa: state.target ? state.target.ra : '',
+      targetDec: state.target ? state.target.dec : ''
+    });
+    
+    // Apriamo la finestra e teniamoci il riferimento per inviare comandi dopo
+    telescopeWindow = window.open(TELESCOPE_APP_URL + '?' + params.toString(), 'EGASTROmountWindow');
+  };
+
+  // Invia un comando GOTO in tempo reale se la finestra è aperta
+  window.sendGotoToTelescope = function(obj) {
+    const targetData = {
+      name: obj.n || obj.name,
+      ra: obj.ra,
+      dec: obj.dec,
+      type: obj.type || 'Oggetto'
+    };
+
+    if (telescopeWindow && !telescopeWindow.closed) {
+      // Se la finestra è già aperta, invia il messaggio senza ricaricare
+      telescopeWindow.postMessage({ type: 'goto_command', target: targetData }, '*');
+    } else {
+      // Se è chiusa, aprila passando il target nell'URL
+      const params = new URLSearchParams({
+        lat: state.lat, lon: state.lon,
+        targetName: targetData.name,
+        targetRa: targetData.ra,
+        targetDec: targetData.dec
+      });
+      telescopeWindow = window.open(TELESCOPE_APP_URL + '?' + params.toString(), 'EGASTROmountWindow');
+    }
+  };
+
+  // Aggiunge un pulsante visibile nell'interfaccia (in basso a destra)
+  const btn = document.createElement('button');
+  btn.innerText = "🔭 Apri App Telescopio";
+  btn.style = "position:fixed; bottom:20px; right:20px; z-index:99999; padding:15px 25px; background:#d4af37; color:#000; font-weight:bold; border-radius:50px; border:none; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.5); font-size:16px;";
+  btn.onclick = window.openTelescopeApp;
+  document.body.appendChild(btn);
 })();
 </script>
 </body>
