@@ -2752,6 +2752,73 @@ window.addEventListener('load', async () => {
   populateProvinces(); renderSavedPositions(); await loadConstellations(); await loadStarsCatalog(); updateAll(); checkGPSAvailability(); updateInfoStrip();
   const ref = getTonightReferenceDate(); _lastTonightRefDate = ref.getFullYear()+'-'+String(ref.getMonth()+1).padStart(2,'0')+'-'+String(ref.getDate()).padStart(2,'0');
 });
-</script>
+  
+</scrip/* ============================================================
+   INTEGRAZIONE CON APP TELESCOPIO — aggiunto in fondo
+   ============================================================ */
+(function() {
+  const TELESCOPE_APP_URL = './mount.html';   // <-- CAMBIA CON IL NOME REALE DEL FILE DELL'APP SATELLITE
+  const SYNC_CHANNEL_NAME = 'egastro_mount_sync';
+  let mountChannel = null;
+
+  try {
+    if ('BroadcastChannel' in window) {
+      mountChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+      mountChannel.onmessage = (event) => {
+        const msg = event.data;
+        if (msg.type === 'mount_status_update') {
+          console.log('📍 Telescopio:', msg.data);
+        }
+        if (msg.type === 'goto_completed') {
+          console.log('✅ Telescopio arrivato');
+        }
+      };
+    }
+  } catch(e) { console.warn('BroadcastChannel non supportato', e); }
+
+  window.openTelescopeApp = function() {
+    const params = new URLSearchParams({
+      lat: state.lat,
+      lon: state.lon,
+      targetName: state.target ? state.target.n : '',
+      targetRa: state.target ? state.target.ra : '',
+      targetDec: state.target ? state.target.dec : ''
+    });
+    const sharedData = {
+      lat: state.lat,
+      lon: state.lon,
+      target: state.target ? {
+        name: state.target.n,
+        ra: state.target.ra,
+        dec: state.target.dec,
+        type: state.target.type || 'Oggetto'
+      } : null,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('egastro_shared_data', JSON.stringify(sharedData));
+    window.open(TELESCOPE_APP_URL + '?' + params.toString(), '_blank');
+  };
+
+  window.sendGotoToTelescope = function(obj) {
+    const sharedData = {
+      lat: state.lat,
+      lon: state.lon,
+      target: {
+        name: obj.n || obj.name,
+        ra: obj.ra,
+        dec: obj.dec,
+        type: obj.type || 'Oggetto'
+      },
+      command: 'goto',
+      timestamp: Date.now()
+    };
+    localStorage.setItem('egastro_shared_data', JSON.stringify(sharedData));
+
+    if (mountChannel) {
+      mountChannel.postMessage({ type: 'goto_command', data: sharedData });
+    }
+    window.open(TELESCOPE_APP_URL + '?goto=1', '_blank');
+  };
+})();t>
 </body>
 </html>
