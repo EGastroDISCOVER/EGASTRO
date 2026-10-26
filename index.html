@@ -2776,50 +2776,128 @@ window.addEventListener('load', async () => {
     }
   });
 
-  // Apre l'app del telescopio passando i dati nell'URL
-  window.openTelescopeApp = function() {
-    const params = new URLSearchParams({
-      lat: state.lat,
-      lon: state.lon,
-      targetName: state.target ? state.target.n : '',
-      targetRa: state.target ? state.target.ra : '',
-      targetDec: state.target ? state.target.dec : ''
-    });
+ /* ============================================================
+   PULSANTE SFERICO FLOTTANTE — INVIA A MOUNT
+   ============================================================ */
+(function() {
+  // Inserisci qui l'URL della tua app telescopio (già testato)
+  const TELESCOPE_APP_URL = 'https://egastrodiscover.github.io/EGASTROmount/'; 
+  let telescopeWindow = null;
+
+  // 1. Crea l'elemento HTML del pulsante
+  const btnHTML = `
+    <a id="floating-mount-btn" onclick="inviaAlTelescopio()" title="Invia a Mount" style="
+      position: fixed; 
+      bottom: 30px; 
+      right: 30px; 
+      width: 64px; 
+      height: 64px; 
+      background: #0a1220; 
+      border: 2px solid #d4af37; 
+      border-radius: 50%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      cursor: pointer; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6), 0 0 20px rgba(212,175,55,0.3); 
+      z-index: 99999; 
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+      text-decoration: none; 
+      overflow: hidden;
+    ">
+      <!-- Icona del Telescopio (SVG) -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 32px; height: 32px; transition: all 0.3s ease;">
+        <path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path>
+        <path d="M7 16l-2 6"></path>
+        <path d="M3 22h8"></path>
+        <path d="M10 6l10-3 2 4-10 3-2-4z"></path>
+      </svg>
+      
+      <!-- Testo che appare all'hover -->
+      <span style="
+        position: absolute; 
+        right: 100%; 
+        margin-right: 15px; 
+        background: #d4af37; 
+        color: #000; 
+        font-family: 'Orbitron', sans-serif; 
+        font-weight: 700; 
+        font-size: 12px; 
+        padding: 6px 12px; 
+        border-radius: 6px; 
+        white-space: nowrap; 
+        opacity: 0; 
+        transform: translateX(10px); 
+        transition: all 0.3s ease; 
+        pointer-events: none;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      " id="floating-mount-tooltip">INVIA A MOUNT</span>
+    </a>
+  `;
+
+  // 2. Aggiunge il pulsante al body della pagina
+  document.body.insertAdjacentHTML('beforeend', btnHTML);
+
+  // 3. Gestione animazioni Hover
+  const btn = document.getElementById('floating-mount-btn');
+  const tooltip = document.getElementById('floating-mount-tooltip');
+  const svg = btn.querySelector('svg');
+
+  btn.addEventListener('mouseenter', () => {
+    btn.style.transform = 'scale(1.1)';
+    btn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.8), 0 0 30px rgba(212,175,55,0.6)';
+    btn.style.background = '#d4af37';
+    svg.style.stroke = '#000';
+    svg.style.transform = 'rotate(15deg)';
+    tooltip.style.opacity = '1';
+    tooltip.style.transform = 'translateX(0)';
+  });
+
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = 'scale(1)';
+    btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.6), 0 0 20px rgba(212,175,55,0.3)';
+    btn.style.background = '#0a1220';
+    svg.style.stroke = '#d4af37';
+    svg.style.transform = 'rotate(0deg)';
+    tooltip.style.opacity = '0';
+    tooltip.style.transform = 'translateX(10px)';
+  });
+
+  // 4. Funzione Globale per inviare l'oggetto selezionato (o solo aprire)
+  window.inviaAlTelescopio = function() {
+    // Prende i dati attuali dallo stato dell'app madre
+    const target = state.target;
     
-    // Apriamo la finestra e teniamoci il riferimento per inviare comandi dopo
-    telescopeWindow = window.open(TELESCOPE_APP_URL + '?' + params.toString(), 'EGASTROmountWindow');
-  };
-
-  // Invia un comando GOTO in tempo reale se la finestra è aperta
-  window.sendGotoToTelescope = function(obj) {
-    const targetData = {
-      name: obj.n || obj.name,
-      ra: obj.ra,
-      dec: obj.dec,
-      type: obj.type || 'Oggetto'
-    };
-
-    if (telescopeWindow && !telescopeWindow.closed) {
-      // Se la finestra è già aperta, invia il messaggio senza ricaricare
-      telescopeWindow.postMessage({ type: 'goto_command', target: targetData }, '*');
-    } else {
-      // Se è chiusa, aprila passando il target nell'URL
+    let url = TELESCOPE_APP_URL;
+    if (target && target.n && target.ra && target.dec) {
       const params = new URLSearchParams({
-        lat: state.lat, lon: state.lon,
-        targetName: targetData.name,
-        targetRa: targetData.ra,
-        targetDec: targetData.dec
+        lat: state.lat,
+        lon: state.lon,
+        targetName: target.n,
+        targetRa: target.ra,
+        targetDec: target.dec
       });
-      telescopeWindow = window.open(TELESCOPE_APP_URL + '?' + params.toString(), 'EGASTROmountWindow');
+      url += '?' + params.toString();
+    } else {
+      // Se non c'è un target, passa solo le coordinate GPS
+      const params = new URLSearchParams({ lat: state.lat, lon: state.lon });
+      url += '?' + params.toString();
+    }
+
+    // Invia in tempo reale se la finestra è già aperta
+    if (telescopeWindow && !telescopeWindow.closed && target) {
+      telescopeWindow.postMessage({ 
+        type: 'goto_command', 
+        target: { name: target.n, ra: target.ra, dec: target.dec, type: target.type } 
+      }, '*');
+      // Aggiunge un feedback visivo rapido sul pulsante
+      tooltip.innerText = "INVIATO!";
+      setTimeout(() => tooltip.innerText = "INVIA A MOUNT", 2000);
+    } else {
+      // Altrimenti apre l'app del telescopio
+      telescopeWindow = window.open(url, 'EGASTROmountWindow');
     }
   };
-
-  // Aggiunge un pulsante visibile nell'interfaccia (in basso a destra)
-  const btn = document.createElement('button');
-  btn.innerText = "🔭 Apri App Telescopio";
-  btn.style = "position:fixed; bottom:20px; right:20px; z-index:99999; padding:15px 25px; background:#d4af37; color:#000; font-weight:bold; border-radius:50px; border:none; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.5); font-size:16px;";
-  btn.onclick = window.openTelescopeApp;
-  document.body.appendChild(btn);
 })();
 </script>
 </body>
