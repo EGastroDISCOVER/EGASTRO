@@ -160,48 +160,6 @@
         .alt-limits-row > div { flex: 1; display: flex; flex-direction: column; gap: 4px; }
         .alt-limits-row span { font-size: 10px; color: #8a9bb5; text-transform: uppercase; letter-spacing: 0.5px; }
         .limits-section-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #d4af37; letter-spacing: 1px; text-transform: uppercase; margin-top: 15px; padding-bottom: 5px; border-bottom: 1px solid rgba(212, 175, 55, 0.3); }
-        
-        /* --- SPLASH SCREEN --- */
-        #splash-screen {
-            position: fixed;
-            inset: 0;
-            background: transparent;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        #splash-screen.fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-        #splash-screen img {
-            width: 300px;
-            max-width: 80vw;
-            border-radius: 50%;
-            
-            animation: pulse-logo 2s infinite alternate;
-        }
-        .splash-text {
-            color: #d4af37;
-            font-family: 'Orbitron', sans-serif;
-            margin-top: 30px;
-            font-size: 16px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            font-weight: 700;
-            animation: blink-text 1.5s infinite;
-        }
-        @keyframes pulse-logo {
-            0% { transform: scale(1); box-shadow: 0 0 30px rgba(212, 175, 55, 0.3); }
-            100% { transform: scale(1.05); box-shadow: 0 0 60px rgba(212, 175, 55, 0.8); }
-        }
-        @keyframes blink-text {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
 
         @media (max-width: 768px) {
             body { display: block; height: 100vh; height: 100dvh; overflow: hidden; }
@@ -261,12 +219,6 @@
     </style>
 </head>
 <body>
-    <!-- SPLASH SCREEN -->
-    <div id="splash-screen">
-        <img src="logo-mount.png" alt="EG ASTRO MOUNT Logo">
-        
-    </div>
-
     <div id="canvas-container"></div>
     <div class="top-bar">
         <div class="info-panel" id="info-panel">
@@ -1581,29 +1533,9 @@
         updateTrackingBtn(); updateInvertButtons(); updateGPSDisplay(); updateLinkButtons();
         updateToggleBtnPosition();
         
-        // --- GESTIONE SPLASH SCREEN ---
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
-            if (splash) {
-                splash.classList.add('fade-out');
-                setTimeout(() => splash.style.display = 'none', 1000);
-            }
-            showWelcomeModal(); // Mostra il popup dopo il logo
-        }, 2500); // 2.5 secondi di attesa
+        // Mostra subito il popup di benvenuto senza splash screen
+        showWelcomeModal();
     };
     </script>
 </body>
-    <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js')
-        .then(registration => {
-          console.log('ServiceWorker registrato con successo:', registration.scope);
-        })
-        .catch(error => {
-          console.log('Registrazione ServiceWorker fallita:', error);
-        });
-    });
-  }
-</script>
 </html>
