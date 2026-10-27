@@ -2726,12 +2726,12 @@ let _lastTonightRefDate = null;
 setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.getFullYear()+'-'+String(ref.getMonth()+1).padStart(2,'0')+'-'+String(ref.getDate()).padStart(2,'0'); if (_lastTonightRefDate === null) { _lastTonightRefDate = rs; return; } if (_lastTonightRefDate !== rs) { _lastTonightRefDate = rs; if (document.getElementById('tab-tonight').classList.contains('active')) { const now = new Date(); document.getElementById('date').value = rs; const t = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0'); document.getElementById('time').value = t; readInputs(); _planetCache.key = null; state.planets = calcPlanetsPrecise(state.currentTime); renderTonight(); } } } catch(e) {} }, 60000);
 </script>
 
-<!-- MENU A SCOMPARSA -->
+<!-- MENU A SCOMPARSA UNIFICATO -->
 <style>
-  #app-switcher-container { position: fixed; top: 50%; left: 0; transform: translateY(-50%) translateX(calc(-100% + 22px)); z-index: 999999; display: flex; align-items: stretch; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  #app-switcher-container { position: fixed; top: 50%; left: 0; transform: translateY(-50%) translateX(calc(-100% + 24px)); z-index: 999999; display: flex; align-items: center; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   #app-switcher-container.open { transform: translateY(-50%) translateX(0); }
-  #app-switcher-menu { background: rgba(10, 18, 32, 0.95); border: 1px solid rgba(212, 175, 55, 0.4); border-left: none; border-right: none; border-radius: 0 12px 12px 0; padding: 10px 8px; display: flex; flex-direction: column; gap: 10px; backdrop-filter: blur(15px); box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
-  #app-switcher-toggle { background: rgba(10, 18, 32, 0.95); border: 1px solid #d4af37; border-left: none; border-radius: 0 8px 8px 0; color: #d4af37; width: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); transition: all 0.3s; font-size: 11px; user-select: none; }
+  #app-switcher-menu { background: rgba(10, 18, 32, 0.95); border: 1px solid rgba(212, 175, 55, 0.4); border-left: none; border-radius: 0 12px 12px 0; padding: 10px 8px; display: flex; flex-direction: column; gap: 10px; backdrop-filter: blur(15px); box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
+  #app-switcher-toggle { background: rgba(10, 18, 32, 0.95); border: 1px solid #d4af37; border-left: none; border-radius: 0 8px 8px 0; color: #d4af37; width: 24px; height: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); transition: all 0.3s; font-size: 11px; user-select: none; }
   #app-switcher-toggle:hover { background: #d4af37; color: #000; }
   .app-switch-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; transition: all 0.3s; position: relative; pointer-events: auto !important; }
   .app-btn-telescope { border: 2px solid #d4af37; background: #0a1220; color: #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
@@ -2756,18 +2756,17 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 <script src="sync-bus.js"></script>
 <script>
 // ============================================================
-//  EGastro DISCOVER (PIANETA) — SyncBus Integration · v4.0
+//  EGastro DISCOVER (PIANETA) — SyncBus Integration · v5.0
 // ============================================================
 (function () {
   if (typeof SyncBus === 'undefined' || typeof scopeState === 'undefined') return;
+  let _isRemote = false;
 
-  // 1. Menu e Navigazione
   document.addEventListener('click', function(e) { 
     const container = document.getElementById('app-switcher-container');
     if (container && !container.contains(e.target)) { 
       container.classList.remove('open'); 
-      const btn = document.getElementById('app-switcher-toggle');
-      if(btn) btn.innerText = '▶'; 
+      const btn = document.getElementById('app-switcher-toggle'); if(btn) btn.innerText = '▶'; 
     } 
   });
 
@@ -2778,52 +2777,46 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   if (btnTele) {
     btnTele.addEventListener('click', function(e) {
       e.preventDefault();
+      // Invia GPS SOLO in questo momento
       SyncBus.send('sync_activate', { role: 'master', gpsLat: state.lat, gpsLon: state.lon, target: state.target || null });
       window.open('https://egastrodiscover.github.io/EGASTROmount/', 'EGASTRO_App');
     });
   }
 
-  // 2. Stato Ricevuto (Specchio fluido)
   let _peerConnected = false;
   SyncBus.on('mount_state', d => {
     if (!d) return;
     _peerConnected = !!d.connected;
     
-    // Se il satellite è connesso, il pianeta è connesso
-    scopeState.connected = _peerConnected;
-    scopeState.tracking = d.tracking && d.tracking !== 'off';
-    scopeState.isParked = !!d.isParked;
+    if (!_isRemote) {
+      scopeState.connected = _peerConnected;
+      scopeState.tracking = d.tracking && d.tracking !== 'off';
+      scopeState.isParked = !!d.isParked;
 
-    // Sincronizza Velocità
-    if (Number.isFinite(d.rate)) {
-      const map = { 0.005:1, 0.02:20, 0.06:50, 0.2:100 };
-      scopeState.rate = map[d.rate] || 20;
-      const rd = document.getElementById('scopeRateDisplay'); if (rd) rd.innerText = scopeState.rate + 'X';
+      if (Number.isFinite(d.rate)) {
+        const map = { 0.005:1, 0.02:20, 0.06:50, 0.2:100 };
+        scopeState.rate = map[d.rate] || 20;
+        const rd = document.getElementById('scopeRateDisplay'); if (rd) rd.innerText = scopeState.rate + 'X';
+      }
+
+      if (Number.isFinite(d.ra) && Number.isFinite(d.dec)) {
+        const p = getAltAz(d.ra * 180 / Math.PI, d.dec * 180 / Math.PI, state.currentTime);
+        if (Number.isFinite(p.alt) && Number.isFinite(p.az)) { scopeState.mountAlt = p.alt; scopeState.mountAz = p.az; }
+      }
+      
+      if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+      if (scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) {
+        if (typeof scopeDraw === 'function') scopeDraw();
+      }
     }
 
-    // Sincronizza Coordinate (senza scatti)
-    if (Number.isFinite(d.ra) && Number.isFinite(d.dec)) {
-      const p = getAltAz(d.ra * 180 / Math.PI, d.dec * 180 / Math.PI, state.currentTime);
-      if (Number.isFinite(p.alt) && Number.isFinite(p.az)) { scopeState.mountAlt = p.alt; scopeState.mountAz = p.az; }
-    }
-    
-    if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-    if (scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) {
-      if (typeof scopeDraw === 'function') scopeDraw();
-    }
-    
     const badge = document.getElementById('scopeConnBadge');
     if (badge) { badge.innerText = _peerConnected ? 'CONNESSO (satellite)' : 'DISCONNESSO'; badge.classList.toggle('on', _peerConnected); }
-    const tb = document.getElementById('scopeTrackBtn');
-    if (tb) { tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON'; tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : ''); }
-    const parkOv = document.getElementById('parkOverlay');
-    if (parkOv) parkOv.classList.toggle('open', !!d.isParked);
   });
 
-  // 3. GPS (Invia su richiesta o al caricamento)
   function broadcastGPS() {
-    if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
-      SyncBus.send('gps_update', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy, source: 'observatory' });
+    if (Number.isFinite(state.lat) && Number.isFinite(state.lon) && SyncBus.isPeerAlive()) {
+      SyncBus.send('gps_update', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
     }
   }
   const _origApply = window.applyCoordinates;
@@ -2834,25 +2827,21 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       return r;
     };
   }
-  
-  const _sendSyncActivate = () => {
-    broadcastGPS();
-    SyncBus.send('sync_activate', { role: 'master', gpsLat: state.lat, gpsLon: state.lon, target: state.target || null });
-  };
-  SyncBus.on('sync_request', _sendSyncActivate);
 
-  // 4. Comandi (Se peer c'è, NON eseguire localmente)
+  // Wrapping bidirezionale
   function wrapM(fnName, msgType, dataFn) {
     const orig = window[fnName]; if (typeof orig !== 'function') return;
     window[fnName] = function () {
-      if (!SyncBus.isPeerAlive()) {
-        return orig.apply(this, arguments);
+      if (SyncBus.isPeerAlive()) {
+        const data = dataFn ? dataFn.apply(this, arguments) : null;
+        if (data !== false) SyncBus.send(msgType, data);
+      } else {
+        try { orig.apply(this, arguments); } catch (e) {}
       }
-      const data = dataFn ? dataFn.apply(this, arguments) : null;
-      if (data !== false) SyncBus.send(msgType, data);
     };
   }
 
+  wrapM('scopeToggleConnect', 'cmd_connect', () => ({ on: !scopeState.connected }));
   wrapM('scopeSlewToTarget', 'cmd_goto', () => scopeState.target ? { ra: scopeState.target.ra, dec: scopeState.target.dec } : false);
   wrapM('scopeStopSlewing', 'cmd_stop');
   wrapM('scopeEmergencyStop', 'cmd_stop');
@@ -2861,30 +2850,9 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   wrapM('scopeHome', 'cmd_home');
   wrapM('scopeToggleTracking', 'cmd_tracking', () => ({ on: scopeState.tracking }));
   wrapM('scopeChangeRate', 'cmd_speed', () => { const map = { 1:0.005, 5:0.005, 10:0.02, 20:0.02, 50:0.06, 100:0.2 }; return { rate: map[scopeState.rate] || 0.02 }; });
-  wrapM('scopeManualMove', 'cmd_manual_start', dir => { SyncBus.send('cmd_manual_stop'); return { dir }; });
-  wrapM('startEdgeMove', 'cmd_manual_start', dir => ({ dir }));
-  wrapM('stopEdgeMove', 'cmd_manual_stop');
 
-  // 5. Comandi Ricevuti dallo Slave
-  SyncBus.on('cmd_connect', d => {
-    if (d && d.on !== scopeState.connected) {
-      // Esegue la connessione locale reale (bypassando il wrapper)
-      const orig = Object.getPrototypeOf(window).scopeToggleConnect; // fallback
-      // Qui, se arriva il comando, aggiorniamo solo lo stato (il simulatore non si avvia per il pianeta)
-      scopeState.connected = d.on;
-      const badge = document.getElementById('scopeConnBadge'); if(badge) { badge.innerText = d.on ? 'CONNESSO (satellite)' : 'DISCONNESSO'; badge.classList.toggle('on', d.on); }
-    }
-  });
-  SyncBus.on('cmd_tracking', d => {
-    if (d) { scopeState.tracking = d.on; const tb = document.getElementById('scopeTrackBtn'); if (tb) { tb.innerText = d.on ? 'Track OFF' : 'Track ON'; tb.className = 'triton-btn' + (d.on ? ' active' : ''); } }
-  });
-  SyncBus.on('cmd_speed', d => {
-    if (d && Number.isFinite(d.rate)) {
-      const map = { 0.005:1, 0.02:20, 0.06:50, 0.2:100 };
-      scopeState.rate = map[d.rate] || 20;
-      const rd = document.getElementById('scopeRateDisplay'); if (rd) rd.innerText = scopeState.rate + 'X';
-    }
-  });
+  // Ricezione comandi dallo Slave
+  SyncBus.on('cmd_connect', d => { if (d) { _isRemote = true; scopeState.connected = d.on; const badge = document.getElementById('scopeConnBadge'); if(badge){ badge.innerText = d.on ? 'CONNESSO (satellite)' : 'DISCONNESSO'; badge.classList.toggle('on', d.on);} _isRemote = false; } });
 
   const ind = document.createElement('div');
   ind.style.cssText = 'position:fixed;bottom:8px;right:8px;padding:3px 8px;background:rgba(10,18,32,.92);border:1px solid #333;border-radius:6px;color:#666;font-size:10px;font-family:monospace;z-index:99999;pointer-events:none;';
