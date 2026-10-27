@@ -2732,7 +2732,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   #app-switcher-toggle { background: rgba(10, 18, 32, 0.95); border: 1px solid #d4af37; border-left: none; border-radius: 0 8px 8px 0; color: #d4af37; width: 30px; height: 60px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; backdrop-filter: blur(10px); transition: all 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.5); pointer-events: auto !important; }
   #app-switcher-toggle:hover { background: #d4af37; color: #000; width: 35px; }
   #app-switcher-menu { position: absolute; left: -100px; background: rgba(10, 18, 32, 0.95); border: 1px solid rgba(212, 175, 55, 0.4); border-left: none; border-radius: 0 16px 16px 0; padding: 15px 10px; display: flex; flex-direction: column; gap: 15px; backdrop-filter: blur(15px); transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 5px 0 20px rgba(0,0,0,0.7); }
-  #app-switcher-menu.open { left: 30px !important; }
+  #app-switcher-menu.open { left: 30px !important; border-left: 1px solid rgba(212, 175, 55, 0.4); }
   .app-switch-btn { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; transition: all 0.3s; position: relative; pointer-events: auto !important; }
   .app-btn-telescope { border: 2px solid #d4af37; background: #0a1220; color: #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
   .app-btn-telescope:hover { background: #d4af37; color: #000; transform: scale(1.1); }
@@ -2756,14 +2756,14 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 <script src="sync-bus.js"></script>
 <script>
 // ============================================================
-//  EGastro DISCOVER (MASTER) — SyncBus Integration
+//  EGastro DISCOVER (PIANETA) — SyncBus Integration · v2.3
 // ============================================================
 (function () {
   if (typeof SyncBus === 'undefined' || typeof scopeState === 'undefined') return;
 
   let _isRemote = false;
 
-  // 1. Gestione Menu e Icone
+  // 1. Menu e Icone
   document.addEventListener('click', function(e) { 
     const container = document.getElementById('app-switcher-container');
     const menu = document.getElementById('app-switcher-menu');
@@ -2775,22 +2775,19 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   });
 
   const btnDome = document.getElementById('btn-goto-dome');
-  if (btnDome) {
-    btnDome.style.pointerEvents = 'none';
-    btnDome.style.opacity = '0.4';
-    btnDome.style.boxShadow = 'none';
-  }
+  if (btnDome) { btnDome.style.pointerEvents = 'none'; btnDome.style.opacity = '0.4'; btnDome.style.boxShadow = 'none'; }
 
   const btnTele = document.getElementById('btn-goto-telescope');
   if (btnTele) {
     btnTele.addEventListener('click', function(e) {
       e.preventDefault();
       SyncBus.send('sync_activate', { role: 'master', gpsLat: state.lat, gpsLon: state.lon, target: state.target || null });
-      window.open('https://egastrodiscover.github.io/EGASTROmount/', 'EGASTRO_Sync_App');
+      // Apre o porta in primo piano la scheda esistente
+      window.open('https://egastrodiscover.github.io/EGASTROmount/', 'EGASTRO_App');
     });
   }
 
-  // 2. Ricezione stato Slave
+  // 2. Stato
   let _peerConnected = false;
   SyncBus.on('mount_state', d => {
     if (!d) return;
@@ -2830,7 +2827,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     if (parkOv) parkOv.classList.toggle('open', !!d.isParked);
   });
 
-  // 3. GPS
+  // 3. GPS (Invia solo su richiesta o all'avvio)
   function broadcastGPS() {
     if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
       SyncBus.send('gps_update', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy, source: 'observatory' });
@@ -2844,17 +2841,16 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       return r;
     };
   }
-  setInterval(broadcastGPS, 5000);
   
-  // 4. Attivazione
   const _sendSyncActivate = () => {
     broadcastGPS();
     SyncBus.send('sync_activate', { role: 'master', gpsLat: state.lat, gpsLon: state.lon, target: state.target || null });
   };
-  SyncBus.on('hello', _sendSyncActivate);
   SyncBus.on('sync_request', _sendSyncActivate);
+  // Invia GPS appena l'app è pronta
+  setTimeout(_sendSyncActivate, 1000);
 
-  // 5. Connessione e Comandi (Bidirezionale)
+  // 4. Connessione e Comandi Bidirezionali
   const _origToggle = window.scopeToggleConnect;
   if (typeof _origToggle === 'function') {
     window.scopeToggleConnect = function() {
@@ -2889,13 +2885,13 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   wrapM('startEdgeMove', 'cmd_manual_start', dir => ({ dir }));
   wrapM('stopEdgeMove', 'cmd_manual_stop');
 
-  // 6. Indicatore
+  // 5. Indicatore
   const ind = document.createElement('div');
   ind.style.cssText = 'position:fixed;bottom:8px;right:8px;padding:3px 8px;background:rgba(10,18,32,.92);border:1px solid #333;border-radius:6px;color:#666;font-size:10px;font-family:monospace;z-index:99999;pointer-events:none;';
   document.body.appendChild(ind);
   setInterval(() => {
     if (!SyncBus.isPeerAlive()) { ind.textContent = '🔗 ○ solo'; ind.style.color = '#666'; return; }
-    ind.textContent = '🔗 ✓ PADRONE'; ind.style.color = _peerConnected ? '#4ade80' : '#8bd3ff';
+    ind.textContent = '🔗 ✓ PIANETA'; ind.style.color = _peerConnected ? '#4ade80' : '#8bd3ff';
   }, 1000);
 })();
 </script>
