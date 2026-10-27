@@ -1489,17 +1489,30 @@ const CONSTELLATION_META = {
   'Vul': { it:'Volpetta', area:'268°q', season:'Estate', desc:'Contiene la nebulosa Manubrio (M27).' }
 };
 
-function applyConstellationMeta() {
-  if (typeof CONSTELLATIONS === 'undefined' || !Array.isArray(CONSTELLATIONS)) return;
-  CONSTELLATIONS.forEach(c => {
-    const meta = CONSTELLATION_META[c.abbr] || Object.values(CONSTELLATION_META).find(m => m.it === c.name);
-    if (!meta) return;
-    if (meta.it) c.name = meta.it;
-    if (!c.area || c.area === '—') c.area = meta.area;
-    if (!c.season || c.season === '—') c.season = meta.season;
-    if (!c.desc || c.desc === '—' || c.desc.startsWith('Costellazione ')) c.desc = meta.desc;
-  });
+ // FIX: Normalizza le RA negative (es. -5.46 diventa 354.54)
+      CONSTELLATIONS.forEach(c => {
+        if (c.stars && Array.isArray(c.stars)) {
+          c.stars.forEach(s => {
+            if (typeof s.ra === 'number') {
+              s.ra = ((s.ra % 360) + 360) % 360;
+            }
+          });
+        }
+      });
+
+      applyConstellationMeta();
+      console.log('✅ Caricate ' + CONSTELLATIONS.length + ' costellazioni dal file esterno');
+      if (typeof rebuildCatalog === 'function') rebuildCatalog();
+    } else {
+      console.warn('⚠️ CONSTELLATIONS_STATIC non trovato o vuoto. Uso le 10 di fallback.');
+    }
+  } catch (e) {
+    console.error('Errore caricamento costellazioni:', e);
+  }
 }
+
+// AGGIUNGI QUESTA RIGA QUA SOTTO:
+loadConstellations();
 
 const STAR_FACTS = {
   "Polaris":   { bayer:"α UMi", constellation:"Orsa Minore", dist:"433 a.l.", spec:"F7 Ib", mag:"1.98", temp:"6.000 K", lum:"1.260 L☉", radius:"46 R☉", mass:"5,4 M☉", var:"Cefeide", desc:"Stella Polare, indica il Nord celeste." },
