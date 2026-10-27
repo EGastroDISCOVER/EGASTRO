@@ -1607,6 +1607,33 @@ let CONSTELLATIONS = [
 ];
 
 async function loadConstellations() {
+  // 1. PROVA PRIMA CON IL FILE LOCALE (constellations-data.js)
+  try {
+    if (typeof CONSTELLATIONS_STATIC !== 'undefined' && Array.isArray(CONSTELLATIONS_STATIC) && CONSTELLATIONS_STATIC.length > 20) {
+      CONSTELLATIONS = CONSTELLATIONS_STATIC;
+      
+      // FIX: Normalizza le RA negative (es. -5.46 diventa 354.54) che c'erano nel tuo file
+      CONSTELLATIONS.forEach(c => {
+        if (c.stars && Array.isArray(c.stars)) {
+          c.stars.forEach(s => {
+            if (typeof s.ra === 'number') {
+              s.ra = ((s.ra % 360) + 360) % 360;
+            }
+          });
+        }
+      });
+
+      applyConstellationMeta();
+      console.log('✅ Caricate ' + CONSTELLATIONS.length + ' costellazioni dal file LOCALE');
+      if (typeof rebuildCatalog === 'function') rebuildCatalog();
+      return;
+    }
+  } catch (e) {
+    console.warn('⚠️ Errore nel file locale, provo da internet...', e);
+  }
+
+  // 2. FALLBACK: SE IL FILE LOCALE MANCA, SCARICA DA INTERNET (d3-celestial)
+  console.log('ℹ️ File locale non trovato. Scarico da internet...');
   const urls = ['https://raw.githubusercontent.com/ofrohn/d3-celestial/master/data/constellations.lines.json','https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/data/constellations.lines.json'];
   for (const url of urls) {
     try {
@@ -1623,11 +1650,11 @@ async function loadConstellations() {
       });
       if (loaded.length > 20) {
         CONSTELLATIONS = loaded; applyConstellationMeta();
-        console.log(`✅ Caricate ${loaded.length} costellazioni`);
+        console.log(`✅ Caricate ${loaded.length} costellazioni da INTERNET`);
         if (typeof rebuildCatalog === 'function') rebuildCatalog();
         return;
       }
-    } catch (e) { console.warn('⚠️ Tentativo fallito:', e.message); }
+    } catch (e) { console.warn('⚠️ Tentativo internet fallito:', e.message); }
   }
   console.warn('⚠️ Uso le 10 costellazioni di fallback');
 }
