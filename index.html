@@ -2761,167 +2761,186 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 </div>
 
 <script>
-// ============================================================
-//  EGastro DISCOVER (PIANETA) — Sincronizzazione e Navigazione
-//  FIX v1.1: bidirezionale, chiusura iframe, sync_activate
-// ============================================================
-(function () {
-  if (typeof SyncBus === 'undefined') return;
-  let _isRemote = false;
+(function(){
+  'use strict';
+  if (window.__planetSwitcherFixed) return;
+  window.__planetSwitcherFixed = true;
 
-  // --- Gestione menu laterale ---
-  document.addEventListener('click', function(e) {
-    const container = document.getElementById('app-switcher-container');
-    if (container && !container.contains(e.target)) {
-      container.classList.remove('open');
-      const btn = document.getElementById('app-switcher-toggle');
-      if (btn) btn.innerText = '▶';
+  const D2R = Math.PI/180;
+
+  /* Attende che SyncBus esista (max 5s) */
+  let waited = 0;
+  function initWhenReady() {
+    if (typeof SyncBus === 'undefined') {
+      if (waited < 5000) { waited += 100; return setTimeout(initWhenReady, 100); }
+      console.warn('[Switcher] SyncBus assente, applico solo UI');
     }
-  });
-
-  // Icona Dome (già in Master) → disabilitata
-  const btnDome = document.getElementById('btn-goto-dome');
-  if (btnDome) { btnDome.style.pointerEvents = 'none'; btnDome.style.opacity = '0.4'; }
-
-  // --- Helper per inviare stato attuale al Satellite ---
-  function sendSyncActivate() {
-    const data = { role: 'master' };
-    if (typeof state !== 'undefined') {
-      if (Number.isFinite(state.lat)) data.gpsLat = state.lat;
-      if (Number.isFinite(state.lon)) data.gpsLon = state.lon;
-      if (state.target && Number.isFinite(state.target.ra)) {
-        data.targetName = state.target.n || '';
-        data.targetRa = state.target.ra;
-        data.targetDec = state.target.dec;
-      }
-    }
-    SyncBus.send('sync_activate', data);
+    applySwitcherUI();
+    attachSyncHandlers();
   }
 
-  // --- Icona Telescopio ---
-  const btnTele = document.getElementById('btn-goto-telescope');
-  if (btnTele) {
-    btnTele.addEventListener('click', function(e) {
-      e.preventDefault();
+  function applySwitcherUI(){
+    /* --- Gestione menu a scomparsa --- */
+    const sc = document.getElementById('app-switcher-container');
+    const tg = document.getElementById('app-switcher-toggle');
+    if (sc && tg) {
+      tg.removeAttribute('onclick');
+      tg.onclick = function(e){
+        e.preventDefault(); e.stopPropagation();
+        const open = sc.classList.toggle('open');
+        this.innerText = open ? '◀' : '▶';
+      };
+      document.addEventListener('click', e => {
+        if (!sc.contains(e.target)) { sc.classList.remove('open'); tg.innerText = '▶'; }
+      });
+    }
 
-      // A) Se siamo dentro un iframe (aperti dal Satellite) → chiedi al padre di chiuderci
-      if (window.parent !== window) {
-        window.parent.postMessage('egastro-close-frame', '*');
-        return;
-      }
+    /* --- PIANETA: dome spento, telescope acceso --- */
+    const dm = document.getElementById('btn-goto-dome');
+    const td = document.getElementById('btn-goto-telescope');
 
-      // B) Altrimenti apri il Satellite in iframe
-      // Invia GPS subito (best-effort)
-      if (typeof state !== 'undefined' && Number.isFinite(state.lat)) {
-        SyncBus.send('gps_update', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
-      }
-
-      // Prepara URL con parametri GPS + target
-      let url = 'https://egastrodiscover.github.io/EGASTROmount/';
-      const params = new URLSearchParams();
-      if (typeof state !== 'undefined') {
-        if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
-          params.set('lat', state.lat);
-          params.set('lon', state.lon);
+    if (dm) {
+      dm.style.pointerEvents = 'none';
+      dm.style.opacity = '0.35';
+      dm.style.filter = 'grayscale(0.6)';
+    }
+    if (td) {
+      td.style.pointerEvents = 'auto';
+      td.style.opacity = '1';
+      td.style.filter = 'none';
+      const clone = td.cloneNode(true);
+      td.parentNode.replaceChild(clone, td);
+      clone.onclick = function(e){
+        e.preventDefault();
+        // Se siamo dentro un iframe → chiedi al parent di chiuderci
+        if (window.parent !== window) {
+          window.parent.postMessage('egastro-close-frame', '*');
+          return;
         }
-        if (state.target && Number.isFinite(state.target.ra)) {
-          params.set('targetName', state.target.n || '');
-          params.set('targetRa', state.target.ra);
-          params.set('targetDec', state.target.dec);
+        // Prepara URL con GPS + target
+        let url = 'https://egastrodiscover.github.io/EGASTROmount/';
+        const params = new URLSearchParams();
+        if (typeof state !== 'undefined') {
+          if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
+            params.set('lat', state.lat);
+            params.set('lon', state.lon);
+          }
+          if (state.target && Number.isFinite(state.target.ra)) {
+            params.set('targetName', state.target.n || '');
+            params.set('targetRa', state.target.ra);
+            params.set('targetDec', state.target.dec);
+          }
         }
+        if (params.toString()) url += '?' + params.toString();
+        const fc = document.getElementById('app-frame-container');
+        const fr = document.getElementById('app-frame');
+        if (fc && fr) { fr.src = url; fc.style.display = 'block'; }
+
+        // Invia sync_activate (best-effort, ripetuto)
+        [200, 800, 2000, 4000].forEach(ms => setTimeout(() => {
+          if (typeof SyncBus !== 'undefined' && SyncBus.send) {
+            const data = { role: 'master' };
+            if (typeof state !== 'undefined') {
+              if (Number.isFinite(state.lat)) data.gpsLat = state.lat;
+              if (Number.isFinite(state.lon)) data.gpsLon = state.lon;
+              if (state.target && Number.isFinite(state.target.ra)) {
+                data.targetName = state.target.n || '';
+                data.targetRa = state.target.ra;
+                data.targetDec = state.target.dec;
+              }
+            }
+            SyncBus.send('sync_activate', data);
+          }
+        }, ms));
+      };
+    }
+
+    /* --- Chiudi iframe se il satellite lo chiede --- */
+    window.addEventListener('message', e => {
+      if (e.data === 'egastro-close-frame' || e.data === 'show-master') {
+        const fc = document.getElementById('app-frame-container');
+        if (fc) fc.style.display = 'none';
       }
-      if (params.toString()) url += '?' + params.toString();
-
-      document.getElementById('app-frame').src = url;
-      document.getElementById('app-frame-container').style.display = 'block';
-
-      // Invia sync_activate ripetutamente finché il Satellite non è pronto
-      [100, 500, 1500, 3000, 6000].forEach(ms =>
-        setTimeout(sendSyncActivate, ms)
-      );
     });
   }
 
-  // --- Ascolta chiusura iframe (dal Satellite che vuole tornare al Master) ---
-  window.addEventListener('message', function(e) {
-    if (e.data === 'egastro-close-frame' || e.data === 'show-master') {
-      const c = document.getElementById('app-frame-container');
-      if (c) c.style.display = 'none';
-    }
-  });
+  function attachSyncHandlers(){
+    if (typeof SyncBus === 'undefined' || typeof scopeState === 'undefined') return;
 
-  // --- Ricezione stato dal Satellite ---
-  SyncBus.on('mount_state', d => {
-    if (!d) return;
-    scopeState.connected = !!d.connected;
-    scopeState.tracking = d.tracking && d.tracking !== 'off';
-    scopeState.isParked = !!d.isParked;
-
-    if (Number.isFinite(d.rate)) {
-      const map = { 0.005: 1, 0.02: 20, 0.06: 50, 0.2: 100 };
-      scopeState.rate = map[d.rate] || 20;
-      const rd = document.getElementById('scopeRateDisplay');
-      if (rd) rd.innerText = scopeState.rate + 'X';
-    }
-    if (Number.isFinite(d.ra) && Number.isFinite(d.dec)) {
-      const p = getAltAz(d.ra * 180 / Math.PI, d.dec * 180 / Math.PI, state.currentTime);
-      if (Number.isFinite(p.alt)) { scopeState.mountAlt = p.alt; scopeState.mountAz = p.az; }
-    }
-    if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-    if (scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) {
-      if (typeof scopeDraw === 'function') scopeDraw();
-    }
-    const badge = document.getElementById('scopeConnBadge');
-    if (badge) {
-      badge.innerText = scopeState.connected ? 'CONNESSO (satellite)' : 'DISCONNESSO';
-      badge.classList.toggle('on', scopeState.connected);
-    }
-    const tb = document.getElementById('scopeTrackBtn');
-    if (tb) {
-      tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON';
-      tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : '');
-    }
-  });
-
-  // --- Comandi locali → invio al Satellite ---
-  function wrapM(fnName, msgType, dataFn) {
-    const orig = window[fnName]; if (typeof orig !== 'function') return;
-    window[fnName] = function () {
-      const result = orig.apply(this, arguments);
-      if (!_isRemote) {
-        const data = dataFn ? dataFn.apply(this, arguments) : null;
-        if (data !== false) SyncBus.send(msgType, data);
+    /* Stato dal satellite */
+    SyncBus.on('mount_state', d => {
+      if (!d) return;
+      scopeState.connected = !!d.connected;
+      scopeState.tracking  = d.tracking && d.tracking !== 'off';
+      scopeState.isParked  = !!d.isParked;
+      if (Number.isFinite(d.rate)) {
+        const map = {0.005:1, 0.02:20, 0.06:50, 0.2:100};
+        scopeState.rate = map[d.rate] || 20;
+        const rd = document.getElementById('scopeRateDisplay');
+        if (rd) rd.innerText = scopeState.rate + 'X';
       }
-      return result;
-    };
-  }
-  wrapM('scopeToggleConnect', 'cmd_connect', () => ({ on: !scopeState.connected }));
-  wrapM('scopeSlewToTarget', 'cmd_goto', () => scopeState.target ? { ra: scopeState.target.ra, dec: scopeState.target.dec } : false);
-  wrapM('scopeStopSlewing', 'cmd_stop');
-  wrapM('scopeEmergencyStop', 'cmd_stop');
-  wrapM('scopePark', 'cmd_park');
-  wrapM('scopeUnpark', 'cmd_unpark');
-  wrapM('scopeHome', 'cmd_home');
-  wrapM('scopeToggleTracking', 'cmd_tracking', () => ({ on: scopeState.tracking }));
-  wrapM('scopeChangeRate', 'cmd_speed', () => {
-    const map = { 1: 0.005, 5: 0.005, 10: 0.02, 20: 0.02, 50: 0.06, 100: 0.2 };
-    return { rate: map[scopeState.rate] || 0.02 };
-  });
-
-  // --- Ricezione comandi dal Satellite ---
-  SyncBus.on('cmd_connect', d => {
-    if (d) { _isRemote = true; scopeState.connected = d.on;
+      if (Number.isFinite(d.ra) && Number.isFinite(d.dec) && typeof getAltAz === 'function') {
+        const p = getAltAz(d.ra*180/Math.PI, d.dec*180/Math.PI, state.currentTime);
+        if (Number.isFinite(p.alt)) { scopeState.mountAlt = p.alt; scopeState.mountAz = p.az; }
+      }
+      if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+      if (typeof scopeCanvasEl !== 'undefined' && scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active') && typeof scopeDraw === 'function') {
+        scopeDraw();
+      }
       const badge = document.getElementById('scopeConnBadge');
-      if (badge) { badge.innerText = d.on ? 'CONNESSO (satellite)' : 'DISCONNESSO'; badge.classList.toggle('on', d.on); }
-      _isRemote = false; }
-  });
-  SyncBus.on('cmd_speed', d => {
-    if (d && Number.isFinite(d.rate)) { _isRemote = true;
-      const map = { 0.005: 1, 0.02: 20, 0.06: 50, 0.2: 100 };
-      scopeState.rate = map[d.rate] || 20;
-      const rd = document.getElementById('scopeRateDisplay'); if (rd) rd.innerText = scopeState.rate + 'X';
-      _isRemote = false; }
-  });
+      if (badge) {
+        badge.innerText = scopeState.connected ? 'CONNESSO (satellite)' : 'DISCONNESSO';
+        badge.classList.toggle('on', scopeState.connected);
+      }
+      const tb = document.getElementById('scopeTrackBtn');
+      if (tb) {
+        tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON';
+        tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : '');
+      }
+    });
+
+    /* GPS dal satellite */
+    SyncBus.on('gps_update', d => {
+      if (!d || !Number.isFinite(d.lat) || !Number.isFinite(d.lon)) return;
+      if (typeof state === 'undefined') return;
+      state.lat = d.lat; state.lon = d.lon;
+      try {
+        if (typeof updateAll === 'function') updateAll();
+      } catch(e){}
+    });
+
+    /* Wrapper comandi locali → satellite */
+    const wrapM = (fn, msg, dataFn) => {
+      const orig = window[fn];
+      if (typeof orig !== 'function' || orig.__wrapped) return;
+      const wrapped = function(){
+        const r = orig.apply(this, arguments);
+        const data = dataFn ? dataFn.apply(this, arguments) : null;
+        if (data !== false && typeof SyncBus !== 'undefined') SyncBus.send(msg, data);
+        return r;
+      };
+      wrapped.__wrapped = true;
+      window[fn] = wrapped;
+    };
+    wrapM('scopeToggleConnect', 'cmd_connect', () => ({ on: !scopeState.connected }));
+    wrapM('scopeSlewToTarget',  'cmd_goto', () => scopeState.target ? { ra: scopeState.target.ra, dec: scopeState.target.dec } : false);
+    wrapM('scopeStopSlewing',   'cmd_stop');
+    wrapM('scopeEmergencyStop', 'cmd_stop');
+    wrapM('scopePark',          'cmd_park');
+    wrapM('scopeUnpark',        'cmd_unpark');
+    wrapM('scopeHome',          'cmd_home');
+    wrapM('scopeToggleTracking','cmd_tracking', () => ({ on: scopeState.tracking }));
+    wrapM('scopeChangeRate',    'cmd_speed', () => {
+      const map = { 1:0.005, 5:0.005, 10:0.02, 20:0.02, 50:0.06, 100:0.2 };
+      return { rate: map[scopeState.rate] || 0.02 };
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initWhenReady, 100));
+  } else {
+    setTimeout(initWhenReady, 100);
+  }
 })();
 </script>
 </body>
