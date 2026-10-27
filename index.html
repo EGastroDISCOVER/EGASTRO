@@ -2843,7 +2843,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   if (typeof SyncBus === 'undefined' || typeof scopeState === 'undefined') return;
   let _isRemote = false;
 
-  // 1. Gestione Menu e Navigazione
+  // 1. Menu
   document.addEventListener('click', function(e) { 
     const container = document.getElementById('app-switcher-container');
     if (container && !container.contains(e.target)) { 
@@ -2859,17 +2859,14 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   if (btnTele) {
     btnTele.addEventListener('click', function(e) {
       e.preventDefault();
-      // Invia coordinate GPS al satellite
       if (Number.isFinite(state.lat)) {
         SyncBus.send('gps_update', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
       }
-      // Mostra l'Iframe con l'app satellite
       document.getElementById('app-frame').src = 'https://egastrodiscover.github.io/EGASTROmount/';
       document.getElementById('app-frame-container').style.display = 'block';
     });
   }
 
-  // Ascolta il ritorno dal Satellite
   window.addEventListener('message', function(e) {
     if (e.data === 'show-master') {
       document.getElementById('app-frame-container').style.display = 'none';
@@ -2902,20 +2899,19 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     if (tb) { tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON'; tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : ''); }
   });
 
-  // 3. Comandi (Esecuzione locale + invio al satellite)
+  // 3. Comandi
   function wrapM(fnName, msgType, dataFn) {
     const orig = window[fnName]; if (typeof orig !== 'function') return;
     window[fnName] = function () {
-      const result = orig.apply(this, arguments); 
-      if (!_isRemote) { 
+      if (SyncBus.isPeerAlive() && !_isRemote) {
         const data = dataFn ? dataFn.apply(this, arguments) : null;
         if (data !== false) SyncBus.send(msgType, data);
+      } else {
+        return orig.apply(this, arguments);
       }
-      return result;
     };
   }
 
-  wrapM('scopeToggleConnect', 'cmd_connect', () => ({ on: !scopeState.connected }));
   wrapM('scopeSlewToTarget', 'cmd_goto', () => scopeState.target ? { ra: scopeState.target.ra, dec: scopeState.target.dec } : false);
   wrapM('scopeStopSlewing', 'cmd_stop');
   wrapM('scopeEmergencyStop', 'cmd_stop');
@@ -2928,7 +2924,19 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   wrapM('startEdgeMove', 'cmd_manual_start', dir => ({ dir }));
   wrapM('stopEdgeMove', 'cmd_manual_stop');
 
-  // 4. Ricezione comandi dal Satellite
+  const _origMasterConnect = window.scopeToggleConnect;
+  if (typeof _origMasterConnect === 'function') {
+    window.scopeToggleConnect = function() {
+      if (_isRemote) return _origMasterConnect.apply(this, arguments);
+      if (SyncBus.isPeerAlive()) {
+        SyncBus.send('cmd_connect', { on: !scopeState.connected });
+      } else {
+        return _origMasterConnect.apply(this, arguments);
+      }
+    };
+  }
+
+  // 4. Ricezione
   SyncBus.on('cmd_connect', d => { if (d) { _isRemote = true; scopeState.connected = d.on; const badge = document.getElementById('scopeConnBadge'); if(badge){ badge.innerText = d.on ? 'CONNESSO (satellite)' : 'DISCONNESSO'; badge.classList.toggle('on', d.on);} _isRemote = false; } });
   SyncBus.on('cmd_speed', d => { if (d && Number.isFinite(d.rate)) { _isRemote = true; const map = { 0.005:1, 0.02:20, 0.06:50, 0.2:100 }; scopeState.rate = map[d.rate] || 20; const rd = document.getElementById('scopeRateDisplay'); if (rd) rd.innerText = scopeState.rate + 'X'; _isRemote = false; } });
 
@@ -2939,12 +2947,11 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').then(reg => {
-        setInterval(() => { reg.update(); }, 60 * 60 * 1000);
-      }).catch(err => console.warn('SW fallito:', err));
+      navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('SW fallito:', err));
     });
   }
 </script>
+
 <!-- PATCH: Popup una tantum e Icone -->
 <script>
   const icons = [
@@ -2975,7 +2982,8 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     }, 500);
   });
 </script>
-  <!-- PATCH: Aggiornamento visivo tasto Connetti (Master) -->
+
+<!-- PATCH: Aggiornamento visivo tasto Connetti (Master) -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const badge = document.getElementById('scopeConnBadge');
