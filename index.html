@@ -16,6 +16,7 @@ f<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+<script src="./constellations-data.js"></script>
 <style>
   :root {
     --bg: #03050a; --bg2: #080c14; --card: #0d121c;
@@ -1608,32 +1609,20 @@ let CONSTELLATIONS = [
   {name:"Scorpione", stars:[{ra:247.35,dec:-26.43},{ra:241.36,dec:-19.81},{ra:240.08,dec:-22.62},{ra:264.33,dec:-42.99},{ra:263.40,dec:-37.10}], area:"497°q", season:"Estate", desc:"Con Antares."}
 ];
 
-async function loadConstellations() {
-  const urls = ['https://raw.githubusercontent.com/ofrohn/d3-celestial/master/data/constellations.lines.json','https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/data/constellations.lines.json'];
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      if (!data || !data.features || data.features.length < 10) throw new Error('Formato non valido');
-      const loaded = data.features.map(f => {
-        const segments = f.geometry?.coordinates || [];
-        const stars = []; const starKeyToIdx = new Map();
-        const addStar = (ra, dec) => { const key = ra.toFixed(4) + ',' + dec.toFixed(4); if (starKeyToIdx.has(key)) return starKeyToIdx.get(key); const idx = stars.length; stars.push({ ra, dec, mag: 3 }); starKeyToIdx.set(key, idx); return idx; };
-        const lines = segments.map(seg => seg.map(pt => addStar(pt[0], pt[1])));
-        return { name: f.properties?.name || f.id, abbr: f.id, stars, lines, area: '—', season: '—', desc: 'Costellazione ' + (f.properties?.name || f.id) };
-      });
-      if (loaded.length > 20) {
-        CONSTELLATIONS = loaded; applyConstellationMeta();
-        console.log(`✅ Caricate ${loaded.length} costellazioni`);
-        if (typeof rebuildCatalog === 'function') rebuildCatalog();
-        return;
-      }
-    } catch (e) { console.warn('⚠️ Tentativo fallito:', e.message); }
+function loadConstellations() {
+  try {
+    if (typeof CONSTELLATIONS_STATIC !== 'undefined' && Array.isArray(CONSTELLATIONS_STATIC) && CONSTELLATIONS_STATIC.length > 20) {
+      CONSTELLATIONS = CONSTELLATIONS_STATIC;
+      applyConstellationMeta();
+      console.log('✅ Caricate ' + CONSTELLATIONS.length + ' costellazioni (da file locale, offline-safe)');
+      if (typeof rebuildCatalog === 'function') rebuildCatalog();
+      return;
+    }
+    console.warn('⚠️ CONSTELLATIONS_STATIC non trovato. Uso le 10 di fallback.');
+  } catch (e) {
+    console.error('Errore caricamento costellazioni:', e);
   }
-  console.warn('⚠️ Uso le 10 costellazioni di fallback');
 }
-
 function getSunPositionPure(date) {
   const d = getDays(date); const L = norm360(280.460 + 0.9856474 * d); const g = norm360(357.528 + 0.9856003 * d);
   const lambda = norm360(L + 1.915 * Math.sin(rad(g)) + 0.020 * Math.sin(rad(2 * g))); const eps = rad(23.439 - 0.0000004 * d);
