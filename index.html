@@ -2753,5 +2753,57 @@ window.addEventListener('load', async () => {
   const ref = getTonightReferenceDate(); _lastTonightRefDate = ref.getFullYear()+'-'+String(ref.getMonth()+1).padStart(2,'0')+'-'+String(ref.getDate()).padStart(2,'0');
 });
 </script>
+  <!-- PULSANTE TELESCOPIO E INVIO DATI -->
+<script>
+(function() {
+  function init() {
+    if (document.getElementById('btn-apri-telescopio')) return;
+
+    const btn = document.createElement('a');
+    btn.id = 'btn-apri-telescopio';
+    btn.href = 'javascript:void(0)';
+    
+    // Stile sfera dorata con icona
+    btn.style.cssText = "position:fixed; bottom:30px; right:30px; width:64px; height:64px; background:#0a1220; border:2px solid #d4af37; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.8),0 0 20px rgba(212,175,55,0.4); z-index:999999; transition:all 0.3s ease; overflow:hidden;";
+    
+    // Icona e Tooltip
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;transition:all 0.3s ease;"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path><path d="M7 16l-2 6"></path><path d="M3 22h8"></path><path d="M10 6l10-3 2 4-10 3-2-4z"></path></svg>' +
+                  '<span style="position:absolute;right:100%;margin-right:15px;background:#d4af37;color:#000;font-family:sans-serif;font-weight:700;font-size:12px;padding:6px 12px;border-radius:6px;white-space:nowrap;opacity:0;transform:translateX(10px);transition:all 0.3s ease;pointer-events:none;box-shadow:0 4px 10px rgba(0,0,0,0.5);" id="btn-tooltip">INVIA A MOUNT</span>';
+
+    const svg = btn.querySelector('svg');
+    const tooltip = btn.querySelector('span');
+
+    // Animazioni
+    btn.onmouseenter = () => { btn.style.transform = 'scale(1.1)'; btn.style.background = '#d4af37'; svg.style.stroke = '#000'; tooltip.style.opacity = '1'; tooltip.style.transform = 'translateX(0)'; };
+    btn.onmouseleave = () => { btn.style.transform = 'scale(1)'; btn.style.background = '#0a1220'; svg.style.stroke = '#d4af37'; tooltip.style.opacity = '0'; tooltip.style.transform = 'translateX(10px)'; };
+
+    // Click
+    btn.onclick = function() {
+      // Usa il percorso relativo corretto
+      const TELESCOPE_APP_URL = './mount/'; 
+      let url = TELESCOPE_APP_URL + '?';
+      
+      if (typeof state !== 'undefined' && state.lat) {
+        url += `lat=${state.lat}&lon=${state.lon}`;
+        if (state.target && state.target.ra) {
+          url += `&targetName=${encodeURIComponent(state.target.n)}&targetRa=${state.target.ra}&targetDec=${state.target.dec}`;
+        }
+      } else {
+        url += `lat=41.9028&lon=12.4964`; // Fallback Roma
+      }
+
+      window.open(url, 'EGASTROmountWindow');
+    };
+
+    document.body.appendChild(btn);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
 </body>
 </html>
