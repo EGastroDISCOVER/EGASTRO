@@ -2949,5 +2949,180 @@ window.addEventListener('load', async () => {
   }
 })();
 </script>
+  <script src="sync-bus.js"></script>
+<script>
+// ============================================================
+//  EGastro DISCOVER — SyncBus Integration
+//  Invia comandi alla montatura, riceve stato continuo
+// ============================================================
+(function () {
+  if (typeof SyncBus === 'undefined')   { console.warn('[Obs-Sync] SyncBus mancante');   return; }
+  if (typeof scopeState === 'undefined') { console.warn('[Obs-Sync] scopeState mancante'); return; }
+
+  let _peerConnected = false;
+
+  // ---------- ricezione stato mount ----------
+  SyncBus.on('mount_state', d => {
+    if (!d) return;
+    try {
+      _peerConnected = !!d.connected;
+
+      scopeState.tracking  = d.tracking && d.tracking !== 'off';
+      scopeState.isParked  = !!d.isParked;
+      scopeState.slewing   = (d.slewMode === 'goto' || d.slewMode === 'park');
+      if (d.tracking && d.tracking !== 'off') scopeState.trackRate = d.tracking;
+
+      // RA/Dec → Alt/Az
+      if (Number.isFinite(d.ra) && Number.isFinite(d.dec)) {
+        const raDeg  = d.ra  * 180 / Math.PI;
+        const decDeg = d.dec * 180 / Math.PI;
+        const p = getAltAz(raDeg, decDeg, state.currentTime);
+        if (Number.isFinite(p.alt) && Number.isFinite(p.az)) {
+          scopeState.mountAlt = p.alt;
+          scopeState.mountAz  = p.az;
+        }
+      }
+
+      // GPS ridondante
+      if (d.gpsActive && Number.isFinite(d.gpsLat) && Number.isFinite(d.gpsLon)) {
+        if (Math.abs(state.lat - d.gpsLat) > 5e-4 ||
+            Math.abs(state.lon - d.gpsLon) > 5e-4) {
+          state.lat = d.gpsLat; state.lon = d.gpsLon;
+          const le = document.getElementById('lat');
+          const lo = document.getElementById('lon');
+          if (le) le.value = d.gpsLat.toFixed(4);
+          if (lo) lo.value = d.gpsLon.toFixed(4);
+          _planetCache.key = null;
+          state.planets = calcPlanetsPrecise(state.currentTime);
+          try { renderSunMoon(); renderQuality(); renderSkyQuality(); } catch (e) {}
+        }
+      }
+
+      // refresh UI
+      try { scopeUpdateUI && scopeUpdateUI(); } catch (e) {}
+      if (scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) {
+        try { scopeDraw && scopeDraw(); } catch (e) {}
+        if (scopeState.target) try { scopeRefreshTargetData && scopeRefreshTargetData(); } catch (e) {}
+      }
+
+      // badge + tracking btn + park overlay
+      const badge = document.getElementById('scopeConnBadge');
+      if (badge) {
+        const localOk  = scopeState.connected;
+        const remoteOk = _peerConnected;
+        badge.innerText = localOk ? 'CONNESSO' : (remoteOk ? 'CONNESSO (peer)' : 'DISCONNESSO');
+        badge.classList.toggle('on', localOk || remoteOk);
+      }
+      const tb = document.getElementById('scopeTrackBtn');
+      if (tb) {
+        tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON';
+        tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : '');
+      }
+      const parkOv = document.getElementById('parkOverlay');
+      if (parkOv) parkOv.classList.toggle('open', !!d.isParked);
+    } catch (e) { console.error('[Obs-Sync] mount_state:', e); }
+  });
+
+  // ---------- invio GPS alla mount ----------
+  function broadcastGPS() {
+    if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
+      SyncBus.send('gps_update', {
+        lat: state.lat, lon: state.lon,
+        accuracy: state.gpsAccuracy, source: 'observatory'
+      });
+    }
+  }
+  const _origApply = window.applyCoordinates;
+  if (typeof _origApply === 'function') {
+    window.applyCoordinates = function () {
+      const r = _origApply.apply(this, arguments);
+      setTimeout(broadcastGPS, 30);
+      return r;
+    };
+  }
+  setInterval(broadcastGPS, 5000);
+  SyncBus.on('hello', broadcastGPS);
+
+  // ---------- wrapper comandi → broadcast ----------
+  function wrap(fnName, msgType, dataFn) {
+    const orig = window[fnName];
+    if (typeof orig !== 'function') return;
+    window[fnName] = function () {
+      const peerOnly = _peerConnected && !scopeState.connected;
+      // se la mount è connessa via peer e qui non siamo connessi,
+      // evitiamo di eseguire localmente (evita warning "Connetti") e solo trasmettiamo
+      if (peerOnly) {
+        try {
+          const data = dataFn ? dataFn.apply(this, arguments) : null;
+          if (data !== false) SyncBus.send(msgType, data);
+        } catch (e) {}
+        return;
+      }
+      const r = orig.apply(this, arguments);
+      try {
+        const data = dataFn ? dataFn.apply(this, arguments) : null;
+        if (data !== false) SyncBus.send(msgType, data);
+      } catch (e) {}
+      return r;
+    };
+  }
+
+  // GOTO dal pannello
+  wrap('scopeSlewToTarget', 'cmd_goto', () => {
+    if (!scopeState.target) return false;
+    return { ra: scopeState.target.ra, dec: scopeState.target.dec, name: scopeState.target.name };
+  });
+
+  // GOTO dallo step-wizard (solo quando lo step era 1)
+  const _origStep = window.scopeStepAction;
+  if (typeof _origStep === 'function') {
+    window.scopeStepAction = function () {
+      const pre = scopeState.step;
+      const r = _origStep.apply(this, arguments);
+      if (pre === 1 && scopeState.target) {
+        try {
+          SyncBus.send('cmd_goto', {
+            ra: scopeState.target.ra, dec: scopeState.target.dec, name: scopeState.target.name
+          });
+        } catch (e) {}
+      }
+      return r;
+    };
+  }
+
+  wrap('scopeStopSlewing', 'cmd_stop');
+  wrap('scopeEmergencyStop', 'cmd_stop');
+  wrap('scopePark',       'cmd_park');
+  wrap('scopeUnpark',     'cmd_unpark');
+  wrap('scopeHome',       'cmd_home');
+  wrap('scopeSetHome',    'cmd_set_home');
+  wrap('scopeSetPark',    'cmd_set_park');
+  wrap('scopeToggleTracking', 'cmd_tracking', () => ({
+    on: scopeState.tracking, rate: scopeState.trackRate
+  }));
+  wrap('scopeSetTrackRate', 'cmd_tracking', rate => ({ on: true, rate }));
+  wrap('scopeChangeRate',   'cmd_speed', () => ({
+    rate: scopeState.rate * 0.0025 / 5, label: scopeState.rate + 'x'
+  }));
+  wrap('scopeSyncMount', 'cmd_sync', () => {
+    if (!scopeState.target) return false;
+    return { ra: scopeState.target.ra, dec: scopeState.target.dec };
+  });
+
+  // ---------- indicatore di sync flottante ----------
+  const ind = document.createElement('div');
+  ind.style.cssText = 'position:fixed;bottom:8px;right:8px;padding:3px 8px;'
+    + 'background:rgba(10,18,32,.92);border:1px solid #333;border-radius:6px;'
+    + 'color:#666;font-size:10px;font-family:monospace;z-index:99999;pointer-events:none;';
+  ind.textContent = '🔗 init';
+  document.body.appendChild(ind);
+  setInterval(() => {
+    ind.textContent = '🔗 ' + (SyncBus.isPeerAlive() ? '✓ mount' : '○ solo');
+    ind.style.color = SyncBus.isPeerAlive() ? '#4ade80' : '#666';
+  }, 1500);
+
+  console.log('[Obs-Sync] attivo · transport:', SyncBus.transport);
+})();
+</script>
 </body>
 </html>
