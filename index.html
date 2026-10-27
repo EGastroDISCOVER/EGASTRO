@@ -2836,9 +2836,6 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 
 <script src="sync-bus.js"></script>
 <script>
-// ============================================================
-//  EGastro DISCOVER (MASTER) — v1.5
-// ============================================================
 (function () {
   if (typeof SyncBus === 'undefined' || typeof scopeState === 'undefined') return;
   let _isRemote = false;
@@ -2862,7 +2859,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       const container = document.getElementById('app-frame-container');
       
       if (container.style.display !== 'block') {
-        if (SyncBus.isPeerAlive() && Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
+        if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
           SyncBus.send('gps_update', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
         }
         iframe.src = 'https://egastrodiscover.github.io/EGASTROmount/';
@@ -2882,17 +2879,22 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     window.applyCoordinates = function () {
       const r = _origApply.apply(this, arguments);
       setTimeout(() => {
-        if (SyncBus.isPeerAlive()) SyncBus.send('gps_update', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
+        if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
+          SyncBus.send('gps_update', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
+        }
       }, 30);
       return r;
     };
   }
 
-  // IGNORA d.connected per non disconnettersi al cambio scheda
+  let _peerConnected = false;
   SyncBus.on('mount_state', d => {
     if (!d) return;
+    _peerConnected = !!d.connected;
+    
     scopeState.tracking = d.tracking && d.tracking !== 'off';
     scopeState.isParked = !!d.isParked;
+    
     if (Number.isFinite(d.rate)) {
       const map = { 0.005:1, 0.02:20, 0.06:50, 0.2:100 };
       scopeState.rate = map[d.rate] || 20;
@@ -2906,16 +2908,20 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     if (scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) {
       if (typeof scopeDraw === 'function') scopeDraw();
     }
+    
     const tb = document.getElementById('scopeTrackBtn');
     if (tb) { tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON'; tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : ''); }
-    if (typeof window.updateMasterConnBtn === 'function') window.updateMasterConnBtn(scopeState.connected);
+    
+    if (typeof window.updateMasterConnBtn === 'function') {
+      window.updateMasterConnBtn(scopeState.connected);
+    }
   });
 
   function wrapM(fnName, msgType, dataFn) {
     const orig = window[fnName]; if (typeof orig !== 'function') return;
     window[fnName] = function () {
       const result = orig.apply(this, arguments); 
-      if (!_isRemote && SyncBus.isPeerAlive()) {
+      if (!_isRemote) {
         const data = dataFn ? dataFn.apply(this, arguments) : null;
         if (data !== false) SyncBus.send(msgType, data);
       }
@@ -2940,7 +2946,9 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     window.scopeToggleConnect = function() {
       const wasConnected = scopeState.connected;
       const result = _origMasterConnect.apply(this, arguments);
-      if (!_isRemote && SyncBus.isPeerAlive()) SyncBus.send('cmd_connect', { on: !wasConnected }); 
+      if (!_isRemote) {
+        SyncBus.send('cmd_connect', { on: !wasConnected });
+      }
       return result;
     };
   }
@@ -2956,16 +2964,12 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 })();
 </script>
 
-<!-- SERVICE WORKER -->
 <script>
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('SW fallito:', err));
-    });
+    window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('SW fallito:', err)); });
   }
 </script>
 
-<!-- PATCH UI -->
 <script>
   const icons = [
     { rel: 'icon', href: './icon-192.png', sizes: '192x192', type: 'image/png' },
