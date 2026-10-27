@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+f<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -2866,5 +2866,43 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     });
   }
 </script>
+<!-- PATCH: Popup una tantum e Icone -->
+<script>
+  // 1. Forza le icone della scheda e della PWA
+  const icons = [
+    { rel: 'icon', href: './icon-192.png', sizes: '192x192', type: 'image/png' },
+    { rel: 'icon', href: './icon-512.png', sizes: '512x512', type: 'image/png' },
+    { rel: 'apple-touch-icon', href: './icon-192.png' }
+  ];
+  
+  icons.forEach(iconData => {
+    const link = document.createElement('link');
+    link.rel = iconData.rel;
+    link.href = iconData.href;
+    if (iconData.sizes) link.sizes = iconData.sizes;
+    if (iconData.type) link.type = iconData.type;
+    document.head.appendChild(link);
+  });
+
+  // 2. Gestione Popup "Connessione Richiesta"
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      // Se l'utente ha già chiuso il popup in questa sessione, lo nascondiamo
+      if (sessionStorage.getItem('egastro_welcome_shown') === 'true') {
+        const modal = document.getElementById('welcome-modal');
+        if (modal) modal.style.display = 'none';
+      }
+
+      // Ogni volta che l'utente chiude il popup, salviamo il fatto che l'ha visto
+      const closeBtn = document.querySelector('#welcome-modal .btn.primary');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          sessionStorage.setItem('egastro_welcome_shown', 'true');
+        });
+      }
+    }, 500);
+  });
+</script>
+  
 </body>
 </html>
