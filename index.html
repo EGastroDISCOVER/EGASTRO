@@ -2949,5 +2949,128 @@ window.addEventListener('load', async () => {
   }
 })();
 </script>
+  <script src="sync-bus.js"></script>
+<script>
+// =======================================================
+// 🟦 CODICE MASTER (APP PIANETA)
+// =======================================================
+(function() {
+  if (typeof Bus === 'undefined' || typeof scopeState === 'undefined') return;
+  let isRemote = false;
+
+  // 1. RICEZIONE COMANDI DALLO SLAVE
+  Bus.on('cmd', (d) => {
+    if (!d || !d.action) return;
+    console.log('📥 Master riceve:', d.action, d);
+    isRemote = true;
+    try {
+      switch(d.action) {
+        case 'connect': 
+          if (scopeState.connected !== d.on) window.scopeToggleConnect(); 
+          break;
+        case 'park': window.scopePark(); break;
+        case 'unpark': window.scopeUnpark(); break;
+        case 'home': window.scopeHome(); break;
+        case 'goto': 
+          if (d.ra !== undefined) { scopeState.target = {ra: d.ra, dec: d.dec}; window.scopeSlewToTarget(); } 
+          break;
+        case 'stop': window.scopeStopSlewing(); break;
+        case 'tracking': 
+          if (d.on !== (scopeState.tracking !== 'off')) window.scopeToggleTracking(); 
+          break;
+      }
+    } catch(e) { console.error(e); }
+    isRemote = false;
+  });
+
+  // 2. INVIO COMANDI ALLO SLAVE
+  function wrap(fn, action, dataFn) {
+    const orig = window[fn];
+    if (typeof orig !== 'function') return;
+    window[fn] = function() {
+      const result = orig.apply(this, arguments);
+      if (!isRemote) {
+        const data = dataFn ? dataFn.apply(this, arguments) : null;
+        if (data !== false) Bus.send('cmd', Object.assign({action}, data || {}));
+      }
+      return result;
+    };
+  }
+  
+  wrap('scopeToggleConnect', 'connect', () => ({ on: !scopeState.connected }));
+  wrap('scopePark', 'park');
+  wrap('scopeUnpark', 'unpark');
+  wrap('scopeHome', 'home');
+  wrap('scopeSlewToTarget', 'goto', () => scopeState.target ? { ra: scopeState.target.ra, dec: scopeState.target.dec } : false);
+  wrap('scopeStopSlewing', 'stop');
+  wrap('scopeEmergencyStop', 'stop');
+  wrap('scopeToggleTracking', 'tracking', () => ({ on: scopeState.tracking }));
+
+  // 3. GESTIONE IFRAME E GPS
+  document.addEventListener('click', function(e) { 
+    const c = document.getElementById('app-switcher-container');
+    if (c && !c.contains(e.target)) { 
+      c.classList.remove('open'); 
+      const b = document.getElementById('app-switcher-toggle'); if(b) b.innerText = '▶'; 
+    } 
+  });
+  
+  const btnDome = document.getElementById('btn-goto-dome');
+  if (btnDome) { btnDome.style.pointerEvents = 'none'; btnDome.style.opacity = '0.4'; }
+  
+  const btnTele = document.getElementById('btn-goto-telescope');
+  if (btnTele) {
+    btnTele.addEventListener('click', function(e) {
+      e.preventDefault();
+      const iframe = document.getElementById('app-frame');
+      const container = document.getElementById('app-frame-container');
+      
+      if (container.style.display !== 'block') {
+        if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
+          Bus.send('gps', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
+        }
+        iframe.src = 'https://egastrodiscover.github.io/EGASTROmount/';
+        container.style.display = 'block';
+      }
+    });
+  }
+  
+  window.addEventListener('message', (e) => {
+    if (e.data === 'show-master') document.getElementById('app-frame-container').style.display = 'none';
+  });
+})();
+</script>
+
+<!-- PATCH UI MASTER -->
+<script>
+  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+  
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      if (sessionStorage.getItem('egastro_welcome_shown') === 'true') {
+        const m = document.getElementById('welcome-modal'); if (m) m.style.display = 'none';
+      }
+      const cb = document.querySelector('#welcome-modal .btn.primary');
+      if (cb) cb.addEventListener('click', () => sessionStorage.setItem('egastro_welcome_shown', 'true'));
+    }, 500);
+    
+    const badge = document.getElementById('scopeConnBadge');
+    if (badge) {
+      const btn = badge.nextElementSibling;
+      if (btn && btn.tagName === 'BUTTON') btn.id = 'scopeConnectBtn';
+    }
+    window.updateMasterConnBtn = function(c) {
+      const btn = document.getElementById('scopeConnectBtn');
+      if (!btn) return;
+      btn.innerText = c ? 'Scollega' : 'Connetti';
+      btn.style.background = c ? 'linear-gradient(180deg, #ef4444 0%, #b91c1c 100%)' : '';
+      btn.style.color = c ? '#fff' : '';
+      btn.style.borderColor = c ? '#ef4444' : '';
+    };
+    setInterval(() => { if (typeof scopeState !== 'undefined') window.updateMasterConnBtn(scopeState.connected); }, 500);
+  });
+</script>
+</body>
+</html>
 </body>
 </html>
