@@ -2725,7 +2725,6 @@ function lvSearchSelect(obj) { closeLvSearch(); lvState.selectedObj = obj; lvSho
 let _lastTonightRefDate = null;
 setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.getFullYear()+'-'+String(ref.getMonth()+1).padStart(2,'0')+'-'+String(ref.getDate()).padStart(2,'0'); if (_lastTonightRefDate === null) { _lastTonightRefDate = rs; return; } if (_lastTonightRefDate !== rs) { _lastTonightRefDate = rs; if (document.getElementById('tab-tonight').classList.contains('active')) { const now = new Date(); document.getElementById('date').value = rs; const t = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0'); document.getElementById('time').value = t; readInputs(); _planetCache.key = null; state.planets = calcPlanetsPrecise(state.currentTime); renderTonight(); } } } catch(e) {} }, 60000);
 
-if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js', { scope:'./' }).then(r => console.log('✅ SW:', r.scope)).catch(e => console.warn('⚠️ SW:', e)); }); }
 
 window.addEventListener('load', async () => {
   const now = new Date(), off = now.getTimezoneOffset()*60000; const iso = (new Date(now-off)).toISOString().slice(0, 16);
@@ -2968,6 +2967,31 @@ window.addEventListener('load', async () => {
     });
   }
 })();
+</script>
+  <!-- Auto-aggiornamento Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').then(reg => {
+        setInterval(() => { reg.update(); }, 60 * 60 * 1000);
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        });
+      }).catch(err => console.warn('SW fallito:', err));
+
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload(); 
+      });
+    });
+  }
 </script>
 </body>
 </html>
