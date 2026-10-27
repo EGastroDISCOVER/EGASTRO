@@ -2802,6 +2802,11 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   <iframe id="app-frame" style="width:100%; height:100%; border:none;"></iframe>
 </div>
 
+<!-- FINESTRA PER L'APP SATELLITE -->
+<div id="app-frame-container" style="display:none; position:fixed; inset:0; z-index:9999999; background:#000;">
+  <iframe id="app-frame" style="width:100%; height:100%; border:none;"></iframe>
+</div>
+
 <!-- MENU A SCOMPARSA -->
 <style>
   #app-switcher-container { position: fixed; top: 50%; left: 0; transform: translateY(-50%) translateX(calc(-100% + 24px)); z-index: 999999; display: flex; align-items: center; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -2832,7 +2837,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 <script src="sync-bus.js"></script>
 <script>
 // ============================================================
-//  EGastro DISCOVER (PIANETA) — Sincronizzazione e Navigazione
+//  EGastro DISCOVER (MASTER) — Sincronizzazione e Navigazione
 // ============================================================
 (function () {
   if (typeof SyncBus === 'undefined' || typeof scopeState === 'undefined') return;
@@ -2901,8 +2906,8 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   function wrapM(fnName, msgType, dataFn) {
     const orig = window[fnName]; if (typeof orig !== 'function') return;
     window[fnName] = function () {
-      const result = orig.apply(this, arguments); // Esegue sempre localmente
-      if (!_isRemote) { // Invia se non è un comando remoto
+      const result = orig.apply(this, arguments); 
+      if (!_isRemote) { 
         const data = dataFn ? dataFn.apply(this, arguments) : null;
         if (data !== false) SyncBus.send(msgType, data);
       }
@@ -2919,6 +2924,9 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   wrapM('scopeHome', 'cmd_home');
   wrapM('scopeToggleTracking', 'cmd_tracking', () => ({ on: scopeState.tracking }));
   wrapM('scopeChangeRate', 'cmd_speed', () => { const map = { 1:0.005, 5:0.005, 10:0.02, 20:0.02, 50:0.06, 100:0.2 }; return { rate: map[scopeState.rate] || 0.02 }; });
+  wrapM('scopeManualMove', 'cmd_manual_start', dir => { SyncBus.send('cmd_manual_stop'); return { dir }; });
+  wrapM('startEdgeMove', 'cmd_manual_start', dir => ({ dir }));
+  wrapM('stopEdgeMove', 'cmd_manual_stop');
 
   // 4. Ricezione comandi dal Satellite
   SyncBus.on('cmd_connect', d => { if (d) { _isRemote = true; scopeState.connected = d.on; const badge = document.getElementById('scopeConnBadge'); if(badge){ badge.innerText = d.on ? 'CONNESSO (satellite)' : 'DISCONNESSO'; badge.classList.toggle('on', d.on);} _isRemote = false; } });
@@ -2939,32 +2947,25 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 </script>
 <!-- PATCH: Popup una tantum e Icone -->
 <script>
-  // 1. Forza le icone della scheda e della PWA
   const icons = [
     { rel: 'icon', href: './icon-192.png', sizes: '192x192', type: 'image/png' },
     { rel: 'icon', href: './icon-512.png', sizes: '512x512', type: 'image/png' },
     { rel: 'apple-touch-icon', href: './icon-192.png' }
   ];
-  
   icons.forEach(iconData => {
     const link = document.createElement('link');
-    link.rel = iconData.rel;
-    link.href = iconData.href;
+    link.rel = iconData.rel; link.href = iconData.href;
     if (iconData.sizes) link.sizes = iconData.sizes;
     if (iconData.type) link.type = iconData.type;
     document.head.appendChild(link);
   });
 
-  // 2. Gestione Popup "Connessione Richiesta"
   document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
-      // Se l'utente ha già chiuso il popup in questa sessione, lo nascondiamo
       if (sessionStorage.getItem('egastro_welcome_shown') === 'true') {
         const modal = document.getElementById('welcome-modal');
         if (modal) modal.style.display = 'none';
       }
-
-      // Ogni volta che l'utente chiude il popup, salviamo il fatto che l'ha visto
       const closeBtn = document.querySelector('#welcome-modal .btn.primary');
       if (closeBtn) {
         closeBtn.addEventListener('click', () => {
@@ -2977,20 +2978,14 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   <!-- PATCH: Aggiornamento visivo tasto Connetti (Master) -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    // 1. Troviamo il pulsante accanto al badge e gli diamo un ID
     const badge = document.getElementById('scopeConnBadge');
     if (badge) {
       const btn = badge.nextElementSibling;
-      if (btn && btn.tagName === 'BUTTON') {
-        btn.id = 'scopeConnectBtn';
-      }
+      if (btn && btn.tagName === 'BUTTON') { btn.id = 'scopeConnectBtn'; }
     }
-
-    // 2. Creiamo una funzione che aggiorna l'aspetto del tasto
     window.updateMasterConnBtn = function(isConnected) {
       const btn = document.getElementById('scopeConnectBtn');
       if (!btn) return;
-      
       if (isConnected) {
         btn.innerText = 'Scollega';
         btn.style.background = 'linear-gradient(180deg, #ef4444 0%, #b91c1c 100%)';
@@ -2998,17 +2993,11 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
         btn.style.borderColor = '#ef4444';
       } else {
         btn.innerText = 'Connetti';
-        btn.style.background = ''; // Torna al colore originale
-        btn.style.color = '';
-        btn.style.borderColor = '';
+        btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
       }
     };
-
-    // 3. Controlliamo lo stato ogni mezzo secondo per tenerlo aggiornato
     setInterval(() => {
-      if (typeof scopeState !== 'undefined') {
-        window.updateMasterConnBtn(scopeState.connected);
-      }
+      if (typeof scopeState !== 'undefined') window.updateMasterConnBtn(scopeState.connected);
     }, 500);
   });
 </script>
