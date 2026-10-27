@@ -2837,13 +2837,12 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 <script src="sync-bus.js"></script>
 <script>
 // ============================================================
-//  EGastro DISCOVER (MASTER) — v12.0 (Definitivo)
+//  EGastro DISCOVER (MASTER) — v1.5
 // ============================================================
 (function () {
   if (typeof SyncBus === 'undefined' || typeof scopeState === 'undefined') return;
   let _isRemote = false;
 
-  // 1. Menu e Navigazione
   document.addEventListener('click', function(e) { 
     const container = document.getElementById('app-switcher-container');
     if (container && !container.contains(e.target)) { 
@@ -2878,7 +2877,6 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     }
   });
 
-  // 2. GPS (Invia solo se cambia posizione)
   const _origApply = window.applyCoordinates;
   if (typeof _origApply === 'function') {
     window.applyCoordinates = function () {
@@ -2890,12 +2888,11 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     };
   }
 
-  // 3. Ricezione Stato dal Satellite (Aggiorna grafica, NON tocca la connessione locale)
+  // IGNORA d.connected per non disconnettersi al cambio scheda
   SyncBus.on('mount_state', d => {
     if (!d) return;
     scopeState.tracking = d.tracking && d.tracking !== 'off';
     scopeState.isParked = !!d.isParked;
-    
     if (Number.isFinite(d.rate)) {
       const map = { 0.005:1, 0.02:20, 0.06:50, 0.2:100 };
       scopeState.rate = map[d.rate] || 20;
@@ -2909,16 +2906,11 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     if (scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) {
       if (typeof scopeDraw === 'function') scopeDraw();
     }
-    
     const tb = document.getElementById('scopeTrackBtn');
     if (tb) { tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON'; tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : ''); }
-    
-    if (typeof window.updateMasterConnBtn === 'function') {
-      window.updateMasterConnBtn(scopeState.connected);
-    }
+    if (typeof window.updateMasterConnBtn === 'function') window.updateMasterConnBtn(scopeState.connected);
   });
 
-  // 4. Comandi
   function wrapM(fnName, msgType, dataFn) {
     const orig = window[fnName]; if (typeof orig !== 'function') return;
     window[fnName] = function () {
@@ -2939,6 +2931,9 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   wrapM('scopeHome', 'cmd_home');
   wrapM('scopeToggleTracking', 'cmd_tracking', () => ({ on: scopeState.tracking }));
   wrapM('scopeChangeRate', 'cmd_speed', () => { const map = { 1:0.005, 5:0.005, 10:0.02, 20:0.02, 50:0.06, 100:0.2 }; return { rate: map[scopeState.rate] || 0.02 }; });
+  wrapM('scopeManualMove', 'cmd_manual_start', dir => { SyncBus.send('cmd_manual_stop'); return { dir }; });
+  wrapM('startEdgeMove', 'cmd_manual_start', dir => ({ dir }));
+  wrapM('stopEdgeMove', 'cmd_manual_stop');
 
   const _origMasterConnect = window.scopeToggleConnect;
   if (typeof _origMasterConnect === 'function') {
@@ -2950,7 +2945,6 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     };
   }
 
-  // 5. Ricezione Comandi dal Satellite
   SyncBus.on('cmd_connect', d => { 
     if (d) { 
       _isRemote = true; 
@@ -2959,7 +2953,6 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     } 
   });
   SyncBus.on('cmd_speed', d => { if (d && Number.isFinite(d.rate)) { _isRemote = true; const map = { 0.005:1, 0.02:20, 0.06:50, 0.2:100 }; scopeState.rate = map[d.rate] || 20; const rd = document.getElementById('scopeRateDisplay'); if (rd) rd.innerText = scopeState.rate + 'X'; _isRemote = false; } });
-
 })();
 </script>
 
