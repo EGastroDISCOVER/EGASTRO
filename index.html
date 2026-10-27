@@ -2954,12 +2954,13 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     };
     setInterval(() => { if (typeof scopeState !== 'undefined') window.updateMasterConnBtn(scopeState.connected); }, 500);
   });
-</script>
 <!-- ======================================================= -->
-<!-- 🟨 MAPPA SATELLITE: TRASPARENTE + VIA LATTEA            -->
+<!-- 🟨 MAPPA SATELLITE: TRASPARENTE + VIA LATTEA (PULITO)   -->
 <!-- ======================================================= -->
 <script>
 (function() {
+  console.log("🟪 INIZIO SCRIPT MAPPA...");
+
   const STARS = [
     {n:"Polaris", ra:37.95, dec:89.26, mag:1.98},{n:"Dubhe", ra:165.93, dec:61.75, mag:1.79},
     {n:"Merak", ra:165.46, dec:56.38, mag:2.37},{n:"Alioth", ra:193.51, dec:55.96, mag:1.77},
@@ -2973,9 +2974,9 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     {n:"Pollux", ra:116.33, dec:28.03, mag:1.14},{n:"Regolo", ra:152.09, dec:11.97, mag:1.35},
     {n:"Spica", ra:201.30, dec:-11.16, mag:0.97},{n:"Antares", ra:247.35, dec:-26.43, mag:0.96},
     {n:"Sirio", ra:101.29, dec:-16.72, mag:-1.46},{n:"Procyon", ra:114.83, dec:5.22, mag:0.34},
-    {n:"Fomalhaut", ra:344.41, dec:-29.62, mag:1.17},{n:"Canopo", ra:95.99, dec:-52.70, mag:-0.74},
-    {n:"Alphard", ra:141.90, dec:-8.66, mag:2.00},{n:"Hamal", ra:31.79, dec:23.46, mag:2.00}
+    {n:"Fomalhaut", ra:344.41, dec:-29.62, mag:1.17},{n:"Canopo", ra:95.99, dec:-52.70, mag:-0.74}
   ];
+  
   const MESSIER = {
     "M1":{ra:83.63,dec:22.01},"M8":{ra:270.90,dec:-24.38},"M13":{ra:250.42,dec:36.46},
     "M16":{ra:274.70,dec:-13.78},"M17":{ra:275.20,dec:-16.17},"M20":{ra:270.67,dec:-23.03},
@@ -2985,7 +2986,6 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     "M101":{ra:210.80,dec:54.35},"M104":{ra:189.99,dec:-11.62}
   };
 
-  // Funzione per convertire Galactic (Via Lattea) in RA/Dec
   function galToEq(l, b) {
     const lR = l * Math.PI / 180, bR = b * Math.PI / 180;
     const x = Math.cos(bR) * Math.cos(lR);
@@ -2999,14 +2999,12 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     return { ra: (ra + 360) % 360, dec };
   }
 
-  // Genera i punti della Via Lattea
   const MILKY_WAY = [];
   for (let i = 0; i < 600; i++) {
     const l = Math.random() * 360;
-    // Distribuzione gaussiana attorno al piano galattico
     const u1 = Math.random(), u2 = Math.random();
     const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    const b = z * 5; // deviazione standard di 5 gradi
+    const b = z * 5; 
     const eq = galToEq(l, b);
     MILKY_WAY.push({ ...eq, size: 4 + Math.random() * 12, alpha: 0.03 + Math.random() * 0.08 });
   }
@@ -3026,282 +3024,162 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     return { alt, az: ((az % 360) + 360) % 360 };
   }
 
-  // Crea la finestra fluttuante TRASPARENTE
-  const wrap = document.createElement('div');
-  wrap.id = 'satelliteMapWrap';
-  wrap.style = "position: fixed; top: 70px; right: 10px; width: 260px; height: 290px; background: rgba(10,14,20,0.4); backdrop-filter: blur(8px); border: 1.5px solid rgba(212,175,55,0.6); border-radius: 12px; z-index: 100000; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.5); overflow: hidden;";
-  
-  const title = document.createElement('div');
-  title.style = "padding: 5px 8px; font-family: 'Orbitron', sans-serif; font-size: 10px; color: #d4af37; border-bottom: 1px solid rgba(212,175,55,0.3); text-align: center; letter-spacing: 1px;";
-  title.innerText = "MAPPA SATELLITE";
-  wrap.appendChild(title);
-
-  const canvas = document.createElement('canvas');
-  canvas.id = 'satelliteMapCanvas';
-  canvas.style = "width: 100%; height: 100%; display: block; flex: 1;";
-  wrap.appendChild(canvas);
-  
-  document.body.appendChild(wrap);
-
-  const ctx = canvas.getContext('2d');
-  const DPR = window.devicePixelRatio || 1;
-
-  function resizeCanvas() {
-    const rect = wrap.getBoundingClientRect();
-    const w = rect.width;
-    const h = rect.height - 25;
-    canvas.width = w * DPR;
-    canvas.height = h * DPR;
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  function draw() {
-    requestAnimationFrame(draw);
-    if (typeof MS === 'undefined') return;
+  // ASPETTA CHE L'APP SIA PRONTA E CREA LA FINESTRA
+  setTimeout(() => {
+    console.log("🟪 Creazione contenitore mappa...");
     
-    const W = canvas.width / DPR;
-    const H = canvas.height / DPR;
-    const cx = W / 2;
-    const cy = H / 2;
-    const R = Math.min(W, H) * 0.45;
+    // Posizionata in basso a destra per non coprire i pulsanti in alto a destra
+    const wrap = document.createElement('div');
+    wrap.id = 'satelliteMapWrap';
+    wrap.style = "position: fixed; bottom: 230px; right: 15px; width: 220px; height: 240px; background: rgba(10,14,20,0.4); backdrop-filter: blur(8px); border: 2px solid #d4af37; border-radius: 12px; z-index: 999999; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.5); overflow: hidden;";
+    
+    const title = document.createElement('div');
+    title.style = "padding: 4px 8px; font-family: 'Orbitron', sans-serif; font-size: 9px; color: #d4af37; border-bottom: 1px solid rgba(212,175,55,0.3); text-align: center; letter-spacing: 1px; background: rgba(0,0,0,0.3);";
+    title.innerText = "MAPPA SATELLITE";
+    wrap.appendChild(title);
 
-    // Sfondo trasparente (pulizia)
-    ctx.clearRect(0, 0, W, H);
+    const canvas = document.createElement('canvas');
+    canvas.id = 'satelliteMapCanvas';
+    canvas.style = "width: 100%; height: 100%; display: block; flex: 1;";
+    wrap.appendChild(canvas);
+    
+    document.body.appendChild(wrap);
+    console.log("🟪 Contenitore mappa inserito nel DOM!");
 
-    const project = (alt, az) => {
-      const r = R * Math.max(0, (90 - alt)) / 90;
-      const theta = (az - 90) * Math.PI / 180;
-      return { x: cx + r * Math.cos(theta), y: cy + r * Math.sin(theta) };
-    };
+    const ctx = canvas.getContext('2d');
+    const DPR = window.devicePixelRatio || 1;
 
-    // Disegna Via Lattea
-    MILKY_WAY.forEach(p => {
-      const pos = raDecToAltAz(p.ra, p.dec, lat, lon, now);
-      if (pos.alt < 0) return;
-      const pt = project(pos.alt, pos.az);
+    function resizeCanvas() {
+      const rect = wrap.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height - 22; 
+      canvas.width = w * DPR;
+      canvas.height = h * DPR;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function draw() {
+      requestAnimationFrame(draw);
+      if (typeof MS === 'undefined') return;
       
-      const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, p.size * 2);
-      glow.addColorStop(0, `rgba(200,220,255,${p.alpha})`);
-      glow.addColorStop(1, 'rgba(200,220,255,0)');
-      ctx.fillStyle = glow;
-      ctx.beginPath(); ctx.arc(pt.x, pt.y, p.size * 2, 0, Math.PI * 2); ctx.fill();
-    });
+      const W = canvas.width / DPR;
+      const H = canvas.height / DPR;
+      const cx = W / 2;
+      const cy = H / 2;
+      const R = Math.min(W, H) * 0.45;
 
-    // Orizzonte e griglia
-    ctx.strokeStyle = 'rgba(212,175,55,0.5)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+      const lat = Number.isFinite(MS.gpsLat) ? MS.gpsLat : 41.9028;
+      const lon = Number.isFinite(MS.gpsLon) ? MS.gpsLon : 12.4964;
+      const now = new Date();
 
-    // Punti cardinali
-    ctx.fillStyle = '#d4af37';
-    ctx.font = 'bold 11px Orbitron, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    [{l:'N', a:0}, {l:'E', a:90}, {l:'S', a:180}, {l:'O', a:270}].forEach(c => {
-      const p = project(-6, c.a);
-      ctx.fillText(c.l, p.x, p.y);
-    });
+      ctx.clearRect(0, 0, W, H);
 
-    const lat = Number.isFinite(MS.gpsLat) ? MS.gpsLat : 41.9028;
-    const lon = Number.isFinite(MS.gpsLon) ? MS.gpsLon : 12.4964;
-    const now = new Date();
+      const project = (alt, az) => {
+        const r = R * Math.max(0, (90 - alt)) / 90;
+        const theta = (az - 90) * Math.PI / 180;
+        return { x: cx + r * Math.cos(theta), y: cy + r * Math.sin(theta) };
+      };
 
-    // Stelle
-    STARS.forEach(s => {
-      const pos = raDecToAltAz(s.ra, s.dec, lat, lon, now);
-      if (pos.alt < 0) return;
-      const p = project(pos.alt, pos.az);
-      const size = Math.max(1, 3.5 - s.mag * 0.8);
-      ctx.fillStyle = s.mag < 0.5 ? '#ffffff' : (s.mag < 1.5 ? '#ffffcc' : '#d0d8e0');
-      ctx.beginPath(); ctx.arc(p.x, p.y, size, 0, Math.PI * 2); ctx.fill();
-      if (s.mag < 1.2) {
-        ctx.fillStyle = 'rgba(201,209,227,0.8)';
-        ctx.font = '8px Inter, sans-serif';
+      // Via Lattea
+      MILKY_WAY.forEach(p => {
+        const pos = raDecToAltAz(p.ra, p.dec, lat, lon, now);
+        if (pos.alt < 0) return;
+        const pt = project(pos.alt, pos.az);
+        
+        const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, p.size * 2);
+        glow.addColorStop(0, `rgba(200,220,255,${p.alpha})`);
+        glow.addColorStop(1, 'rgba(200,220,255,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, p.size * 2, 0, Math.PI * 2); ctx.fill();
+      });
+
+      // Orizzonte
+      ctx.strokeStyle = 'rgba(212,175,55,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+      // Punti cardinali
+      ctx.fillStyle = '#d4af37';
+      ctx.font = 'bold 11px Orbitron, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      [{l:'N', a:0}, {l:'E', a:90}, {l:'S', a:180}, {l:'O', a:270}].forEach(c => {
+        const p = project(-6, c.a);
+        ctx.fillText(c.l, p.x, p.y);
+      });
+
+      // Stelle
+      STARS.forEach(s => {
+        const pos = raDecToAltAz(s.ra, s.dec, lat, lon, now);
+        if (pos.alt < 0) return;
+        const p = project(pos.alt, pos.az);
+        const size = Math.max(1, 3.5 - s.mag * 0.8);
+        ctx.fillStyle = s.mag < 0.5 ? '#ffffff' : (s.mag < 1.5 ? '#ffffcc' : '#d0d8e0');
+        ctx.beginPath(); ctx.arc(p.x, p.y, size, 0, Math.PI * 2); ctx.fill();
+        if (s.mag < 1.2) {
+          ctx.fillStyle = 'rgba(201,209,227,0.8)';
+          ctx.font = '8px Inter, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText(s.n, p.x + 3, p.y + 2);
+        }
+      });
+
+      // Messier
+      Object.values(MESSIER).forEach(m => {
+        const pos = raDecToAltAz(m.ra, m.dec, lat, lon, now);
+        if (pos.alt < 0) return;
+        const p = project(pos.alt, pos.az);
+        ctx.strokeStyle = '#8bd3ff';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.rect(p.x - 2, p.y - 2, 4, 4); ctx.stroke();
+      });
+
+      // Telescopio
+      let astro;
+      try { astro = (typeof getAstroCoords === 'function') ? getAstroCoords() : { ra: MS.ra, dec: MS.dec }; } 
+      catch(e) { astro = { ra: MS.ra, dec: MS.dec }; }
+      
+      const tPos = raDecToAltAz(astro.ra * 180 / Math.PI, astro.dec * 180 / Math.PI, lat, lon, now);
+
+      if (tPos.alt >= 0) {
+        const p = project(tPos.alt, tPos.az);
+        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 18);
+        glow.addColorStop(0, 'rgba(255,68,102,0.7)');
+        glow.addColorStop(1, 'rgba(255,68,102,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 18, 0, Math.PI * 2); ctx.fill();
+
+        ctx.strokeStyle = '#ff4466';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(p.x - 12, p.y); ctx.lineTo(p.x - 4, p.y);
+        ctx.moveTo(p.x + 4, p.y);  ctx.lineTo(p.x + 12, p.y);
+        ctx.moveTo(p.x, p.y - 12); ctx.lineTo(p.x, p.y - 4);
+        ctx.moveTo(p.x, p.y + 4);  ctx.lineTo(p.x, p.y + 12);
+        ctx.stroke();
+
+        ctx.fillStyle = '#ff4466';
+        ctx.font = 'bold 8px Orbitron, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(s.n, p.x + 3, p.y + 2);
+        ctx.fillText('TELESCOPIO', p.x + 14, p.y + 2);
       }
-    });
 
-    // Messier
-    Object.values(MESSIER).forEach(m => {
-      const pos = raDecToAltAz(m.ra, m.dec, lat, lon, now);
-      if (pos.alt < 0) return;
-      const p = project(pos.alt, pos.az);
-      ctx.strokeStyle = '#8bd3ff';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.rect(p.x - 2, p.y - 2, 4, 4); ctx.stroke();
-    });
-
-    // Telescopio
-    let astro;
-    try { astro = (typeof getAstroCoords === 'function') ? getAstroCoords() : { ra: MS.ra, dec: MS.dec }; } 
-    catch(e) { astro = { ra: MS.ra, dec: MS.dec }; }
-    const tPos = raDecToAltAz(astro.ra * 180 / Math.PI, astro.dec * 180 / Math.PI, lat, lon, now);
-
-    if (tPos.alt >= 0) {
-      const p = project(tPos.alt, tPos.az);
-      const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 18);
-      glow.addColorStop(0, 'rgba(255,68,102,0.7)');
-      glow.addColorStop(1, 'rgba(255,68,102,0)');
-      ctx.fillStyle = glow;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 18, 0, Math.PI * 2); ctx.fill();
-
-      ctx.strokeStyle = '#ff4466';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(p.x - 12, p.y); ctx.lineTo(p.x - 4, p.y);
-      ctx.moveTo(p.x + 4, p.y);  ctx.lineTo(p.x + 12, p.y);
-      ctx.moveTo(p.x, p.y - 12); ctx.lineTo(p.x, p.y - 4);
-      ctx.moveTo(p.x, p.y + 4);  ctx.lineTo(p.x, p.y + 12);
-      ctx.stroke();
-
-      ctx.fillStyle = '#ff4466';
-      ctx.font = 'bold 8px Orbitron, sans-serif';
+      ctx.fillStyle = '#8bd3ff';
+      ctx.font = 'bold 9px Orbitron, sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText('TELESCOPIO', p.x + 14, p.y + 2);
+      ctx.fillText(`ALT ${tPos.alt.toFixed(1)}°`, 6, H - 6);
+      ctx.textAlign = 'right';
+      ctx.fillText(`AZ ${tPos.az.toFixed(1)}°`, W - 6, H - 6);
     }
 
-    ctx.fillStyle = '#8bd3ff';
-    ctx.font = 'bold 9px Orbitron, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(`ALT ${tPos.alt.toFixed(1)}°`, 6, H - 6);
-    ctx.textAlign = 'right';
-    ctx.fillText(`AZ ${tPos.az.toFixed(1)}°`, W - 6, H - 6);
+    draw();
+    console.log("🟪 MAPPA ATTIVA - Ciclo di disegno avviato");
+  }, 500);
 
-    ctx.fillStyle = 'rgba(139,211,255,0.6)';
-    ctx.font = '7px Orbitron, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${lat.toFixed(1)}° / ${lon.toFixed(1)}°`, W - 6, 10);
-  }
-
-  // Nel draw() mancava la definizione di lat/lon/now prima della Via Lattea
-  // Le spostiamo all'inizio della funzione per farle vedere a tutti
-  const originalDraw = draw;
-  draw = function() {
-    requestAnimationFrame(draw);
-    if (typeof MS === 'undefined') return;
-    
-    const W = canvas.width / DPR;
-    const H = canvas.height / DPR;
-    const cx = W / 2;
-    const cy = H / 2;
-    const R = Math.min(W, H) * 0.45;
-    
-    const lat = Number.isFinite(MS.gpsLat) ? MS.gpsLat : 41.9028;
-    const lon = Number.isFinite(MS.gpsLon) ? MS.gpsLon : 12.4964;
-    const now = new Date();
-
-    ctx.clearRect(0, 0, W, H);
-
-    const project = (alt, az) => {
-      const r = R * Math.max(0, (90 - alt)) / 90;
-      const theta = (az - 90) * Math.PI / 180;
-      return { x: cx + r * Math.cos(theta), y: cy + r * Math.sin(theta) };
-    };
-
-    // Via Lattea
-    MILKY_WAY.forEach(p => {
-      const pos = raDecToAltAz(p.ra, p.dec, lat, lon, now);
-      if (pos.alt < 0) return;
-      const pt = project(pos.alt, pos.az);
-      const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, p.size * 2);
-      glow.addColorStop(0, `rgba(200,220,255,${p.alpha})`);
-      glow.addColorStop(1, 'rgba(200,220,255,0)');
-      ctx.fillStyle = glow;
-      ctx.beginPath(); ctx.arc(pt.x, pt.y, p.size * 2, 0, Math.PI * 2); ctx.fill();
-    });
-
-    // Orizzonte
-    ctx.strokeStyle = 'rgba(212,175,55,0.5)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
-
-    // Punti cardinali
-    ctx.fillStyle = '#d4af37';
-    ctx.font = 'bold 11px Orbitron, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    [{l:'N', a:0}, {l:'E', a:90}, {l:'S', a:180}, {l:'O', a:270}].forEach(c => {
-      const p = project(-6, c.a);
-      ctx.fillText(c.l, p.x, p.y);
-    });
-
-    // Stelle
-    STARS.forEach(s => {
-      const pos = raDecToAltAz(s.ra, s.dec, lat, lon, now);
-      if (pos.alt < 0) return;
-      const p = project(pos.alt, pos.az);
-      const size = Math.max(1, 3.5 - s.mag * 0.8);
-      ctx.fillStyle = s.mag < 0.5 ? '#ffffff' : (s.mag < 1.5 ? '#ffffcc' : '#d0d8e0');
-      ctx.beginPath(); ctx.arc(p.x, p.y, size, 0, Math.PI * 2); ctx.fill();
-      if (s.mag < 1.2) {
-        ctx.fillStyle = 'rgba(201,209,227,0.8)';
-        ctx.font = '8px Inter, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(s.n, p.x + 3, p.y + 2);
-      }
-    });
-
-    // Messier
-    Object.values(MESSIER).forEach(m => {
-      const pos = raDecToAltAz(m.ra, m.dec, lat, lon, now);
-      if (pos.alt < 0) return;
-      const p = project(pos.alt, pos.az);
-      ctx.strokeStyle = '#8bd3ff';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.rect(p.x - 2, p.y - 2, 4, 4); ctx.stroke();
-    });
-
-    // Telescopio
-    let astro;
-    try { astro = (typeof getAstroCoords === 'function') ? getAstroCoords() : { ra: MS.ra, dec: MS.dec }; } 
-    catch(e) { astro = { ra: MS.ra, dec: MS.dec }; }
-    const tPos = raDecToAltAz(astro.ra * 180 / Math.PI, astro.dec * 180 / Math.PI, lat, lon, now);
-
-    if (tPos.alt >= 0) {
-      const p = project(tPos.alt, tPos.az);
-      const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 18);
-      glow.addColorStop(0, 'rgba(255,68,102,0.7)');
-      glow.addColorStop(1, 'rgba(255,68,102,0)');
-      ctx.fillStyle = glow;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 18, 0, Math.PI * 2); ctx.fill();
-
-      ctx.strokeStyle = '#ff4466';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(p.x - 12, p.y); ctx.lineTo(p.x - 4, p.y);
-      ctx.moveTo(p.x + 4, p.y);  ctx.lineTo(p.x + 12, p.y);
-      ctx.moveTo(p.x, p.y - 12); ctx.lineTo(p.x, p.y - 4);
-      ctx.moveTo(p.x, p.y + 4);  ctx.lineTo(p.x, p.y + 12);
-      ctx.stroke();
-
-      ctx.fillStyle = '#ff4466';
-      ctx.font = 'bold 8px Orbitron, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('TELESCOPIO', p.x + 14, p.y + 2);
-    }
-
-    ctx.fillStyle = '#8bd3ff';
-    ctx.font = 'bold 9px Orbitron, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(`ALT ${tPos.alt.toFixed(1)}°`, 6, H - 6);
-    ctx.textAlign = 'right';
-    ctx.fillText(`AZ ${tPos.az.toFixed(1)}°`, W - 6, H - 6);
-
-    ctx.fillStyle = 'rgba(139,211,255,0.6)';
-    ctx.font = '7px Orbitron, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${lat.toFixed(1)}° / ${lon.toFixed(1)}°`, W - 6, 10);
-  };
-
-  draw();
 })();
 </script>
-</body>
-</html>
