@@ -2903,28 +2903,5 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     }, 500);
   });
 </script>
-  <!-- PATCH: Aggiornamento visivo tasto Connetti (Slave) -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    window.updateSlaveConnBtn = function(isConnected) {
-      const btn = document.getElementById('connect-btn');
-      if (!btn) return;
-
-      if (isConnected) {
-        btn.innerText = 'Scollega';
-        btn.className = 'btn danger'; // Usa la classe rossa che hai già nel CSS
-      } else {
-        btn.innerText = 'Connetti';
-        btn.className = 'btn primary'; // Usa la classe originale
-      }
-    };
-
-    setInterval(() => {
-      if (typeof MS !== 'undefined') {
-        window.updateSlaveConnBtn(MS.connected);
-      }
-    }, 500);
-  });
-</script>
 </body>
 </html>
