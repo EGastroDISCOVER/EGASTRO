@@ -2728,21 +2728,20 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 
 <!-- MENU A SCOMPARSA -->
 <style>
-  #app-switcher-container { position: fixed; top: 50%; left: 0; transform: translateY(-50%); z-index: 999999; display: flex; align-items: center; font-family: 'Orbitron', 'Inter', sans-serif; }
-  #app-switcher-toggle { background: rgba(10, 18, 32, 0.95); border: 1px solid #d4af37; border-left: none; border-radius: 0 8px 8px 0; color: #d4af37; width: 30px; height: 60px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; backdrop-filter: blur(10px); transition: all 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.5); pointer-events: auto !important; }
-  #app-switcher-toggle:hover { background: #d4af37; color: #000; width: 35px; }
-  #app-switcher-menu { position: absolute; left: -100px; background: rgba(10, 18, 32, 0.95); border: 1px solid rgba(212, 175, 55, 0.4); border-left: none; border-radius: 0 16px 16px 0; padding: 15px 10px; display: flex; flex-direction: column; gap: 15px; backdrop-filter: blur(15px); transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 5px 0 20px rgba(0,0,0,0.7); }
-  #app-switcher-menu.open { left: 30px !important; border-left: 1px solid rgba(212, 175, 55, 0.4); }
-  .app-switch-btn { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; transition: all 0.3s; position: relative; pointer-events: auto !important; }
+  #app-switcher-container { position: fixed; top: 50%; left: 0; transform: translateY(-50%) translateX(calc(-100% + 22px)); z-index: 999999; display: flex; align-items: stretch; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  #app-switcher-container.open { transform: translateY(-50%) translateX(0); }
+  #app-switcher-menu { background: rgba(10, 18, 32, 0.95); border: 1px solid rgba(212, 175, 55, 0.4); border-right: none; border-radius: 12px 0 0 12px; padding: 10px 8px; display: flex; flex-direction: column; gap: 10px; backdrop-filter: blur(15px); box-shadow: -2px 0 10px rgba(0,0,0,0.5); }
+  #app-switcher-toggle { background: rgba(10, 18, 32, 0.95); border: 1px solid #d4af37; border-left: none; border-radius: 0 8px 8px 0; color: #d4af37; width: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); transition: all 0.3s; font-size: 11px; user-select: none; }
+  #app-switcher-toggle:hover { background: #d4af37; color: #000; }
+  .app-switch-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; transition: all 0.3s; position: relative; pointer-events: auto !important; }
   .app-btn-telescope { border: 2px solid #d4af37; background: #0a1220; color: #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
   .app-btn-telescope:hover { background: #d4af37; color: #000; transform: scale(1.1); }
   .app-btn-dome { border: 2px solid #8bd3ff; background: #0a1220; color: #8bd3ff; box-shadow: 0 0 10px rgba(139, 211, 255, 0.3); }
   .app-btn-dome:hover { background: #8bd3ff; color: #000; transform: scale(1.1); }
-  .app-switch-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .app-switch-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
 </style>
 
 <div id="app-switcher-container">
-  <button id="app-switcher-toggle" title="Apri menu app" onclick="const m=document.getElementById('app-switcher-menu'); m.classList.toggle('open'); this.innerText=m.classList.contains('open')?'▶':'◀';">◀</button>
   <div id="app-switcher-menu">
     <a class="app-switch-btn app-btn-dome" id="btn-goto-dome" href="javascript:void(0);">
       <svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M4 21v-8"/><path d="M20 21v-8"/><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 5v8"/><path d="M12 10l-3-2"/></svg>
@@ -2751,26 +2750,24 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       <svg viewBox="0 0 24 24"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path><path d="M7 16l-2 6"></path><path d="M3 22h8"></path><path d="M10 6l10-3 2 4-10 3-2-4z"></path></svg>
     </a>
   </div>
+  <button id="app-switcher-toggle" title="Apri menu app" onclick="const c=document.getElementById('app-switcher-container'); c.classList.toggle('open'); this.innerText=c.classList.contains('open')?'◀':'▶';">▶</button>
 </div>
 
 <script src="sync-bus.js"></script>
 <script>
 // ============================================================
-//  EGastro DISCOVER (PIANETA) — SyncBus Integration · v2.3
+//  EGastro DISCOVER (PIANETA) — SyncBus Integration · v3.0
 // ============================================================
 (function () {
   if (typeof SyncBus === 'undefined' || typeof scopeState === 'undefined') return;
 
-  let _isRemote = false;
-
-  // 1. Menu e Icone
+  // 1. Menu
   document.addEventListener('click', function(e) { 
     const container = document.getElementById('app-switcher-container');
-    const menu = document.getElementById('app-switcher-menu');
-    if (container && menu && !container.contains(e.target)) { 
-      menu.classList.remove('open'); 
+    if (container && !container.contains(e.target)) { 
+      container.classList.remove('open'); 
       const btn = document.getElementById('app-switcher-toggle');
-      if(btn) btn.innerText = '◀'; 
+      if(btn) btn.innerText = '▶'; 
     } 
   });
 
@@ -2782,28 +2779,19 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     btnTele.addEventListener('click', function(e) {
       e.preventDefault();
       SyncBus.send('sync_activate', { role: 'master', gpsLat: state.lat, gpsLon: state.lon, target: state.target || null });
-      // Apre o porta in primo piano la scheda esistente
       window.open('https://egastrodiscover.github.io/EGASTROmount/', 'EGASTRO_App');
     });
   }
 
-  // 2. Stato
+  // 2. Stato (Specchio)
   let _peerConnected = false;
   SyncBus.on('mount_state', d => {
     if (!d) return;
     _peerConnected = !!d.connected;
     
-    if (!scopeState.connected && _peerConnected) {
-      scopeState.connected = true;
-      const badge = document.getElementById('scopeConnBadge'); if(badge) { badge.innerText = 'CONNESSO (peer)'; badge.classList.add('on'); }
-    } else if (scopeState.connected && !_peerConnected) {
-      scopeState.connected = false;
-      const badge = document.getElementById('scopeConnBadge'); if(badge) { badge.innerText = 'DISCONNESSO'; badge.classList.remove('on'); }
-    }
-
+    scopeState.connected = _peerConnected;
     scopeState.tracking = d.tracking && d.tracking !== 'off';
     scopeState.isParked = !!d.isParked;
-    scopeState.slewing  = (d.slewMode === 'goto' || d.slewMode === 'park');
     
     if (Number.isFinite(d.rate)) {
       const map = { 0.005:1, 0.02:20, 0.06:50, 0.2:100 };
@@ -2821,13 +2809,15 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       if (typeof scopeDraw === 'function') scopeDraw();
     }
     
+    const badge = document.getElementById('scopeConnBadge');
+    if (badge) { badge.innerText = _peerConnected ? 'CONNESSO (satellite)' : 'DISCONNESSO'; badge.classList.toggle('on', _peerConnected); }
     const tb = document.getElementById('scopeTrackBtn');
     if (tb) { tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON'; tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : ''); }
     const parkOv = document.getElementById('parkOverlay');
     if (parkOv) parkOv.classList.toggle('open', !!d.isParked);
   });
 
-  // 3. GPS (Invia solo su richiesta o all'avvio)
+  // 3. GPS (Invia solo su richiesta)
   function broadcastGPS() {
     if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
       SyncBus.send('gps_update', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy, source: 'observatory' });
@@ -2847,45 +2837,44 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     SyncBus.send('sync_activate', { role: 'master', gpsLat: state.lat, gpsLon: state.lon, target: state.target || null });
   };
   SyncBus.on('sync_request', _sendSyncActivate);
-  // Invia GPS appena l'app è pronta
-  setTimeout(_sendSyncActivate, 1000);
 
-  // 4. Connessione e Comandi Bidirezionali
-  const _origToggle = window.scopeToggleConnect;
-  if (typeof _origToggle === 'function') {
-    window.scopeToggleConnect = function() {
-      const wasConnected = scopeState.connected;
-      _origToggle.apply(this, arguments);
-      if (!_isRemote) SyncBus.send('cmd_connect', { on: !wasConnected });
-    };
-  }
-  SyncBus.on('cmd_connect', d => {
-    if (!d) return;
-    _isRemote = true;
-    if (d.on !== scopeState.connected) window.scopeToggleConnect();
-    _isRemote = false;
-  });
-
+  // 4. Comandi (Se peer c'è, non eseguire localmente)
   function wrapM(fnName, msgType, dataFn) {
     const orig = window[fnName]; if (typeof orig !== 'function') return;
     window[fnName] = function () {
-      try { orig.apply(this, arguments); } catch (e) {}
-      if (!_isRemote) { try { const data = dataFn ? dataFn.apply(this, arguments) : null; if (data !== false) SyncBus.send(msgType, data); } catch (e) {} }
+      if (SyncBus.isPeerAlive()) {
+        const data = dataFn ? dataFn.apply(this, arguments) : null;
+        if (data !== false) SyncBus.send(msgType, data);
+      } else {
+        try { orig.apply(this, arguments); } catch (e) {}
+      }
     };
   }
+
   wrapM('scopeSlewToTarget', 'cmd_goto', () => scopeState.target ? { ra: scopeState.target.ra, dec: scopeState.target.dec } : false);
   wrapM('scopeStopSlewing', 'cmd_stop');
   wrapM('scopeEmergencyStop', 'cmd_stop');
   wrapM('scopePark', 'cmd_park');
   wrapM('scopeUnpark', 'cmd_unpark');
   wrapM('scopeHome', 'cmd_home');
-  wrapM('scopeToggleTracking', 'cmd_tracking', () => ({ on: scopeState.tracking }));
+  wrapM('scopeToggleTracking', 'cmd_tracking', () => ({ on: scopeState.tracking, rate: scopeState.trackRate }));
   wrapM('scopeChangeRate', 'cmd_speed', () => { const map = { 1:0.005, 5:0.005, 10:0.02, 20:0.02, 50:0.06, 100:0.2 }; return { rate: map[scopeState.rate] || 0.02 }; });
   wrapM('scopeManualMove', 'cmd_manual_start', dir => { SyncBus.send('cmd_manual_stop'); return { dir }; });
   wrapM('startEdgeMove', 'cmd_manual_start', dir => ({ dir }));
   wrapM('stopEdgeMove', 'cmd_manual_stop');
 
-  // 5. Indicatore
+  // 5. Ricezione comandi dallo Slave
+  SyncBus.on('cmd_connect', d => {
+    if (d && d.on !== scopeState.connected) {
+      _peerConnected = d.on;
+      scopeState.connected = d.on;
+      const badge = document.getElementById('scopeConnBadge'); if(badge) { badge.innerText = d.on ? 'CONNESSO (satellite)' : 'DISCONNESSO'; badge.classList.toggle('on', d.on); }
+    }
+  });
+  SyncBus.on('cmd_tracking', d => {
+    if (d) { scopeState.tracking = d.on; const tb = document.getElementById('scopeTrackBtn'); if (tb) { tb.innerText = d.on ? 'Track OFF' : 'Track ON'; tb.className = 'triton-btn' + (d.on ? ' active' : ''); } }
+  });
+
   const ind = document.createElement('div');
   ind.style.cssText = 'position:fixed;bottom:8px;right:8px;padding:3px 8px;background:rgba(10,18,32,.92);border:1px solid #333;border-radius:6px;color:#666;font-size:10px;font-family:monospace;z-index:99999;pointer-events:none;';
   document.body.appendChild(ind);
