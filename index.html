@@ -2903,5 +2903,43 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     }, 500);
   });
 </script>
+  <!-- PATCH: Aggiornamento visivo tasto Connetti (Master) -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1. Troviamo il pulsante accanto al badge e gli diamo un ID
+    const badge = document.getElementById('scopeConnBadge');
+    if (badge) {
+      const btn = badge.nextElementSibling;
+      if (btn && btn.tagName === 'BUTTON') {
+        btn.id = 'scopeConnectBtn';
+      }
+    }
+
+    // 2. Creiamo una funzione che aggiorna l'aspetto del tasto
+    window.updateMasterConnBtn = function(isConnected) {
+      const btn = document.getElementById('scopeConnectBtn');
+      if (!btn) return;
+      
+      if (isConnected) {
+        btn.innerText = 'Scollega';
+        btn.style.background = 'linear-gradient(180deg, #ef4444 0%, #b91c1c 100%)';
+        btn.style.color = '#fff';
+        btn.style.borderColor = '#ef4444';
+      } else {
+        btn.innerText = 'Connetti';
+        btn.style.background = ''; // Torna al colore originale
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }
+    };
+
+    // 3. Controlliamo lo stato ogni mezzo secondo per tenerlo aggiornato
+    setInterval(() => {
+      if (typeof scopeState !== 'undefined') {
+        window.updateMasterConnBtn(scopeState.connected);
+      }
+    }, 500);
+  });
+</script>
 </body>
 </html>
