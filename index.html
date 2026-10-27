@@ -2836,21 +2836,73 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 
 <script src="sync-bus.js"></script>
 <script>
-(function () {
-  if (typeof SyncBus === 'undefined' || typeof scopeState === 'undefined') return;
-  let _isRemote = false;
+// =======================================================
+// 🟦 CODICE MASTER (APP PIANETA)
+// =======================================================
+(function() {
+  if (typeof Bus === 'undefined' || typeof scopeState === 'undefined') return;
+  let isRemote = false;
 
-  document.addEventListener('click', function(e) { 
-    const container = document.getElementById('app-switcher-container');
-    if (container && !container.contains(e.target)) { 
-      container.classList.remove('open'); 
-      const btn = document.getElementById('app-switcher-toggle'); if(btn) btn.innerText = '▶'; 
-    } 
+  // 1. RICEZIONE COMANDI DALLO SLAVE
+  Bus.on('cmd', (d) => {
+    if (!d || !d.action) return;
+    console.log('📥 Master riceve:', d.action, d);
+    isRemote = true;
+    try {
+      switch(d.action) {
+        case 'connect': 
+          if (scopeState.connected !== d.on) window.scopeToggleConnect(); 
+          break;
+        case 'park': window.scopePark(); break;
+        case 'unpark': window.scopeUnpark(); break;
+        case 'home': window.scopeHome(); break;
+        case 'goto': 
+          if (d.ra !== undefined) { scopeState.target = {ra: d.ra, dec: d.dec}; window.scopeSlewToTarget(); } 
+          break;
+        case 'stop': window.scopeStopSlewing(); break;
+        case 'tracking': 
+          if (d.on !== (scopeState.tracking !== 'off')) window.scopeToggleTracking(); 
+          break;
+      }
+    } catch(e) { console.error(e); }
+    isRemote = false;
   });
 
+  // 2. INVIO COMANDI ALLO SLAVE
+  function wrap(fn, action, dataFn) {
+    const orig = window[fn];
+    if (typeof orig !== 'function') return;
+    window[fn] = function() {
+      const result = orig.apply(this, arguments);
+      if (!isRemote) {
+        const data = dataFn ? dataFn.apply(this, arguments) : null;
+        if (data !== false) Bus.send('cmd', Object.assign({action}, data || {}));
+      }
+      return result;
+    };
+  }
+  
+  wrap('scopeToggleConnect', 'connect', () => ({ on: !scopeState.connected }));
+  wrap('scopePark', 'park');
+  wrap('scopeUnpark', 'unpark');
+  wrap('scopeHome', 'home');
+  wrap('scopeSlewToTarget', 'goto', () => scopeState.target ? { ra: scopeState.target.ra, dec: scopeState.target.dec } : false);
+  wrap('scopeStopSlewing', 'stop');
+  wrap('scopeEmergencyStop', 'stop');
+  wrap('scopeToggleTracking', 'tracking', () => ({ on: scopeState.tracking }));
+
+  // 3. GESTIONE IFRAME E GPS
+  document.addEventListener('click', function(e) { 
+    const c = document.getElementById('app-switcher-container');
+    if (c && !c.contains(e.target)) { 
+      c.classList.remove('open'); 
+      const b = document.getElementById('app-switcher-toggle'); if(b) b.innerText = '▶'; 
+    } 
+  });
+  
   const btnDome = document.getElementById('btn-goto-dome');
   if (btnDome) { btnDome.style.pointerEvents = 'none'; btnDome.style.opacity = '0.4'; }
-
+  
   const btnTele = document.getElementById('btn-goto-telescope');
   if (btnTele) {
     btnTele.addEventListener('click', function(e) {
@@ -2860,156 +2912,45 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       
       if (container.style.display !== 'block') {
         if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
-          SyncBus.send('gps_update', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
+          Bus.send('gps', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
         }
         iframe.src = 'https://egastrodiscover.github.io/EGASTROmount/';
         container.style.display = 'block';
       }
     });
   }
-
-  window.addEventListener('message', function(e) {
-    if (e.data === 'show-master') {
-      document.getElementById('app-frame-container').style.display = 'none';
-    }
+  
+  window.addEventListener('message', (e) => {
+    if (e.data === 'show-master') document.getElementById('app-frame-container').style.display = 'none';
   });
-
-  const _origApply = window.applyCoordinates;
-  if (typeof _origApply === 'function') {
-    window.applyCoordinates = function () {
-      const r = _origApply.apply(this, arguments);
-      setTimeout(() => {
-        if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
-          SyncBus.send('gps_update', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
-        }
-      }, 30);
-      return r;
-    };
-  }
-
-  let _peerConnected = false;
-  SyncBus.on('mount_state', d => {
-    if (!d) return;
-    _peerConnected = !!d.connected;
-    
-    scopeState.tracking = d.tracking && d.tracking !== 'off';
-    scopeState.isParked = !!d.isParked;
-    
-    if (Number.isFinite(d.rate)) {
-      const map = { 0.005:1, 0.02:20, 0.06:50, 0.2:100 };
-      scopeState.rate = map[d.rate] || 20;
-      const rd = document.getElementById('scopeRateDisplay'); if (rd) rd.innerText = scopeState.rate + 'X';
-    }
-    if (Number.isFinite(d.ra) && Number.isFinite(d.dec)) {
-      const p = getAltAz(d.ra * 180 / Math.PI, d.dec * 180 / Math.PI, state.currentTime);
-      if (Number.isFinite(p.alt)) { scopeState.mountAlt = p.alt; scopeState.mountAz = p.az; }
-    }
-    if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-    if (scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) {
-      if (typeof scopeDraw === 'function') scopeDraw();
-    }
-    
-    const tb = document.getElementById('scopeTrackBtn');
-    if (tb) { tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON'; tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : ''); }
-    
-    if (typeof window.updateMasterConnBtn === 'function') {
-      window.updateMasterConnBtn(scopeState.connected);
-    }
-  });
-
-  function wrapM(fnName, msgType, dataFn) {
-    const orig = window[fnName]; if (typeof orig !== 'function') return;
-    window[fnName] = function () {
-      const result = orig.apply(this, arguments); 
-      if (!_isRemote) {
-        const data = dataFn ? dataFn.apply(this, arguments) : null;
-        if (data !== false) SyncBus.send(msgType, data);
-      }
-      return result;
-    };
-  }
-
-  wrapM('scopeSlewToTarget', 'cmd_goto', () => scopeState.target ? { ra: scopeState.target.ra, dec: scopeState.target.dec } : false);
-  wrapM('scopeStopSlewing', 'cmd_stop');
-  wrapM('scopeEmergencyStop', 'cmd_stop');
-  wrapM('scopePark', 'cmd_park');
-  wrapM('scopeUnpark', 'cmd_unpark');
-  wrapM('scopeHome', 'cmd_home');
-  wrapM('scopeToggleTracking', 'cmd_tracking', () => ({ on: scopeState.tracking }));
-  wrapM('scopeChangeRate', 'cmd_speed', () => { const map = { 1:0.005, 5:0.005, 10:0.02, 20:0.02, 50:0.06, 100:0.2 }; return { rate: map[scopeState.rate] || 0.02 }; });
-  wrapM('scopeManualMove', 'cmd_manual_start', dir => { SyncBus.send('cmd_manual_stop'); return { dir }; });
-  wrapM('startEdgeMove', 'cmd_manual_start', dir => ({ dir }));
-  wrapM('stopEdgeMove', 'cmd_manual_stop');
-
-  const _origMasterConnect = window.scopeToggleConnect;
-  if (typeof _origMasterConnect === 'function') {
-    window.scopeToggleConnect = function() {
-      const wasConnected = scopeState.connected;
-      const result = _origMasterConnect.apply(this, arguments);
-      if (!_isRemote) {
-        SyncBus.send('cmd_connect', { on: !wasConnected });
-      }
-      return result;
-    };
-  }
-
-  SyncBus.on('cmd_connect', d => { 
-    if (d) { 
-      _isRemote = true; 
-      if (scopeState.connected !== d.on) window.scopeToggleConnect(); 
-      _isRemote = false; 
-    } 
-  });
-  SyncBus.on('cmd_speed', d => { if (d && Number.isFinite(d.rate)) { _isRemote = true; const map = { 0.005:1, 0.02:20, 0.06:50, 0.2:100 }; scopeState.rate = map[d.rate] || 20; const rd = document.getElementById('scopeRateDisplay'); if (rd) rd.innerText = scopeState.rate + 'X'; _isRemote = false; } });
 })();
 </script>
 
+<!-- PATCH UI MASTER -->
 <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('SW fallito:', err)); });
-  }
-</script>
-
-<script>
-  const icons = [
-    { rel: 'icon', href: './icon-192.png', sizes: '192x192', type: 'image/png' },
-    { rel: 'icon', href: './icon-512.png', sizes: '512x512', type: 'image/png' },
-    { rel: 'apple-touch-icon', href: './icon-192.png' }
-  ];
-  icons.forEach(iconData => {
-    const link = document.createElement('link');
-    link.rel = iconData.rel; link.href = iconData.href;
-    if (iconData.sizes) link.sizes = iconData.sizes;
-    if (iconData.type) link.type = iconData.type;
-    document.head.appendChild(link);
-  });
-
+  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+  
   document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       if (sessionStorage.getItem('egastro_welcome_shown') === 'true') {
-        const modal = document.getElementById('welcome-modal');
-        if (modal) modal.style.display = 'none';
+        const m = document.getElementById('welcome-modal'); if (m) m.style.display = 'none';
       }
-      const closeBtn = document.querySelector('#welcome-modal .btn.primary');
-      if (closeBtn) closeBtn.addEventListener('click', () => sessionStorage.setItem('egastro_welcome_shown', 'true'));
+      const cb = document.querySelector('#welcome-modal .btn.primary');
+      if (cb) cb.addEventListener('click', () => sessionStorage.setItem('egastro_welcome_shown', 'true'));
     }, 500);
-
+    
     const badge = document.getElementById('scopeConnBadge');
     if (badge) {
       const btn = badge.nextElementSibling;
       if (btn && btn.tagName === 'BUTTON') btn.id = 'scopeConnectBtn';
     }
-    window.updateMasterConnBtn = function(isConnected) {
+    window.updateMasterConnBtn = function(c) {
       const btn = document.getElementById('scopeConnectBtn');
       if (!btn) return;
-      if (isConnected) {
-        btn.innerText = 'Scollega';
-        btn.style.background = 'linear-gradient(180deg, #ef4444 0%, #b91c1c 100%)';
-        btn.style.color = '#fff'; btn.style.borderColor = '#ef4444';
-      } else {
-        btn.innerText = 'Connetti';
-        btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
-      }
+      btn.innerText = c ? 'Scollega' : 'Connetti';
+      btn.style.background = c ? 'linear-gradient(180deg, #ef4444 0%, #b91c1c 100%)' : '';
+      btn.style.color = c ? '#fff' : '';
+      btn.style.borderColor = c ? '#ef4444' : '';
     };
     setInterval(() => { if (typeof scopeState !== 'undefined') window.updateMasterConnBtn(scopeState.connected); }, 500);
   });
