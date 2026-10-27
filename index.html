@@ -1163,6 +1163,75 @@ f<!DOCTYPE html>
 </div>
 
 <script>
+  // ============================================================
+//  MODULO MATEMATICO UNIFICATO (AstroMath)
+// ============================================================
+const AstroMath = {
+  DEG2RAD: Math.PI / 180,
+  RAD2DEG: 180 / Math.PI,
+
+  getJulianDate(date) {
+    return date.getTime() / 86400000 + 2440587.5;
+  },
+
+  getGMST(jd) {
+    const T = (jd - 2451545.0) / 36525.0;
+    let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) +
+               0.000387933 * T * T - (T * T * T) / 38710000;
+    return ((gmst % 360) + 360) % 360;
+  },
+
+  getLST(jd, lonDeg) {
+    const gmst = this.getGMST(jd);
+    return ((gmst + lonDeg) % 360 + 360) % 360;
+  },
+
+  // Da RA/Dec a Alt/Az (Fondamentale per il telescopio)
+  raDecToAltAz(raDeg, decDeg, latDeg, lonDeg, date) {
+    const jd = this.getJulianDate(date);
+    const lst = this.getLST(jd, lonDeg);
+    let ha = lst - raDeg;
+    while (ha < -180) ha += 360;
+    while (ha > 180) ha -= 360;
+
+    const haRad = ha * this.DEG2RAD;
+    const decRad = decDeg * this.DEG2RAD;
+    const latRad = latDeg * this.DEG2RAD;
+
+    const sinAlt = Math.sin(decRad) * Math.sin(latRad) + Math.cos(decRad) * Math.cos(latRad) * Math.cos(haRad);
+    const alt = Math.asin(Math.max(-1, Math.min(1, sinAlt))) * this.RAD2DEG;
+
+    const az = Math.atan2(
+      Math.sin(haRad),
+      Math.cos(haRad) * Math.sin(latRad) - Math.tan(decRad) * Math.cos(latRad)
+    ) * this.RAD2DEG + 180;
+
+    return { alt, az: ((az % 360) + 360) % 360 };
+  },
+
+  // Da Alt/Az a RA/Dec (Fondamentale per la mappa dell'app Master)
+  altAzToRaDec(altDeg, azDeg, latDeg, lonDeg, date) {
+    const altRad = altDeg * this.DEG2RAD;
+    const azRad = azDeg * this.DEG2RAD;
+    const latRad = latDeg * this.DEG2RAD;
+
+    const sinDec = Math.sin(altRad) * Math.sin(latRad) + Math.cos(altRad) * Math.cos(latRad) * Math.cos(azRad);
+    const dec = Math.asin(Math.max(-1, Math.min(1, sinDec))) * this.RAD2DEG;
+
+    const ha = Math.atan2(
+      -Math.sin(azRad),
+      Math.cos(azRad) * Math.sin(latRad) + Math.tan(altRad) * Math.cos(latRad)
+    ) * this.RAD2DEG;
+
+    const jd = this.getJulianDate(date);
+    const lst = this.getLST(jd, lonDeg);
+    let ra = lst - ha;
+    ra = ((ra % 360) + 360) % 360;
+
+    return { ra, dec };
+  }
+};
+// ============================================================
 // ============================================================
 //  TRASPORTO DI RETE E PROTOCOLLI MONTATURA
 // ============================================================
