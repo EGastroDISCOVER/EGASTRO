@@ -2753,238 +2753,106 @@ window.addEventListener('load', async () => {
   const ref = getTonightReferenceDate(); _lastTonightRefDate = ref.getFullYear()+'-'+String(ref.getMonth()+1).padStart(2,'0')+'-'+String(ref.getDate()).padStart(2,'0');
 });
 </script>
- <!-- ========================================== -->
-<!-- MENU A SCOMPARSA UNIFICATO (Cupola/Telescopio) -->
-<!-- ========================================== -->
+<!-- ======================================================= -->
+<!-- MENU A SCOMPARSA (IDENTICO AL SATELLITE)                -->
+<!-- ======================================================= -->
 <style>
-  #app-switcher-container {
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    z-index: 999999;
-    display: flex;
-    align-items: center;
-    font-family: 'Orbitron', 'Inter', sans-serif;
-  }
-
-  #app-switcher-toggle {
-    background: rgba(10, 18, 32, 0.85);
-    border: 1px solid #d4af37;
-    border-left: none;
-    border-radius: 0 8px 8px 0;
-    color: #d4af37;
-    width: 24px;
-    height: 60px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-  }
-  
-  #app-switcher-toggle:hover {
-    background: #d4af37;
-    color: #000;
-    width: 30px;
-  }
-
-  #app-switcher-menu {
-    position: absolute;
-    left: -80px;
-    background: rgba(10, 18, 32, 0.85);
-    border: 1px solid rgba(212, 175, 55, 0.4);
-    border-left: none;
-    border-radius: 0 16px 16px 0;
-    padding: 15px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    backdrop-filter: blur(15px);
-    transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 5px 0 20px rgba(0,0,0,0.7);
-  }
-
-  #app-switcher-menu.open {
-    left: 24px;
-  }
-
-  .app-switch-btn {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-  }
-
-  .app-btn-telescope {
-    border: 2px solid #d4af37;
-    background: #0a1220;
-    color: #d4af37;
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-  }
-  .app-btn-telescope:hover {
-    background: #d4af37;
-    color: #000;
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
-  }
-
-  .app-btn-dome {
-    border: 2px solid #8bd3ff;
-    background: #0a1220;
-    color: #8bd3ff;
-    box-shadow: 0 0 10px rgba(139, 211, 255, 0.3);
-  }
-  .app-btn-dome:hover {
-    background: #8bd3ff;
-    color: #000;
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(139, 211, 255, 0.6);
-  }
-
-  .app-switch-btn svg {
-    width: 24px;
-    height: 24px;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .app-switch-btn::after {
-    content: attr(data-title);
-    position: absolute;
-    left: 120%;
-    background: #0a1220;
-    color: #fff;
-    padding: 4px 8px;
-    font-size: 10px;
-    border-radius: 4px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    border: 1px solid #333;
-  }
-  .app-switch-btn:hover::after {
-    opacity: 1;
-  }
+  #app-switcher-container { position: fixed; top: 50%; left: 0; transform: translateY(-50%) translateX(calc(-100% + 24px)); z-index: 999999; display: flex; align-items: center; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  #app-switcher-container.open { transform: translateY(-50%) translateX(0); }
+  #app-switcher-menu { background: rgba(10, 18, 32, 0.95); border: 1px solid rgba(212, 175, 55, 0.4); border-left: none; border-radius: 0 12px 12px 0; padding: 10px 8px; display: flex; flex-direction: column; gap: 10px; backdrop-filter: blur(15px); box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
+  #app-switcher-toggle { background: rgba(10, 18, 32, 0.95); border: 1px solid #d4af37; border-left: none; border-radius: 0 8px 8px 0; color: #d4af37; width: 24px; height: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); transition: all 0.3s; font-size: 11px; user-select: none; }
+  #app-switcher-toggle:hover { background: #d4af37; color: #000; }
+  .app-switch-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; transition: all 0.3s; position: relative; pointer-events: auto !important; }
+  .app-btn-telescope { border: 2px solid #d4af37; background: #0a1220; color: #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+  .app-btn-telescope:hover { background: #d4af37; color: #000; transform: scale(1.1); }
+  .app-btn-dome { border: 2px solid #8bd3ff; background: #0a1220; color: #8bd3ff; box-shadow: 0 0 10px rgba(139, 211, 255, 0.3); }
+  .app-btn-dome:hover { background: #8bd3ff; color: #000; transform: scale(1.1); }
+  .app-switch-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
 </style>
 
 <div id="app-switcher-container">
-  <button id="app-switcher-toggle" title="Apri menu app">◀</button>
   <div id="app-switcher-menu">
-    
-    <!-- PULSANTE CUPOLA (App Madre) -->
-    <a class="app-switch-btn app-btn-dome" id="btn-goto-dome" data-title="EGastro DISCOVER" href="https://egastrodiscover.github.io/EGASTRO/">
-      <svg viewBox="0 0 24 24">
-        <path d="M3 21h18"/>
-        <path d="M4 21v-8"/>
-        <path d="M20 21v-8"/>
-        <path d="M4 13a8 8 0 0 1 16 0"/>
-        <path d="M12 5v8"/>
-        <path d="M12 10l-3-2"/>
-      </svg>
+    <!-- Icona Cupola: disattivata (siamo già nel Pianeta) -->
+    <a class="app-switch-btn app-btn-dome" id="btn-goto-dome" href="javascript:void(0);" style="pointer-events: none; opacity: 0.4;">
+      <svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M4 21v-8"/><path d="M20 21v-8"/><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 5v8"/><path d="M12 10l-3-2"/></svg>
     </a>
-    
-    <!-- PULSANTE TELESCOPIO (App Satellite) -->
-    <a class="app-switch-btn app-btn-telescope" id="btn-goto-telescope" data-title="EGASTRO Mount" href="https://egastrodiscover.github.io/EGASTROmount/">
-      <svg viewBox="0 0 24 24">
-        <path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path>
-        <path d="M7 16l-2 6"></path>
-        <path d="M3 22h8"></path>
-        <path d="M10 6l10-3 2 4-10 3-2-4z"></path>
-      </svg>
+    <!-- Icona Telescopio: attiva (apre il Satellite) -->
+    <a class="app-switch-btn app-btn-telescope" id="btn-goto-telescope" href="javascript:void(0);">
+      <svg viewBox="0 0 24 24"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path><path d="M7 16l-2 6"></path><path d="M3 22h8"></path><path d="M10 6l10-3 2 4-10 3-2-4z"></path></svg>
     </a>
   </div>
+  <button id="app-switcher-toggle" title="Apri menu app" onclick="const c=document.getElementById('app-switcher-container'); c.classList.toggle('open'); this.innerText=c.classList.contains('open')?'◀':'▶';">▶</button>
 </div>
 
+<!-- FINESTRA PER L'APP SATELLITE -->
+<div id="app-frame-container" style="display:none; position:fixed; inset:0; z-index:9999999; background:#000;">
+  <iframe id="app-frame" style="width:100%; height:100%; border:none;"></iframe>
+</div>
+
+<script src="sync-bus.js"></script>
 <script>
-(function() {
-  // 1. Gestione apertura/chiusura menu
-  const toggleBtn = document.getElementById('app-switcher-toggle');
-  const menu = document.getElementById('app-switcher-menu');
-  
-  toggleBtn.addEventListener('click', function() {
-    menu.classList.toggle('open');
-    toggleBtn.innerText = menu.classList.contains('open') ? '▶' : '◀';
-  });
-
-  document.addEventListener('click', function(e) {
-    if (!document.getElementById('app-switcher-container').contains(e.target)) {
-      menu.classList.remove('open');
-      toggleBtn.innerText = '◀';
-    }
-  });
-
-  // 2. Logica per inviare i dati se siamo nell'app Madre
-  const btnTelescope = document.getElementById('btn-goto-telescope');
-  
-  // Controlla se siamo nell'app madre (cerca la variabile 'state')
-  const isMotherApp = (typeof state !== 'undefined' && state.lat !== undefined);
-
-  if (isMotherApp) {
-    // Se siamo nell'app madre, intercettiamo il click e passiamo i dati GPS
-    btnTelescope.addEventListener('click', function(e) {
-      e.preventDefault();
-      let url = 'https://egastrodiscover.github.io/EGASTROmount/?';
-      url += `lat=${state.lat}&lon=${state.lon}`;
-      
-      // Passa anche il target se presente
-      if (state.target && state.target.ra) {
-        url += `&targetName=${encodeURIComponent(state.target.n)}&targetRa=${state.target.ra}&targetDec=${state.target.dec}`;
-      }
-      window.open(url, 'EGASTROmountWindow');
-    });
-  }
-})();
-</script>
-  <script src="sync-bus.js"></script>
-<script>
-// =======================================================
-// 🟦 CODICE MASTER (APP PIANETA)
-// =======================================================
-(function() {
+// ============================================================
+//  MASTER — Logica Menu + Sync Bus
+// ============================================================
+(function () {
   if (typeof Bus === 'undefined' || typeof scopeState === 'undefined') return;
   let isRemote = false;
 
-  // 1. RICEZIONE COMANDI DALLO SLAVE
+  // ==== GESTIONE MENU E IFRAME ====
+  document.addEventListener('click', function(e) { 
+    const container = document.getElementById('app-switcher-container');
+    if (container && !container.contains(e.target)) { 
+      container.classList.remove('open'); 
+      const btn = document.getElementById('app-switcher-toggle'); if(btn) btn.innerText = '▶'; 
+    } 
+  });
+
+  // Click sull'icona del Telescopio (apre il Satellite)
+  const btnTele = document.getElementById('btn-goto-telescope');
+  if (btnTele) {
+    btnTele.addEventListener('click', function(e) {
+      e.preventDefault();
+      const iframe = document.getElementById('app-frame');
+      const container = document.getElementById('app-frame-container');
+      
+      if (container.style.display !== 'block') {
+        // Invia GPS all'apertura
+        if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
+          Bus.send('gps', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
+        }
+        iframe.src = 'https://egastrodiscover.github.io/EGASTROmount/';
+        container.style.display = 'block';
+      }
+    });
+  }
+
+  // Ascolta il messaggio di ritorno dal Satellite
+  window.addEventListener('message', function(e) {
+    if (e.data === 'show-master') {
+      document.getElementById('app-frame-container').style.display = 'none';
+    }
+  });
+
+  // ==== RICEZIONE COMANDI DAL SATELLITE ====
   Bus.on('cmd', (d) => {
     if (!d || !d.action) return;
-    console.log('📥 Master riceve:', d.action, d);
     isRemote = true;
     try {
       switch(d.action) {
-        case 'connect': 
-          if (scopeState.connected !== d.on) window.scopeToggleConnect(); 
-          break;
+        case 'connect': if (scopeState.connected !== d.on) window.scopeToggleConnect(); break;
         case 'park': window.scopePark(); break;
         case 'unpark': window.scopeUnpark(); break;
         case 'home': window.scopeHome(); break;
-        case 'goto': 
-          if (d.ra !== undefined) { scopeState.target = {ra: d.ra, dec: d.dec}; window.scopeSlewToTarget(); } 
-          break;
+        case 'goto': if (d.ra !== undefined) { scopeState.target = {ra: d.ra, dec: d.dec}; window.scopeSlewToTarget(); } break;
         case 'stop': window.scopeStopSlewing(); break;
-        case 'tracking': 
-          if (d.on !== (scopeState.tracking !== 'off')) window.scopeToggleTracking(); 
-          break;
+        case 'tracking': if (d.on !== (scopeState.tracking !== 'off')) window.scopeToggleTracking(); break;
       }
-    } catch(e) { console.error(e); }
+    } catch(e) {}
     isRemote = false;
   });
 
-  // 2. INVIO COMANDI ALLO SLAVE
-  function wrap(fn, action, dataFn) {
+  // ==== INVIO COMANDI AL SATELLITE ====
+  function wrapM(fn, action, dataFn) {
     const orig = window[fn];
     if (typeof orig !== 'function') return;
     window[fn] = function() {
@@ -2996,81 +2864,93 @@ window.addEventListener('load', async () => {
       return result;
     };
   }
-  
-  wrap('scopeToggleConnect', 'connect', () => ({ on: !scopeState.connected }));
-  wrap('scopePark', 'park');
-  wrap('scopeUnpark', 'unpark');
-  wrap('scopeHome', 'home');
-  wrap('scopeSlewToTarget', 'goto', () => scopeState.target ? { ra: scopeState.target.ra, dec: scopeState.target.dec } : false);
-  wrap('scopeStopSlewing', 'stop');
-  wrap('scopeEmergencyStop', 'stop');
-  wrap('scopeToggleTracking', 'tracking', () => ({ on: scopeState.tracking }));
+  wrapM('scopeToggleConnect', 'connect', () => ({ on: !scopeState.connected }));
+  wrapM('scopePark', 'park');
+  wrapM('scopeUnpark', 'unpark');
+  wrapM('scopeHome', 'home');
+  wrapM('scopeSlewToTarget', 'goto', () => scopeState.target ? { ra: scopeState.target.ra, dec: scopeState.target.dec } : false);
+  wrapM('scopeStopSlewing', 'stop');
+  wrapM('scopeEmergencyStop', 'stop');
+  wrapM('scopeToggleTracking', 'tracking', () => ({ on: scopeState.tracking }));
 
-  // 3. GESTIONE IFRAME E GPS
-  document.addEventListener('click', function(e) { 
-    const c = document.getElementById('app-switcher-container');
-    if (c && !c.contains(e.target)) { 
-      c.classList.remove('open'); 
-      const b = document.getElementById('app-switcher-toggle'); if(b) b.innerText = '▶'; 
-    } 
-  });
-  
-  const btnDome = document.getElementById('btn-goto-dome');
-  if (btnDome) { btnDome.style.pointerEvents = 'none'; btnDome.style.opacity = '0.4'; }
-  
-  const btnTele = document.getElementById('btn-goto-telescope');
-  if (btnTele) {
-    btnTele.addEventListener('click', function(e) {
-      e.preventDefault();
-      const iframe = document.getElementById('app-frame');
-      const container = document.getElementById('app-frame-container');
-      
-      if (container.style.display !== 'block') {
-        if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
-          Bus.send('gps', { lat: state.lat, lon: state.lon, accuracy: state.gpsAccuracy });
-        }
-        iframe.src = 'https://egastrodiscover.github.io/EGASTROmount/';
-        container.style.display = 'block';
-      }
-    });
-  }
-  
-  window.addEventListener('message', (e) => {
-    if (e.data === 'show-master') document.getElementById('app-frame-container').style.display = 'none';
+  // ==== RICEZIONE STATO DAL SATELLITE ====
+  Bus.on('state', (d) => {
+    if (!d) return;
+    scopeState.tracking = d.tracking;
+    scopeState.isParked = d.parked;
+    if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+    if (scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active')) {
+      if (typeof scopeDraw === 'function') scopeDraw();
+    }
+    if (typeof window.updateMasterConnBtn === 'function') {
+      window.updateMasterConnBtn(scopeState.connected);
+    }
   });
 })();
 </script>
 
-<!-- PATCH UI MASTER -->
+<!-- SERVICE WORKER -->
 <script>
-  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
-  
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('SW fallito:', err));
+    });
+  }
+</script>
+
+<!-- PATCH: Icone, Popup una tantum, Bottone Connetti -->
+<script>
+  const icons = [
+    { rel: 'icon', href: './icon-192.png', sizes: '192x192', type: 'image/png' },
+    { rel: 'icon', href: './icon-512.png', sizes: '512x512', type: 'image/png' },
+    { rel: 'apple-touch-icon', href: './icon-192.png' }
+  ];
+  icons.forEach(iconData => {
+    const link = document.createElement('link');
+    link.rel = iconData.rel; link.href = iconData.href;
+    if (iconData.sizes) link.sizes = iconData.sizes;
+    if (iconData.type) link.type = iconData.type;
+    document.head.appendChild(link);
+  });
+
   document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       if (sessionStorage.getItem('egastro_welcome_shown') === 'true') {
-        const m = document.getElementById('welcome-modal'); if (m) m.style.display = 'none';
+        const modal = document.getElementById('welcome-modal');
+        if (modal) modal.style.display = 'none';
       }
-      const cb = document.querySelector('#welcome-modal .btn.primary');
-      if (cb) cb.addEventListener('click', () => sessionStorage.setItem('egastro_welcome_shown', 'true'));
+      const closeBtn = document.querySelector('#welcome-modal .btn.primary');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          sessionStorage.setItem('egastro_welcome_shown', 'true');
+        });
+      }
     }, 500);
-    
+
     const badge = document.getElementById('scopeConnBadge');
     if (badge) {
       const btn = badge.nextElementSibling;
-      if (btn && btn.tagName === 'BUTTON') btn.id = 'scopeConnectBtn';
+      if (btn && btn.tagName === 'BUTTON') { btn.id = 'scopeConnectBtn'; }
     }
-    window.updateMasterConnBtn = function(c) {
+    window.updateMasterConnBtn = function(isConnected) {
       const btn = document.getElementById('scopeConnectBtn');
       if (!btn) return;
-      btn.innerText = c ? 'Scollega' : 'Connetti';
-      btn.style.background = c ? 'linear-gradient(180deg, #ef4444 0%, #b91c1c 100%)' : '';
-      btn.style.color = c ? '#fff' : '';
-      btn.style.borderColor = c ? '#ef4444' : '';
+      if (isConnected) {
+        btn.innerText = 'Scollega';
+        btn.style.background = 'linear-gradient(180deg, #ef4444 0%, #b91c1c 100%)';
+        btn.style.color = '#fff';
+        btn.style.borderColor = '#ef4444';
+      } else {
+        btn.innerText = 'Connetti';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }
     };
-    setInterval(() => { if (typeof scopeState !== 'undefined') window.updateMasterConnBtn(scopeState.connected); }, 500);
+    setInterval(() => {
+      if (typeof scopeState !== 'undefined') window.updateMasterConnBtn(scopeState.connected);
+    }, 500);
   });
 </script>
-</body>
-</html>
 </body>
 </html>
