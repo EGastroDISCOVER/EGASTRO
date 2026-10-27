@@ -2729,9 +2729,7 @@ let _lastTonightRefDate = null;
 setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.getFullYear()+'-'+String(ref.getMonth()+1).padStart(2,'0')+'-'+String(ref.getDate()).padStart(2,'0'); if (_lastTonightRefDate === null) { _lastTonightRefDate = rs; return; } if (_lastTonightRefDate !== rs) { _lastTonightRefDate = rs; if (document.getElementById('tab-tonight').classList.contains('active')) { const now = new Date(); document.getElementById('date').value = rs; const t = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0'); document.getElementById('time').value = t; readInputs(); _planetCache.key = null; state.planets = calcPlanetsPrecise(state.currentTime); renderTonight(); } } } catch(e) {} }, 60000);
 </script>
 
-<!-- ============================================================ -->
-<!-- BLOCCO DEFINITIVO PIANETA — SWITCHER, SYNC E IFRAME            -->
-<!-- ============================================================ -->
+<!-- BLOCCO DEFINITIVO PIANETA — MASTER -->
 <style>
   #app-switcher-container { position: fixed; top: 50%; left: 0; transform: translateY(-50%) translateX(calc(-100% + 24px)); z-index: 999999; display: flex; align-items: center; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   #app-switcher-container.open { transform: translateY(-50%) translateX(0); }
@@ -2740,7 +2738,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   #app-switcher-toggle:hover { background: #d4af37; color: #000; }
   .app-switch-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; transition: all 0.3s; position: relative; pointer-events: auto !important; }
   
-  /* Nel Pianeta: la cupola (Pianeta) è SPENTA, il telescopio (Satellite) è ACCESO */
+  /* Pianeta: Cupola SPENTA, Telescopio ACCESO */
   .app-btn-dome { border: 2px solid #8bd3ff; background: #0a1220; color: #8bd3ff; pointer-events: none; opacity: 0.35; }
   .app-btn-telescope { border: 2px solid #d4af37; background: #0a1220; color: #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
   .app-btn-telescope:hover { background: #d4af37; color: #000; transform: scale(1.1); }
@@ -2789,23 +2787,19 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       });
     }
 
-    // Gestione click sull'icona Telescopio (Satellite)
     const td = document.getElementById('btn-goto-telescope');
     if (td) {
       td.onclick = function(e) {
         e.preventDefault();
-        // Se siamo dentro l'iframe del satellite, chiediamo al parent di chiuderci
         if (window.parent !== window) {
           window.parent.postMessage('egastro-close-frame', '*');
           return;
         }
-        // Altrimenti apriamo il satellite in iframe passando GPS e target
         let url = 'https://egastrodiscover.github.io/EGASTROmount/';
         const params = new URLSearchParams();
         if (typeof state !== 'undefined') {
           if (Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
-            params.set('lat', state.lat);
-            params.set('lon', state.lon);
+            params.set('lat', state.lat); params.set('lon', state.lon);
           }
           if (state.target && Number.isFinite(state.target.ra)) {
             params.set('targetName', state.target.n || '');
@@ -2820,7 +2814,6 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       };
     }
 
-    // Chiudi iframe se il satellite lo richiede
     window.addEventListener('message', e => {
       if (e.data === 'egastro-close-frame' || e.data === 'show-master') {
         const fc = document.getElementById('app-frame-container');
@@ -2832,7 +2825,6 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   function attachSyncHandlers(){
     if (typeof SyncBus === 'undefined' || typeof scopeState === 'undefined') return;
 
-    // 1. Stato dal satellite (connessione, posizione, tracking)
     SyncBus.on('mount_state', d => {
       if (!d) return;
       scopeState.connected = !!d.connected;
@@ -2868,7 +2860,6 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       }
     });
 
-    // 2. GPS dal satellite
     SyncBus.on('gps_update', d => {
       if (!d || !Number.isFinite(d.lat) || !Number.isFinite(d.lon)) return;
       if (typeof state === 'undefined') return;
@@ -2876,7 +2867,36 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       try { if (typeof updateAll === 'function') updateAll(); } catch(e){}
     });
 
-    // 3. Invio comandi locali al satellite
+    // --- OVERRIDE DELLE FUNZIONI LOCALI PER COMANDARE IL SATELLITE ---
+    
+    // Connessione
+    window.scopeToggleConnect = function() {
+      if (typeof SyncBus !== 'undefined') {
+        const targetState = !scopeState.connected;
+        SyncBus.send('cmd_connect', { on: targetState, simulated: true });
+        if (typeof scopeLog === 'function') scopeLog(`Inviato comando Connessione ${targetState?'ON':'OFF'} al satellite...`, 'warn');
+      }
+    };
+
+    // Tasti Direzionali (D-Pad)
+    window.scopeManualMove = function(dir) {
+      if (typeof SyncBus !== 'undefined') {
+        SyncBus.send('cmd_manual_start', { dir: dir });
+        setTimeout(() => SyncBus.send('cmd_manual_stop'), 150); // Movimento breve
+      }
+    };
+
+    // Set Home / Park
+    window.scopeSetHome = function() {
+      if (typeof SyncBus !== 'undefined') SyncBus.send('cmd_set_home');
+      if (typeof scopeLog === 'function') scopeLog('Inviato comando SET HOME al satellite.', 'ok');
+    };
+    window.scopeSetPark = function() {
+      if (typeof SyncBus !== 'undefined') SyncBus.send('cmd_set_park');
+      if (typeof scopeLog === 'function') scopeLog('Inviato comando SET PARK al satellite.', 'ok');
+    };
+
+    // Wrapper per gli altri comandi
     const wrapM = (fn, msg, dataFn) => {
       const orig = window[fn];
       if (typeof orig !== 'function' || orig.__wrapped) return;
@@ -2890,14 +2910,13 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       window[fn] = wrapped;
     };
     
-    wrapM('scopeToggleConnect', 'cmd_connect', () => ({ on: !scopeState.connected }));
     wrapM('scopeSlewToTarget',  'cmd_goto', () => scopeState.target ? { ra: scopeState.target.ra, dec: scopeState.target.dec } : false);
     wrapM('scopeStopSlewing',   'cmd_stop');
     wrapM('scopeEmergencyStop', 'cmd_stop');
     wrapM('scopePark',          'cmd_park');
     wrapM('scopeUnpark',        'cmd_unpark');
     wrapM('scopeHome',          'cmd_home');
-    wrapM('scopeToggleTracking','cmd_tracking', () => ({ on: scopeState.tracking }));
+    wrapM('scopeToggleTracking','cmd_tracking', () => ({ on: !scopeState.tracking }));
     wrapM('scopeChangeRate',    'cmd_speed', () => {
       const map = { 1:0.005, 5:0.005, 10:0.02, 20:0.02, 50:0.06, 100:0.2 };
       return { rate: map[scopeState.rate] || 0.02 };
