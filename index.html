@@ -2893,79 +2893,50 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 </script>
 <script>
 (function(){
-  // Crea un banner visibile
-  function mostraBanner(msg, colore) {
-    let b = document.getElementById('bannerCostellazioni');
-    if (!b) {
-      b = document.createElement('div');
-      b.id = 'bannerCostellazioni';
-      b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999999;padding:15px;font-family:sans-serif;font-size:14px;font-weight:bold;text-align:center;color:white;background:' + colore + ';box-shadow:0 4px 10px rgba(0,0,0,0.5);';
-      document.body.appendChild(b);
-    }
-    b.innerHTML = msg + '<br><span style="font-size:20px;cursor:pointer;display:inline-block;margin-top:10px;" onclick="this.parentNode.style.display=\'none\'">✕ Chiudi</span>';
-  }
+  // 1. RIMOZIONE BANNER (se presente)
+  const b = document.getElementById('bannerCostellazioni');
+  if (b) b.remove();
 
-  mostraBanner('⏳ Avvio caricamento costellazioni...', '#1e3a8a');
-
-  // Aspetta 1 secondo per far caricare l'app principale, poi prova
+  // 2. CARICAMENTO SILENZIOSO DELLE COSTELLAZIONI
   setTimeout(async () => {
-    if (typeof CONSTELLATIONS === 'undefined') {
-      mostraBanner('❌ Errore: l\'app principale non ha caricato l\'oggetto CONSTELLATIONS. Controlla di aver incollato il codice nel file giusto.', '#b91c1c');
-      return;
-    }
-
+    if (typeof CONSTELLATIONS === 'undefined') return;
     try {
-      // Aggiunge ?t= per forzare il browser a non usare la cache
       const res = await fetch('./constellations.json?t=' + Date.now());
-      
-      if (!res.ok) {
-        mostraBanner('❌ File JSON non trovato. Errore HTTP: ' + res.status, '#b91c1c');
-        return;
-      }
-      
+      if (!res.ok) throw new Error('File non trovato');
       const data = await res.json();
       
-      if (!data || !data.features || data.features.length < 10) {
-        mostraBanner('❌ Il file JSON c\'è, ma il formato è errato (mancano le features).', '#b91c1c');
-        return;
+      if (data && data.features && data.features.length > 10) {
+        CONSTELLATIONS = data.features.map(f => {
+          const segs = f.geometry?.coordinates || [];
+          const stars = []; const map = new Map();
+          const add = (ra,dec) => { const k=ra.toFixed(4)+','+dec.toFixed(4); if(map.has(k)) return map.get(k); const i=stars.length; stars.push({ra,dec,mag:3}); map.set(k,i); return i; };
+          return { name: f.properties?.name || f.id, abbr: f.id, stars, lines: segs.map(s=>s.map(p=>add(p[0],p[1]))), area:'—', season:'—', desc:'Costellazione '+(f.properties?.name||f.id) };
+        });
+
+        if (typeof applyConstellationMeta === 'function') applyConstellationMeta();
+        if (typeof drawMap === 'function') drawMap();
+        console.log('✅ Costellazioni caricate in background (' + CONSTELLATIONS.length + ')');
       }
-
-      // Costruisce le costellazioni
-      CONSTELLATIONS = data.features.map(f => {
-        const segs = f.geometry?.coordinates || [];
-        const stars = []; const map = new Map();
-        const add = (ra,dec) => { 
-          const k=ra.toFixed(4)+','+dec.toFixed(4); 
-          if(map.has(k)) return map.get(k); 
-          const i=stars.length; 
-          stars.push({ra,dec,mag:3}); 
-          map.set(k,i); 
-          return i; 
-        };
-        return { 
-          name: f.properties?.name || f.id, 
-          abbr: f.id, 
-          stars: stars, 
-          lines: segs.map(s=>s.map(p=>add(p[0],p[1]))), 
-          area:'—', 
-          season:'—', 
-          desc:'Costellazione '+(f.properties?.name||f.id) 
-        };
-      });
-
-      if (typeof applyConstellationMeta === 'function') applyConstellationMeta();
-      
-      // Forza il disegno della mappa
-      if (typeof drawMap === 'function') drawMap();
-      if (typeof scopeDraw === 'function') scopeDraw(); // se sei nel telescopio
-      if (typeof lvRenderLoop === 'function' && typeof lvState !== 'undefined' && lvState.active) lvRenderLoop(); // se sei nel live view
-      
-      mostraBanner('✅ SUCCESSO! Caricate ' + CONSTELLATIONS.length + ' costellazioni. Ora dovresti vederle sulla mappa.', '#15803d');
-
     } catch (err) {
-      mostraBanner('❌ Errore di rete: ' + err.message, '#b91c1c');
+      console.warn('Errore caricamento costellazioni:', err);
     }
-  }, 1500);
+  }, 800);
+
+  // 3. GESTIONE LOGO DI DEFAULT
+  window.addEventListener('load', () => {
+    const logoImg = document.getElementById('logoImg');
+    const logoFallback = document.getElementById('logoFallback');
+    
+    if (logoImg && logoFallback) {
+      const savedLogo = localStorage.getItem('egastro_logo');
+      
+      // Se hai un file chiamato diversamente (es. logo.png), cambia il nome qui sotto:
+      logoImg.src = savedLogo ? savedLogo : './icon-192.png'; 
+      
+      logoImg.style.display = 'block';
+      logoFallback.style.display = 'none';
+    }
+  });
 })();
 </script>
 </body>
