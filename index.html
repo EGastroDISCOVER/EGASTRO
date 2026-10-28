@@ -2939,271 +2939,156 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   });
 })();
 </script>
-  <!-- ============================================================ -->
-<!-- EGASTRO MASTER — Integrazione SyncBus v3                     -->
-<!-- Da incollare PRIMA di </body>                                -->
-<!-- ============================================================ -->
+<!-- EGASTRO MASTER — Sync Bus v3 (incolla prima di </body>) -->
 <script>
 (function () {
   'use strict';
+  if (typeof SyncBus === 'undefined') { console.error('SyncBus mancante'); return; }
+  if (SyncBus.appId !== 'observatory') { console.warn('app-id atteso: observatory'); }
 
-  /* ============================================================
-     1. VERIFICA PREREQUISITI
-     ============================================================ */
-  if (typeof SyncBus === 'undefined') {
-    console.error('[MASTER] SyncBus mancante: includi sync-bus.js v3 prima di questo script');
-    return;
-  }
-  if (SyncBus.appId !== 'observatory') {
-    console.warn('[MASTER] Rilevato appId=' + SyncBus.appId + ', atteso "observatory"');
-  }
-
-  /* ============================================================
-     2. COSTANTI E STATO INTERNO
-     ============================================================ */
   const SATELLITE_URL = 'https://egastrodiscover.github.io/EGASTROmount/';
-  const CMD_TIMEOUT   = 5000;
-  const STATUS_TICK   = 500;
 
-  const masterRuntime = {
-    satelliteAlive: false,
-    lastSatelliteUpdate: 0,
-    pendingGoto: null,
-    lastSentStatus: null
-  };
-
-  /* ============================================================
-     3. UTILITY: TOAST / LOG
-     ============================================================ */
-  function toast(msg, isError) {
-    if (typeof showToast === 'function') {
-      try { showToast(msg, !!isError); return; } catch (e) {}
-    }
-    console[isError ? 'error' : 'log']('[MASTER]', msg);
+  function toast(m, err) {
+    if (typeof showToast === 'function') { try { showToast(m, !!err); return; } catch (e) {} }
+    console[err ? 'error' : 'log']('[MASTER]', m);
   }
 
   /* ============================================================
-     4. APERTURA INTELLIGENTE DEL SATELLITE
-     Evita iframe duplicati se il satellite è già aperto
+     1. APRI SATELLITE (evita duplicati)
      ============================================================ */
-  function openSatelliteSmart(extraParams) {
-    // Se il satellite è già attivo su BroadcastChannel, non aprire un secondo iframe
+  function openSatellite(extra) {
     if (SyncBus.isPeerAlive() && SyncBus.getPeerId() === 'mount') {
-      SyncBus.send('focus_request', { from: SyncBus.instanceId });
+      SyncBus.send('focus_request', {});
       const fc = document.getElementById('app-frame-container');
       if (fc) fc.style.display = 'block';
-      toast('Satellite già attivo: focus inviato');
+      toast('Satellite già aperto');
       return;
     }
-
-    // Altrimenti apri nuovo iframe con parametri
     const fc = document.getElementById('app-frame-container');
     const fr = document.getElementById('app-frame');
-    if (!fc || !fr) {
-      // Fallback: apri in nuova tab
-      window.open(buildSatelliteUrl(extraParams), '_blank');
-      return;
-    }
-
-    fr.src = buildSatelliteUrl(extraParams);
-    fc.style.display = 'block';
-  }
-
-  function buildSatelliteUrl(extraParams) {
-    const params = new URLSearchParams();
+    const p = new URLSearchParams();
     try {
       if (typeof state !== 'undefined') {
-        if (Number.isFinite(state.lat)) params.set('lat', state.lat);
-        if (Number.isFinite(state.lon)) params.set('lon', state.lon);
+        if (Number.isFinite(state.lat)) p.set('lat', state.lat);
+        if (Number.isFinite(state.lon)) p.set('lon', state.lon);
         if (state.target && Number.isFinite(state.target.ra)) {
-          params.set('targetName', state.target.n || '');
-          params.set('targetRa',  state.target.ra);
-          params.set('targetDec', state.target.dec);
+          p.set('targetName', state.target.n || '');
+          p.set('targetRa', state.target.ra);
+          p.set('targetDec', state.target.dec);
         }
       }
     } catch (e) {}
-    if (extraParams) Object.keys(extraParams).forEach(k => params.set(k, extraParams[k]));
-    const qs = params.toString();
-    return SATELLITE_URL + (qs ? '?' + qs : '');
+    if (extra) Object.keys(extra).forEach(k => p.set(k, extra[k]));
+    const url = SATELLITE_URL + (p.toString() ? '?' + p.toString() : '');
+    if (fc && fr) { fr.src = url; fc.style.display = 'block'; }
+    else window.open(url, '_blank');
   }
 
   /* ============================================================
-     5. INVIO COMANDI CRITICI CON ACK + RETRY
+     2. COMANDI VERSO IL SATELLITE (con ACK)
      ============================================================ */
-  async function sendCommandWithRetry(type, data, timeoutMs) {
-    const ok = await SyncBus.sendWithAck(type, data, timeoutMs || CMD_TIMEOUT);
-    if (ok) return true;
-
-    // Se il satellite non risponde, prova ad avviarlo e riprova
-    toast('Satellite non risponde: avvio...', true);
-    openSatelliteSmart();
-    await new Promise(r => setTimeout(r, 3000));
-    return await SyncBus.sendWithAck(type, data, timeoutMs || CMD_TIMEOUT);
+  async function sendCmd(type, data, retry) {
+    let ok = await SyncBus.sendWithAck(type, data, 4000);
+    if (!ok && retry !== false) {
+      toast('Satellite non risponde, riprovo...', true);
+      openSatellite();
+      await new Promise(r => setTimeout(r, 2500));
+      ok = await SyncBus.sendWithAck(type, data, 4000);
+    }
+    return ok;
   }
 
-  async function masterGoto(raDeg, decDeg, name) {
-    masterRuntime.pendingGoto = { ra: raDeg, dec: decDeg, name };
-    const ok = await sendCommandWithRetry('cmd_goto', {
-      ra: raDeg, dec: decDeg, name: name || ''
-    });
-    if (ok) toast('GOTO inviato al satellite');
-    else toast('GOTO non confermato dal satellite', true);
-  }
-
-  async function masterStop() {
-    // STOP è critico: broadcast ripetuto indipendentemente dall'ACK
+  window.masterGoto = async function (ra, dec, name) {
+    const ok = await sendCmd('cmd_goto', { ra: ra, dec: dec, name: name || '' });
+    toast(ok ? 'GOTO inviato' : 'GOTO fallito', !ok);
+  };
+  window.masterStop = function () {
     SyncBus.send('cmd_stop', {});
     setTimeout(() => SyncBus.send('cmd_stop', {}), 200);
     setTimeout(() => SyncBus.send('cmd_stop', {}), 500);
-    await SyncBus.sendWithAck('cmd_stop', {}, 3000);
     toast('STOP inviato');
-  }
-
-  async function masterPark()   { await sendCommandWithRetry('cmd_park', {}, CMD_TIMEOUT); toast('PARK inviato'); }
-  async function masterUnpark() { await sendCommandWithRetry('cmd_unpark', {}, CMD_TIMEOUT); toast('UNPARK inviato'); }
-  async function masterHome()   { await sendCommandWithRetry('cmd_home', {}, CMD_TIMEOUT); toast('HOME inviato'); }
-  async function masterSetHome(){ await sendCommandWithRetry('cmd_set_home', {}, CMD_TIMEOUT); toast('SET HOME inviato'); }
-  async function masterSetPark(){ await sendCommandWithRetry('cmd_set_park', {}, CMD_TIMEOUT); toast('SET PARK inviato'); }
-
-  async function masterSetSpeed(rate) {
-    // rate = valore speedPerStep (0.005, 0.02, 0.06, 0.2)
-    await SyncBus.sendWithAck('cmd_speed', { rate: rate }, CMD_TIMEOUT);
-  }
-
-  async function masterSetTracking(on) {
-    await SyncBus.sendWithAck('cmd_tracking', { on: !!on }, CMD_TIMEOUT);
-  }
+  };
+  window.masterPark    = () => sendCmd('cmd_park').then(ok => toast(ok ? 'PARK ok' : 'PARK fallito', !ok));
+  window.masterUnpark  = () => sendCmd('cmd_unpark').then(ok => toast(ok ? 'UNPARK ok' : 'UNPARK fallito', !ok));
+  window.masterHome    = () => sendCmd('cmd_home').then(ok => toast(ok ? 'HOME ok' : 'HOME fallito', !ok));
+  window.masterSetHome = () => sendCmd('cmd_set_home').then(ok => toast(ok ? 'SET HOME ok' : 'SET HOME fallito', !ok));
+  window.masterSetPark = () => sendCmd('cmd_set_park').then(ok => toast(ok ? 'SET PARK ok' : 'SET PARK fallito', !ok));
 
   /* ============================================================
-     6. PUBBLICAZIONE PERIODICA DELLO STATO DEL MASTER
-     GPS, target, coordinate — con versioning automatico
-     ============================================================ */
-  function publishMasterStatus() {
-    if (!SyncBus.isPeerAlive()) return;
-    try {
-      const payload = {
-        __isState: true, // attiva auto-versioning nel bus
-        gpsLat: Number.isFinite(state.lat) ? state.lat : null,
-        gpsLon: Number.isFinite(state.lon) ? state.lon : null,
-        target: state.target ? {
-          n:   state.target.n   || null,
-          ra:  state.target.ra  || null,
-          dec: state.target.dec || null
-        } : null,
-        currentTime: state.currentTime ? state.currentTime.getTime() : null,
-        sqm: state.sqm || null
-      };
-      const key = JSON.stringify(payload);
-      if (key === masterRuntime.lastSentStatus) return; // evita spam
-      masterRuntime.lastSentStatus = key;
-      SyncBus.send('master_state', payload);
-    } catch (e) {
-      console.warn('[MASTER] publishMasterStatus:', e);
-    }
-  }
-
-  /* ============================================================
-     7. RICEZIONE STATO DELLA MONTATURA DAL SATELLITE
-     Aggiorna scopeState locale (per UI master)
+     3. STATO MOUNT RICEVUTO DAL SATELLITE
      ============================================================ */
   SyncBus.on('mount_state', function (d) {
     if (!d) return;
-    masterRuntime.satelliteAlive = true;
-    masterRuntime.lastSatelliteUpdate = Date.now();
-
     if (typeof scopeState !== 'undefined') {
       scopeState.connected = !!d.connected;
       scopeState.tracking  = d.tracking && d.tracking !== 'off';
       scopeState.isParked  = !!d.isParked;
-      scopeState.slewing   = (d.slewMode === 'goto' || d.slewMode === 'park');
-
-      // Mappatura rate mount -> rate UI master
-      if (Number.isFinite(d.rate)) {
-        const map = { 0.005: 1, 0.02: 20, 0.06: 50, 0.2: 100 };
-        scopeState.rate = map[d.rate] || 20;
-        const rd = document.getElementById('scopeRateDisplay');
-        if (rd) rd.innerText = scopeState.rate + 'X';
-      }
-
-      // Aggiorna alt/az mount nel pannello telescopio del master
       if (Number.isFinite(d.ra) && Number.isFinite(d.dec) && typeof getAltAz === 'function') {
         try {
           const p = getAltAz(d.ra * 180 / Math.PI, d.dec * 180 / Math.PI, state.currentTime);
-          if (Number.isFinite(p.alt)) {
-            scopeState.mountAlt = p.alt;
-            scopeState.mountAz  = p.az;
-          }
+          if (Number.isFinite(p.alt)) { scopeState.mountAlt = p.alt; scopeState.mountAz = p.az; }
         } catch (e) {}
       }
-
-      // Aggiorna UI telescopio
-      if (typeof scopeUpdateUI === 'function') {
-        try { scopeUpdateUI(); } catch (e) {}
-      }
-      if (typeof scopeCanvasEl !== 'undefined' && scopeCanvasEl &&
-          document.getElementById('tab-scope') &&
-          document.getElementById('tab-scope').classList.contains('active') &&
-          typeof scopeDraw === 'function') {
-        try { scopeDraw(); } catch (e) {}
-      }
-
-      // Badge connessione
-      const badge = document.getElementById('scopeConnBadge');
-      if (badge) {
-        badge.innerText = scopeState.connected ? 'CONNESSO (satellite)' : 'DISCONNESSO';
-        badge.classList.toggle('on', scopeState.connected);
-      }
-      const tb = document.getElementById('scopeTrackBtn');
-      if (tb) {
-        tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON';
-        tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : '');
-      }
+      if (typeof scopeUpdateUI === 'function') { try { scopeUpdateUI(); } catch (e) {} }
+    }
+    const badge = document.getElementById('scopeConnBadge');
+    if (badge) {
+      badge.innerText = d.connected ? 'CONNESSO (sat)' : 'DISCONNESSO';
+      badge.classList.toggle('on', !!d.connected);
     }
   });
 
+  SyncBus.on('peer_offline', () => toast('Satellite disconnesso', true));
+  SyncBus.on('satellite_ready', () => { toast('Satellite pronto'); publishStatus(); });
+
   /* ============================================================
-     8. EVENTI PEER (ONLINE / OFFLINE)
+     4. PUBBLICA STATO GPS + TARGET
      ============================================================ */
-  SyncBus.on('peer_offline', function () {
-    masterRuntime.satelliteAlive = false;
-    toast('Satellite disconnesso', true);
-    const badge = document.getElementById('scopeConnBadge');
-    if (badge) { badge.innerText = 'SAT OFFLINE'; badge.classList.remove('on'); }
-  });
-
-  SyncBus.on('satellite_ready', function () {
-    masterRuntime.satelliteAlive = true;
-    toast('Satellite pronto');
-    publishMasterStatus();
-  });
+  let lastSent = null;
+  function publishStatus() {
+    if (!SyncBus.isPeerAlive()) return;
+    try {
+      const payload = {
+        __isState: true,
+        gpsLat: (typeof state !== 'undefined' && Number.isFinite(state.lat)) ? state.lat : null,
+        gpsLon: (typeof state !== 'undefined' && Number.isFinite(state.lon)) ? state.lon : null,
+        target: (typeof state !== 'undefined' && state.target) ? {
+          n: state.target.n, ra: state.target.ra, dec: state.target.dec
+        } : null
+      };
+      const key = JSON.stringify(payload);
+      if (key === lastSent) return;
+      lastSent = key;
+      SyncBus.send('master_state', payload);
+    } catch (e) {}
+  }
 
   /* ============================================================
-     9. OVERRIDE DEI COMANDI UI DEL MASTER
-     Sostituisce le funzioni esistenti per farle passare dal bus
+     5. SOSTITUISCI I COMANDI UI (per farli passare dal bus)
      ============================================================ */
   window.scopeToggleConnect = function () {
-    const targetOn = !(typeof scopeState !== 'undefined' && scopeState.connected);
-    SyncBus.send('cmd_connect', { on: targetOn });
+    const on = !(typeof scopeState !== 'undefined' && scopeState.connected);
+    SyncBus.send('cmd_connect', { on: on });
   };
   window.scopeSlewToTarget = function () {
-    if (typeof scopeState !== 'undefined' && scopeState.target) {
-      masterGoto(scopeState.target.ra, scopeState.target.dec, scopeState.target.name);
+    if (scopeState && scopeState.target) {
+      window.masterGoto(scopeState.target.ra, scopeState.target.dec, scopeState.target.name);
     }
   };
   window.scopeManualMove = function (dir) {
     SyncBus.send('cmd_manual_start', { dir: dir });
     setTimeout(() => SyncBus.send('cmd_manual_stop'), 200);
   };
-  window.scopePark         = function () { masterPark(); };
-  window.scopeUnpark       = function () { masterUnpark(); };
-  window.scopeHome         = function () { masterHome(); };
-  window.scopeStopSlewing  = function () { masterStop(); };
-  window.scopeEmergencyStop= function () { masterStop(); };
-  window.scopeSetHome      = function () { masterSetHome(); };
-  window.scopeSetPark      = function () { masterSetPark(); };
+  window.scopePark          = window.masterPark;
+  window.scopeUnpark        = window.masterUnpark;
+  window.scopeHome          = window.masterHome;
+  window.scopeStopSlewing   = window.masterStop;
+  window.scopeEmergencyStop = window.masterStop;
+  window.scopeSetHome       = window.masterSetHome;
+  window.scopeSetPark       = window.masterSetPark;
   window.scopeToggleTracking = function () {
-    const current = (typeof scopeState !== 'undefined' && scopeState.tracking);
-    masterSetTracking(!current);
+    const on = !(typeof scopeState !== 'undefined' && scopeState.tracking);
+    SyncBus.send('cmd_tracking', { on: on });
   };
   window.scopeChangeRate = function (dir) {
     const rates = [1, 5, 10, 20, 50, 100];
@@ -3212,28 +3097,61 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     scopeState.rate = rates[idx];
     if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
     const map = { 1: 0.005, 5: 0.005, 10: 0.02, 20: 0.02, 50: 0.06, 100: 0.2 };
-    masterSetSpeed(map[scopeState.rate] || 0.02);
+    SyncBus.send('cmd_speed', { rate: map[scopeState.rate] || 0.02 });
   };
 
   /* ============================================================
-     10. BOTTONE "TELESCOPIO" → apertura intelligente
+     6. BOTTONE TELESCOPIO
      ============================================================ */
-  (function bindTelescopeButton() {
-    const td = document.getElementById('btn-goto-telescope');
-    if (!td) return;
+  const td = document.getElementById('btn-goto-telescope');
+  if (td) {
     td.onclick = function (e) {
       e.preventDefault();
-      // Se siamo dentro un iframe → delega al parent
-      if (window.parent !== window) {
-        window.parent.postMessage('egastro-close-frame', '*');
-        return;
-      }
-      openSatelliteSmart();
+      if (window.parent !== window) { window.parent.postMessage('egastro-close-frame', '*'); return; }
+      openSatellite();
     };
-  })();
+  }
 
   /* ============================================================
-     11. LISTENER postMessage (chiusura iframe / show-master)
+     7. MENU SWITCHER
+     ============================================================ */
+  const sc = document.getElementById('app-switcher-container');
+  const tg = document.getElementById('app-switcher-toggle');
+  if (sc && tg) {
+    tg.onclick = function (e) {
+      e.preventDefault(); e.stopPropagation();
+      const open = sc.classList.toggle('open');
+      this.innerText = open ? '◀' : '▶';
+    };
+    document.addEventListener('click', e => {
+      if (!sc.contains(e.target)) { sc.classList.remove('open'); tg.innerText = '▶'; }
+    });
+  }
+
+  /* ============================================================
+     8. COORDINATE PERSISTENTI
+     ============================================================ */
+  const latI = document.getElementById('lat'), lonI = document.getElementById('lon');
+  try {
+    const saved = JSON.parse(localStorage.getItem('egastro_last_coords') || '{}');
+    if (saved.lat && saved.lon) {
+      if (latI) latI.value = saved.lat;
+      if (lonI) lonI.value = saved.lon;
+      if (typeof state !== 'undefined') {
+        state.lat = parseFloat(saved.lat);
+        state.lon = parseFloat(saved.lon);
+        if (typeof updateAll === 'function') updateAll();
+      }
+    }
+  } catch (e) {}
+  function saveCoords() {
+    if (latI && lonI) localStorage.setItem('egastro_last_coords', JSON.stringify({ lat: latI.value, lon: lonI.value }));
+  }
+  if (latI) latI.addEventListener('change', saveCoords);
+  if (lonI) lonI.addEventListener('change', saveCoords);
+
+  /* ============================================================
+     9. postMessage HANDLER
      ============================================================ */
   window.addEventListener('message', function (e) {
     if (e.data === 'egastro-close-frame' || e.data === 'show-master') {
@@ -3243,44 +3161,18 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   });
 
   /* ============================================================
-     12. BOOT: annuncio al satellite e ticking stato
+     10. BOOT
      ============================================================ */
   function boot() {
-    // Annuncia al satellite che il master è pronto
     SyncBus.send('master_ready', {
-      instance: SyncBus.instanceId,
       lat: (typeof state !== 'undefined') ? state.lat : null,
       lon: (typeof state !== 'undefined') ? state.lon : null
     });
-
-    // Pubblica stato periodico
-    setInterval(publishMasterStatus, STATUS_TICK);
-
-    console.log('[MASTER] Sync pronto · instance=' + SyncBus.instanceId);
+    setInterval(publishStatus, 500);
+    console.log('[MASTER] ready · ' + SyncBus.instanceId);
   }
-
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    setTimeout(boot, 200);
-  } else {
-    window.addEventListener('load', function () { setTimeout(boot, 200); });
-  }
-
-  /* ============================================================
-     13. EXPORT GLOBALE (per debug / uso manuale)
-     ============================================================ */
-  window.MasterSync = {
-    openSatellite: openSatelliteSmart,
-    goto: masterGoto,
-    stop: masterStop,
-    park: masterPark,
-    unpark: masterUnpark,
-    home: masterHome,
-    setHome: masterSetHome,
-    setPark: masterSetPark,
-    setSpeed: masterSetSpeed,
-    setTracking: masterSetTracking,
-    isSatelliteAlive: () => masterRuntime.satelliteAlive
-  };
+  if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(boot, 200);
+  else window.addEventListener('load', () => setTimeout(boot, 200));
 })();
 </script>
 </body>
