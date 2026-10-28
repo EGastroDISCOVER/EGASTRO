@@ -2891,5 +2891,35 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 </script>
+  <script>
+(async function(){
+  window.loadConstellations = async function() {
+    const urls = [
+      './constellations.json',
+      'https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/data/constellations.lines.json'
+    ];
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
+        if (!res.ok) continue;
+        const data = await res.json();
+        if (!data?.features || data.features.length < 10) continue;
+        CONSTELLATIONS = data.features.map(f => {
+          const segs = f.geometry?.coordinates || [];
+          const stars = []; const map = new Map();
+          const add = (ra,dec) => { const k=ra.toFixed(4)+','+dec.toFixed(4); if(map.has(k)) return map.get(k); const i=stars.length; stars.push({ra,dec,mag:3}); map.set(k,i); return i; };
+          return { name: f.properties?.name || f.id, abbr: f.id, stars, lines: segs.map(s=>s.map(p=>add(p[0],p[1]))), area:'—', season:'—', desc:'Costellazione '+(f.properties?.name||f.id) };
+        });
+        applyConstellationMeta();
+        console.log('✅ Costellazioni caricate da', url, '(' + CONSTELLATIONS.length + ')');
+        if (typeof rebuildCatalog === 'function') rebuildCatalog();
+        if (typeof drawMap === 'function') drawMap();
+        return;
+      } catch(e){}
+    }
+  };
+  setTimeout(() => window.loadConstellations(), 400);
+})();
+</script>
 </body>
 </html>
