@@ -559,6 +559,38 @@ g.SyncBus={version:V,appId:A,instanceId:I,isSatellite:A==='mount',transport:bc?'
 console.log('[SyncBus v'+V+' INLINE] '+A+' / '+I+' · '+(bc?'BC':'LS'));
 if(document.readyState==='complete'||document.readyState==='interactive')setTimeout(st,100);else g.addEventListener('load',function(){setTimeout(st,100)})})(window);
 </script>
+<script>
+(function(g){'use strict';if(g.SyncBus)return;var V=3,C='egastro_sync_v'+V,L='egastro_sync_v'+V,LK='egastro_leader_v'+V;
+function aid(){var m=document.querySelector('meta[name="app-id"]');if(m&&m.content){var v=String(m.content).trim().toLowerCase();if(v==='mount'||v==='observatory')return v}if(document.getElementById('dpad-grid'))return'mount';return'observatory'}
+var A=aid(),I=A+'-'+Math.random().toString(36).slice(2,8),bc=null;try{bc=new BroadcastChannel(C)}catch(e){}
+var ls=new Map(),pa=new Map(),pr={alive:!1,id:null,lastSeen:0,helloBackAt:0},ov=0,iv=new Map();
+function mm(t,d,id){return{v:V,type:t,data:d||null,from:A,instance:I,ts:Date.now(),id:id||(Math.random().toString(36).slice(2)+Date.now().toString(36))}}
+function dis(m){if(!m||!m.type||!m.from)return;if(m.from===A)return;pr.alive=!0;pr.id=m.from;pr.lastSeen=Date.now();
+if(m.type==='ping'){snd('pong');return}if(m.type==='pong')return;
+if(m.type==='hello'){var n=Date.now();if(n-pr.helloBackAt>300){pr.helloBackAt=n;setTimeout(function(){snd('hello')},30+Math.random()*50)}return}
+if(m.type==='ack'){var p=pa.get(m.data&&m.data.id);if(p){clearTimeout(p.timer);pa.delete(m.data.id);p.resolve(!0)}return}
+if(m.data&&Number.isFinite(m.data.__v)){var l=iv.get(m.from)||0;if(m.data.__v<=l)return;iv.set(m.from,m.data.__v)}
+if(m.data&&m.data.__needAck&&m.data.__ackId)snd('ack',{id:m.data.__ackId});
+var h=ls.get(m.type);if(h)h.forEach(function(f){try{f(m.data,m)}catch(e){}});
+var a=ls.get('*');if(a)a.forEach(function(f){try{f(m.data,m)}catch(e){}})}
+var lsd=0;function rs(m){if(bc){try{bc.postMessage(m)}catch(e){}}else{try{m.nonce=Math.random();localStorage.setItem(L,JSON.stringify(m))}catch(e){}}}
+function snd(t,d){var n=Date.now();if(n-lsd<16){setTimeout(function(){snd(t,d)},16);return}lsd=n;if(d&&d.__isState)d.__v=++ov;rs(mm(t,d))}
+function swa(t,d,to){return new Promise(function(r){var ai='ack-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),pl=Object.assign({},d||{},{__needAck:!0,__ackId:ai}),m=mm(t,pl),tm=setTimeout(function(){pa.delete(ai);r(!1)},to||4000);pa.set(ai,{resolve:r,timer:tm});rs(m)})}
+function on(t,f){if(!ls.has(t))ls.set(t,[]);ls.get(t).push(f);return function(){var ar=ls.get(t);if(!ar)return;var i=ar.indexOf(f);if(i>=0)ar.splice(i,1)}}
+function glr(){try{return JSON.parse(localStorage.getItem(LK)||'null')}catch(e){return null}}
+function slr(){try{localStorage.setItem(LK,JSON.stringify({instance:I,app:A,expiresAt:Date.now()+6000}))}catch(e){}}
+function il(){if(A!=='mount')return!1;var r=glr();return!!(r&&r.instance===I&&r.expiresAt>Date.now())}
+function rl(){if(A!=='mount')return!1;var r=glr();if(!r||r.expiresAt<=Date.now()){slr();return!0}return r.instance===I}
+var lt=null;function slrr(){if(A!=='mount'||lt)return;rl();lt=setInterval(function(){if(il())slr()},3000)}
+function stlr(){if(lt){clearInterval(lt);lt=null}try{var r=glr();if(r&&r.instance===I)localStorage.removeItem(LK)}catch(e){}}
+if(bc)bc.onmessage=function(e){dis(e.data)};else g.addEventListener('storage',function(e){if(e.key!==L||!e.newValue)return;try{dis(JSON.parse(e.newValue))}catch(e){}});
+var pt=null;function st(){if(pt)return;[100,300,700,1500].forEach(function(ms){setTimeout(function(){snd('hello')},ms)});slrr();pt=setInterval(function(){snd('ping');if(Date.now()-pr.lastSeen>12000){if(pr.alive){pr.alive=!1;var h=ls.get('peer_offline');if(h)h.forEach(function(f){try{f()}catch(e){}})}}},2000)}
+function sp(){if(pt)clearInterval(pt);pt=null;stlr();if(bc)try{bc.close()}catch(e){}}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){pr.helloBackAt=0;snd('hello')}});
+g.addEventListener('focus',function(){snd('hello')});
+g.SyncBus={version:V,appId:A,instanceId:I,isSatellite:A==='mount',transport:bc?'broadcast':'localStorage',send:snd,sendWithAck:swa,on:on,start:st,stop:sp,isLeader:il,requestLeader:rl,isPeerAlive:function(){return pr.alive},getPeerId:function(){return pr.id},getAppId:function(){return A}};
+if(document.readyState==='complete'||document.readyState==='interactive')setTimeout(st,100);else g.addEventListener('load',function(){setTimeout(st,100)})})(window);
+</script>
 </head>
 <body id="appBody">
 
@@ -3219,6 +3251,167 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     else{b.style.borderColor='#f87171';b.style.background='rgba(248,113,113,0.15)';d.style.color='#f87171';t.textContent='SYNC OFF';}
   }
   setInterval(u,1000);u();
+})();
+</script>
+<script>
+/* ============================================================
+   EGASTRO MASTER — PATCH DEFINITIVE INTEGRATE
+   ============================================================ */
+(function() {
+  if (window.__egastroPatched) return;
+  window.__egastroPatched = true;
+
+  function ready() {
+    if (typeof SyncBus === 'undefined') { setTimeout(ready, 100); return; }
+    if (typeof scopeState === 'undefined') { setTimeout(ready, 100); return; }
+
+    function latLon() {
+      var latEl = document.getElementById('lat');
+      var lonEl = document.getElementById('lon');
+      var lat = parseFloat(latEl && latEl.value) || 41.9;
+      var lon = parseFloat(lonEl && lonEl.value) || 12.5;
+      return { lat: lat, lon: lon };
+    }
+
+    // --- GOTO grande ---
+    window.scopeStepAction = function() {
+      if (!scopeState.target) return;
+      var ll = latLon();
+      SyncBus.send('cmd_goto', {
+        ra: scopeState.target.ra, dec: scopeState.target.dec,
+        name: scopeState.target.name || '',
+        latMaster: ll.lat, lonMaster: ll.lon
+      });
+      if (typeof showToast === 'function') showToast('GOTO inviato');
+    };
+
+    // --- Change slew speed (menu a tendina) ---
+    window.changeSlewSpeed = function(val) {
+      var v = parseFloat(val);
+      if (!Number.isFinite(v)) return;
+      SyncBus.send('cmd_speed', { rate: v });
+      if (typeof showToast === 'function') showToast('Velocità inviata');
+    };
+
+    // --- Rate + - (pulsanti) ---
+    window.scopeChangeRate = function(dir) {
+      var rates = [1, 8, 32, 128];
+      var map = { 1:0.005, 8:0.02, 32:0.06, 128:0.2 };
+      var idx = rates.indexOf(scopeState.rate);
+      if (idx === -1) idx = 1;
+      idx = Math.max(0, Math.min(rates.length - 1, idx + dir));
+      scopeState.rate = rates[idx];
+      var rd = document.getElementById('scopeRateDisplay');
+      if (rd) rd.innerText = rates[idx] + 'X';
+      SyncBus.send('cmd_speed', { rate: map[rates[idx]] });
+    };
+
+    // --- STOP con toast ---
+    window.masterStop = function() {
+      SyncBus.send('cmd_stop', {});
+      setTimeout(function(){ SyncBus.send('cmd_stop', {}); }, 200);
+      if (typeof showToast === 'function') showToast('STOP inviato');
+    };
+    window.scopeStopSlewing = window.masterStop;
+    window.scopeEmergencyStop = window.masterStop;
+
+    // --- Sync ---
+    window.scopeSyncMount = function() {
+      if (!scopeState.target) return;
+      SyncBus.send('cmd_sync', { ra: scopeState.target.ra, dec: scopeState.target.dec, name: scopeState.target.name });
+      if (typeof showToast === 'function') showToast('Sync inviato');
+    };
+
+    // --- mount_state: badge + driver + protocol + rate ---
+    SyncBus.on('mount_state', function(d) {
+      if (!d) return;
+      // badge
+      var badge = document.getElementById('scopeConnBadge');
+      if (badge) {
+        if (d.connected) {
+          var lbl = (d.driver || 'CONN').toUpperCase();
+          badge.innerText = 'CONNESSO (' + lbl + ')';
+          badge.classList.add('on');
+        } else {
+          badge.innerText = 'DISCONNESSO';
+          badge.classList.remove('on');
+        }
+      }
+      // radio connType
+      if (d.driver) {
+        var drv = String(d.driver).toUpperCase();
+        var tr = drv === 'SIM' ? 'sim' : drv === 'WIFI' ? 'wifi' : drv === 'BT' ? 'bt' : null;
+        if (tr) {
+          var radio = document.querySelector('input[name="connType"][value="' + tr + '"]');
+          if (radio && !radio.checked) {
+            radio.checked = true;
+            radio.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+          scopeState.connType = tr;
+        }
+      }
+      // protocol
+      if (d.protocol) {
+        var sel = document.getElementById('scopeProtocolSelect');
+        if (sel) sel.value = d.protocol;
+        scopeState.protocol = d.protocol;
+      }
+      // rate
+      if (Number.isFinite(d.rate)) {
+        var rm = { 0.005:1, 0.02:8, 0.06:32, 0.2:128 };
+        scopeState.rate = rm[d.rate] || 8;
+        var rd = document.getElementById('scopeRateDisplay');
+        if (rd) rd.innerText = scopeState.rate + 'X';
+        var ss = document.getElementById('slew-speed');
+        if (ss) ss.value = String(d.rate);
+      }
+      // tracking/park
+      scopeState.connected = !!d.connected;
+      scopeState.tracking = d.tracking && d.tracking !== 'off';
+      scopeState.isParked = !!d.isParked;
+      var po = document.getElementById('parkOverlay');
+      if (po) po.classList.toggle('open', !!d.isParked);
+    });
+
+    // --- risposta a request_master_state ---
+    SyncBus.on('request_master_state', function() {
+      var ll = latLon();
+      SyncBus.send('master_ready', { lat: ll.lat, lon: ll.lon });
+    });
+    SyncBus.on('satellite_ready', function() {
+      var ll = latLon();
+      setTimeout(function() { SyncBus.send('master_ready', { lat: ll.lat, lon: ll.lon }); }, 200);
+    });
+
+    // --- badge sync header ---
+    function updateSyncBadge() {
+      var b = document.getElementById('syncBadge');
+      var d = document.getElementById('syncDot');
+      var t = document.getElementById('syncText');
+      if (!b || !d || !t) return;
+      if (SyncBus.isPeerAlive()) {
+        b.style.borderColor = '#4ade80';
+        b.style.background = 'rgba(74,222,128,0.15)';
+        d.style.color = '#4ade80';
+        t.textContent = 'SYNC OK · ' + (SyncBus.getPeerId() || '?').toUpperCase();
+      } else {
+        b.style.borderColor = '#f87171';
+        b.style.background = 'rgba(248,113,113,0.15)';
+        d.style.color = '#f87171';
+        t.textContent = 'SYNC OFF';
+      }
+    }
+    setInterval(updateSyncBadge, 1000);
+    updateSyncBadge();
+
+    console.log('[MASTER] ✅ PATCH DEFINITIVE ATTIVE');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ready);
+  } else {
+    ready();
+  }
 })();
 </script>
 </body>
