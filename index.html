@@ -3325,9 +3325,40 @@ if(e.data==="hide-satellite-frame"||e.data==="show-master"){var fc=document.getE
       #planet-menu-ultimate .toggle-btn:hover { background: #d4af37 !important; color: #000 !important; }
       #planet-menu-ultimate .icon-btn { width: 36px !important; height: 36px !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; transition: all 0.3s !important; pointer-events: auto !important; }
       #planet-menu-ultimate .icon-btn svg { width: 18px !important; height: 18px !important; stroke: currentColor !important; fill: none !important; stroke-width: 2 !important; }
-      #planet-menu-ultimate .dome { border: 2px solid #8bd3ff !important; background: #0a1220 !important; color: #8bd3ff !important; pointer-events: none !important; opacity: 0.35 !important; }
-      #planet-menu-ultimate .telescope { border: 2px solid #d4af37 !important; background: #0a1220 !important; color: #d4af37 !important; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3) !important; }
-      #planet-menu-ultimate .telescope:hover { background: #d4af37 !important; color: #000 !important; transform: scale(1.1) !important; }
+     /* ✅ APP CORRENTE = DOME (Observatory) — evidenziato + badge verde "sei qui" */
+#planet-menu-ultimate .dome {
+  border: 2px solid #8bd3ff !important;
+  background: #0a1220 !important;
+  color: #8bd3ff !important;
+  box-shadow: 0 0 15px rgba(139, 211, 255, 0.55) !important;
+  cursor: pointer !important;
+  position: relative !important;
+}
+#planet-menu-ultimate .dome::after {
+  content: '✓';
+  position: absolute !important;
+  bottom: -3px !important; right: -3px !important;
+  width: 14px !important; height: 14px !important;
+  border-radius: 50% !important;
+  background: #4ade80 !important;
+  color: #000 !important;
+  font-size: 9px !important; font-weight: 900 !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  line-height: 1 !important;
+}
+/* ✅ APP DESTINAZIONE = TELESCOPIO (Mount) — cliccabile per aprire il satellite */
+#planet-menu-ultimate .telescope {
+  border: 2px solid #d4af37 !important;
+  background: #0a1220 !important;
+  color: #d4af37 !important;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3) !important;
+}
+#planet-menu-ultimate .telescope:hover {
+  background: #d4af37 !important;
+  color: #000 !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.6) !important;
+}
     </style>
     <div class="menu-box">
       <div class="icon-btn dome"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M4 21v-8"/><path d="M20 21v-8"/><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 5v8"/><path d="M12 10l-3-2"/></svg></div>
