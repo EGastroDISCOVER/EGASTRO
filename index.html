@@ -3309,5 +3309,89 @@ if(e.data==="hide-satellite-frame"||e.data==="show-master"){var fc=document.getE
   });
 })();
 </script>
+
+<script>
+(function() {
+  // --- MENU DEFINITIVO ---
+  document.querySelectorAll('#app-switcher-container').forEach(el => el.remove());
+  const host = document.createElement('div');
+  host.id = 'planet-menu-ultimate';
+  host.innerHTML = `
+    <style>
+      #planet-menu-ultimate { position: fixed !important; top: 50% !important; left: 0 !important; transform: translateY(-50%) translateX(calc(-100% + 26px)) !important; z-index: 2147483647 !important; display: flex !important; align-items: center !important; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important; }
+      #planet-menu-ultimate.open { transform: translateY(-50%) translateX(0) !important; }
+      #planet-menu-ultimate .menu-box { background: rgba(10, 18, 32, 0.95) !important; border: 1px solid rgba(212, 175, 55, 0.4) !important; border-left: none !important; border-radius: 0 12px 12px 0 !important; padding: 14px 8px !important; display: flex !important; flex-direction: column !important; gap: 12px !important; backdrop-filter: blur(15px) !important; box-shadow: 2px 0 10px rgba(0,0,0,0.5) !important; }
+      #planet-menu-ultimate .toggle-btn { width: 26px !important; height: 82px !important; writing-mode: vertical-rl !important; text-orientation: mixed !important; font-size: 11px !important; font-weight: 800 !important; letter-spacing: 3px !important; font-family: 'Orbitron', sans-serif !important; color: #d4af37 !important; background: rgba(10, 18, 32, 0.95) !important; border: 1px solid #d4af37 !important; border-left: none !important; border-radius: 0 8px 8px 0 !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; backdrop-filter: blur(10px) !important; padding: 0 !important; margin: 0 !important; }
+      #planet-menu-ultimate .toggle-btn:hover { background: #d4af37 !important; color: #000 !important; }
+      #planet-menu-ultimate .icon-btn { width: 36px !important; height: 36px !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; transition: all 0.3s !important; pointer-events: auto !important; }
+      #planet-menu-ultimate .icon-btn svg { width: 18px !important; height: 18px !important; stroke: currentColor !important; fill: none !important; stroke-width: 2 !important; }
+      #planet-menu-ultimate .dome { border: 2px solid #8bd3ff !important; background: #0a1220 !important; color: #8bd3ff !important; pointer-events: none !important; opacity: 0.35 !important; }
+      #planet-menu-ultimate .telescope { border: 2px solid #d4af37 !important; background: #0a1220 !important; color: #d4af37 !important; box-shadow: 0 0 10px rgba(212, 175, 55, 0.3) !important; }
+      #planet-menu-ultimate .telescope:hover { background: #d4af37 !important; color: #000 !important; transform: scale(1.1) !important; }
+    </style>
+    <div class="menu-box">
+      <div class="icon-btn dome"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M4 21v-8"/><path d="M20 21v-8"/><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 5v8"/><path d="M12 10l-3-2"/></svg></div>
+      <div class="icon-btn telescope" id="planet-tel-btn"><svg viewBox="0 0 24 24"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path><path d="M7 16l-2 6"></path><path d="M3 22h8"/><path d="M10 6l10-3 2 4-10 3-2-4z"></path></svg></div>
+    </div>
+    <button class="toggle-btn" id="planet-toggle-btn">TUNNEL</button>
+  `;
+  document.body.appendChild(host);
+
+  document.getElementById('planet-toggle-btn').onclick = e => { e.preventDefault(); e.stopPropagation(); host.classList.toggle('open'); };
+  document.addEventListener('click', e => { if (!host.contains(e.target)) host.classList.remove('open'); }, true);
+
+  document.getElementById('planet-tel-btn').onclick = e => {
+    e.preventDefault(); e.stopPropagation(); host.classList.remove('open');
+    let fc = document.getElementById('app-frame-container');
+    let fr = document.getElementById('app-frame');
+    if (!fc) {
+      fc = document.createElement('div'); fc.id = 'app-frame-container'; fc.style.cssText = 'position:fixed;inset:0;z-index:9999999;background:#000;display:none;';
+      fr = document.createElement('iframe'); fr.id = 'app-frame'; fr.style.cssText = 'width:100%;height:100%;border:none;';
+      fc.appendChild(fr); document.body.appendChild(fc);
+    }
+    fr.src = 'https://egastrodiscover.github.io/EGASTROmount/'; fc.style.display = 'block';
+  };
+
+  window.addEventListener('message', e => {
+    if (e.data === 'hide-satellite-frame' || e.data === 'show-master') {
+      const fc = document.getElementById('app-frame-container'); if (fc) fc.style.display = 'none';
+      host.classList.remove('open');
+    }
+  }, true);
+  setInterval(() => { const old = document.getElementById('app-switcher-container'); if (old) old.remove(); }, 100);
+
+  // --- NUOVA LOGICA DI CONNESSIONE (ASCOM ALPACA HTTP) ---
+  if (typeof Protocols !== 'undefined') {
+    Protocols.ascom = {
+      base: '',
+      async connect(cfg, onOk, onErr) {
+        this.base = `http://${cfg.ip}:${cfg.port}/api/v1/telescope/0`;
+        try {
+          const res = await fetch(`${this.base}/connected`, { 
+            method: 'PUT', 
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ Connected: true }) 
+          });
+          if (res.ok) onOk(); else onErr(new Error('HTTP ' + res.status));
+        } catch (e) { onErr(e); }
+      },
+      async sendGoto(raHours, decDeg) {
+        await fetch(`${this.base}/slewtocoordinates`, { 
+          method: 'PUT', 
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ RightAscension: raHours, Declination: decDeg }) 
+        });
+      },
+      async sync(ra, dec) {
+        await fetch(`${this.base}/synctocoordinates`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ RightAscension: ra, Declination: dec }) });
+      },
+      async stop() { await fetch(`${this.base}/abortslew`, { method: 'PUT' }); },
+      async park() { await fetch(`${this.base}/park`, { method: 'PUT' }); },
+      async unpark() { await fetch(`${this.base}/unpark`, { method: 'PUT' }); },
+      async tracking(on) { await fetch(`${this.base}/tracking`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ Tracking: on }) }); }
+    };
+  }
+})();
+</script>
 </body>
 </html>
