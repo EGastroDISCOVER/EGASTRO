@@ -2935,6 +2935,83 @@ init();
 console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 })();
 </script>
+<script id="__oneBtnScript">
+(function(){
+'use strict';
+if (window.__oneButton) return;
+window.__oneButton = true;
+var URLS = { observatory: 'https://egastrodiscover.github.io/EGASTRO/', mount: 'https://egastrodiscover.github.io/EGASTROmount/' };
+var SVG_DOME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21v-8"/><path d="M20 21v-8"/><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 5v8"/><path d="M12 10l-3-2"/></svg>';
+var SVG_TEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"/><path d="M7 16l-2 6"/><path d="M3 22h8"/><path d="M10 6l10-3 2 4-10 3-2-4z"/></svg>';
+var OLD_IDS = ['tunnel-menu','tunnel-panel','tunnel-toggle','tunnel-frame-container','app-switcher-container','app-switcher-menu','app-switcher-toggle','planet-menu-ultimate','app-frame-container','app-frame','btn-goto-dome','btn-goto-telescope'];
+var _origGEBI = document.getElementById.bind(document);
+document.getElementById = function(id) { if (OLD_IDS.indexOf(id) !== -1) return null; return _origGEBI(id); };
+var _origSI = window.setInterval;
+window.setInterval = function(fn, ms) {
+  try { var src = (typeof fn === 'function') ? fn.toString() : String(fn); if (src.indexOf('app-switcher') !== -1 || src.indexOf('planet-menu-ultimate') !== -1 || src.indexOf('showFrame') !== -1) return 0; } catch(e) {}
+  return _origSI.apply(this, arguments);
+};
+function cleanup() {
+  OLD_IDS.forEach(function(id){ var e = _origGEBI(id); if (e) e.remove(); });
+  document.querySelectorAll('.app-switch-btn,.tab').forEach(function(e){ e.remove(); });
+  var badIframes = document.querySelectorAll('iframe');
+  badIframes.forEach(function(f){
+    var id = f.id || '';
+    if (id !== '__oneFrameInner' && id !== '__oneIframe') {
+      var p = f.parentElement;
+      if (p && p.id === '__oneFrame') return;
+      f.remove();
+    }
+  });
+}
+function buildOne(win, doc, myApp) {
+  var iconToShow = myApp === 'mount' ? SVG_DOME : SVG_TEL;
+  var title = myApp === 'mount' ? 'Torna al Pianeta' : 'Vai al Telescopio';
+  cleanup();
+  var ob = _origGEBI('__oneBtn'); if (ob) ob.remove();
+  var of = _origGEBI('__oneFrame'); if (of) of.remove();
+  if (!_origGEBI('__oneCSS')) {
+    var st = doc.createElement('style'); st.id = '__oneCSS';
+    st.textContent = '#__oneBtn{position:fixed!important;left:0!important;top:50%!important;transform:translateY(-50%)!important;z-index:2147483647!important;width:52px!important;height:52px!important;border-radius:0 12px 12px 0!important;background:rgba(10,18,32,.95)!important;border:2px solid #d4af37!important;border-left:none!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 0 20px rgba(212,175,55,.5)!important;color:#d4af37!important;padding:0!important}#__oneBtn:hover{background:#d4af37!important;color:#000!important}#__oneBtn svg{width:24px!important;height:24px!important;pointer-events:none!important}#__oneFrame{position:fixed!important;inset:0!important;z-index:2147483645!important;background:#05070a!important;display:none!important}#__oneFrame iframe{width:100%!important;height:100%!important;border:none!important}';
+    doc.head.appendChild(st);
+  }
+  var btn = doc.createElement('button'); btn.id = '__oneBtn'; btn.title = title; btn.innerHTML = iconToShow; doc.body.appendChild(btn);
+  var fc = doc.createElement('div'); fc.id = '__oneFrame';
+  var fr = doc.createElement('iframe'); fr.id = '__oneIframe'; fr.setAttribute('allow','geolocation; camera; microphone; fullscreen'); fc.appendChild(fr); doc.body.appendChild(fc);
+  btn.onclick = function(e){
+    e.preventDefault(); e.stopPropagation();
+    if (myApp === 'mount') {
+      if (win.self !== win.top) { try { win.parent.postMessage({type:'one-back'},'*'); } catch(err){} }
+      else { win.location.href = URLS.observatory; }
+    } else {
+      if (!fr.src || fr.src === 'about:blank') {
+        var sep = URLS.mount.indexOf('?') === -1 ? '?' : '&';
+        fr.src = URLS.mount + sep + 't=' + Date.now();
+        fr.addEventListener('load', function(){ setTimeout(function(){ try { if (fr.contentDocument && fr.contentDocument.body) buildOne(fr.contentWindow, fr.contentDocument, 'mount'); } catch(e){} }, 300); }, {once:true});
+      }
+      fc.style.display = 'block'; btn.style.display = 'none';
+    }
+  };
+  win.addEventListener('message', function(e){ if (e.data === 'one-back') { fc.style.display='none'; btn.style.display=''; } });
+}
+var detected = (document.querySelector('meta[name="app-id"]')?.content === 'mount') ? 'mount' : 'observatory';
+function init() {
+  if (!document.body) { setTimeout(init, 50); return; }
+  buildOne(window, document, detected);
+  _origSI.call(window, function(){
+    cleanup();
+    var btn = _origGEBI('__oneBtn');
+    if (!btn) { buildOne(window, document, detected); return; }
+    var correct = detected === 'mount' ? SVG_DOME : SVG_TEL;
+    if (btn.innerHTML !== correct) btn.innerHTML = correct;
+    btn.style.display = '';
+  }, 100);
+  try { new MutationObserver(function(muts){ muts.forEach(function(m){ m.addedNodes.forEach(function(n){ if (n && n.nodeType === 1 && n.id && OLD_IDS.indexOf(n.id) !== -1) n.remove(); if (n && n.tagName === 'IFRAME' && n.id !== '__oneIframe') { var p = n.parentElement; if (!p || p.id !== '__oneFrame') n.remove(); } }); }); }).observe(document.body, { childList: true, subtree: true }); } catch(e) {}
+}
+init();
+console.log('[ONE-BTN-NUCLEAR] Ready:', detected);
+})();
+</script>
 </body>  -->
 
 
