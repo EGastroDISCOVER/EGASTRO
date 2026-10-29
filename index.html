@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
-<head>
+<html lang="it" class=" bvhw idc0_350"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#d4af37">
@@ -14,8 +13,8 @@
 <link rel="icon" type="image/png" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Orbitron:wght@500;700;900&amp;display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
 <style>
   :root {
@@ -591,7 +590,44 @@ g.addEventListener('focus',function(){snd('hello')});
 g.SyncBus={version:V,appId:A,instanceId:I,isSatellite:A==='mount',transport:bc?'broadcast':'localStorage',send:snd,sendWithAck:swa,on:on,start:st,stop:sp,isLeader:il,requestLeader:rl,isPeerAlive:function(){return pr.alive},getPeerId:function(){return pr.id},getAppId:function(){return A}};
 if(document.readyState==='complete'||document.readyState==='interactive')setTimeout(st,100);else g.addEventListener('load',function(){setTimeout(st,100)})})(window);
 </script>
-</head>
+<style>undefined</style><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="use-credentials"><link rel="preconnect" href="https://fonts.gstatic.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mulish:wght@200;300;400;500;600;700;800;900&amp;display=swa"><style id="__tunnelTabCSS">
+        #app-switcher-toggle {
+          width: 26px !important;
+          min-width: 26px !important;
+          max-width: 26px !important;
+          height: 96px !important;
+          padding: 6px 4px !important;
+          font-size: 11px !important;
+          font-weight: 800 !important;
+          letter-spacing: 3px !important;
+          font-family: 'Orbitron', sans-serif !important;
+          writing-mode: vertical-rl !important;
+          text-orientation: mixed !important;
+          line-height: 1 !important;
+          color: #d4af37 !important;
+          background: rgba(10, 18, 32, 0.95) !important;
+          border: 1px solid #d4af37 !important;
+          border-left: none !important;
+          border-radius: 0 8px 8px 0 !important;
+          cursor: pointer !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          backdrop-filter: blur(10px) !important;
+          transition: background 0.3s, color 0.3s !important;
+        }
+        #app-switcher-toggle:hover {
+          background: #d4af37 !important;
+          color: #000 !important;
+        }
+        #app-switcher-container {
+          transform: translateY(-50%) translateX(calc(-100% + 26px)) !important;
+          transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
+        #app-switcher-container.open {
+          transform: translateY(-50%) translateX(0) !important;
+        }
+      </style><style id="__obsPermanentCSS">.triton-btn { position: relative !important; transition: all 0.25s !important; }.triton-btn.parked-active { background: linear-gradient(180deg,#f59e0b,#b45309) !important; color: #fff !important; border-color: #f59e0b !important; box-shadow: 0 0 14px rgba(245,158,11,0.7) !important; }.triton-btn.unpark-active { background: linear-gradient(180deg,#ef4444,#b91c1c) !important; color: #fff !important; border-color: #ef4444 !important; box-shadow: 0 0 16px rgba(239,68,68,0.85) !important; animation: pulse-red 1.5s infinite !important; }.triton-btn.home-active { background: linear-gradient(180deg,#3b82f6,#1d4ed8) !important; color: #fff !important; border-color: #3b82f6 !important; box-shadow: 0 0 14px rgba(59,130,246,0.7) !important; }.triton-btn.tracking-active { background: linear-gradient(180deg,#4ade80,#22c55e) !important; color: #000 !important; border-color: #4ade80 !important; box-shadow: 0 0 14px rgba(74,222,128,0.7) !important; }.triton-btn.has-saved::after { content: ""; position: absolute; top: 4px; right: 4px; width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 6px #4ade80; }#app-switcher-toggle { width: 26px !important; height: 82px !important; writing-mode: vertical-rl !important; text-orientation: mixed !important; font-size: 11px !important; font-weight: 800 !important; letter-spacing: 3px !important; font-family: "Orbitron", sans-serif !important; color: #d4af37 !important; background: rgba(10, 18, 32, 0.95) !important; border: 1px solid #d4af37 !important; border-left: none !important; border-radius: 0 8px 8px 0 !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; }</style></head>
 <body id="appBody">
 
 <header>
@@ -605,32 +641,32 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       <span>Anteprima</span>
     </button>
     <button class="btn-night btn-ar" onclick="openLiveView()" title="Live View con giroscopio e camera">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
       <span>Sky Live</span>
     </button>
   </div>
   <div class="logo-container" onclick="document.getElementById('logoInput').click()" title="Clicca per caricare il tuo logo">
-    <img id="logoImg" src="" alt="Logo">
-    <div class="logo-text" id="logoFallback"><span>EG</span><span>ASTRO</span></div>
+    <img id="logoImg" src="./icon-192.png" alt="Logo" style="display: block;">
+    <div class="logo-text" id="logoFallback" style="display: none;"><span>EG</span><span>ASTRO</span></div>
   </div>
   <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
   <h1>EGastro <span>DISCOVER</span> <span class="version-badge">v8.1</span></h1>
-<div id="syncBadge" style="display:inline-flex; align-items:center; gap:6px; margin-top:8px; padding:4px 12px; border-radius:20px; border:1.5px solid #6b778c; background:rgba(107,119,140,0.1); font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; transition:all 0.3s; color:#c9d1e3;"><span id="syncDot" style="font-size:14px; color:#6b778c; line-height:1;">●</span><span id="syncText">SYNC INIT...</span></div>
+<div id="syncBadge" style="display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 4px 12px; border-radius: 20px; border: 1.5px solid rgb(74, 222, 128); background: rgba(74, 222, 128, 0.15); font-family: Orbitron, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; transition: 0.3s; color: rgb(201, 209, 227);"><span id="syncDot" style="font-size: 14px; color: rgb(74, 222, 128); line-height: 1;">●</span><span id="syncText">SYNC OK · MOUNT</span></div>
 </header>
 
 <nav id="menu">
-  <button class="active" onclick="switchTab('tab-sun', this)">Coordinate</button>
-  <button data-tab="tab-sky" onclick="switchTab('tab-sky', this)">Mappa Cielo</button>
-  <button onclick="switchTab('tab-tonight', this)">Stasera</button>
-  <button onclick="switchTab('tab-catalog', this)">Catalogo</button>
-  <button onclick="switchTab('tab-weather', this)">Meteo</button>
-  <button onclick="switchTab('tab-allsky', this)">AllSkyCam</button>
+  <button class="" onclick="switchTab('tab-sun', this)">Coordinate</button>
+  <button data-tab="tab-sky" onclick="switchTab('tab-sky', this)" class="">Mappa Cielo</button>
+  <button onclick="switchTab('tab-tonight', this)" class="">Stasera</button>
+  <button onclick="switchTab('tab-catalog', this)" class="">Catalogo</button>
+  <button onclick="switchTab('tab-weather', this)" class="">Meteo</button>
+  <button onclick="switchTab('tab-allsky', this)" class="">AllSkyCam</button>
   <button onclick="switchTab('tab-nina', this)">N.I.N.A.</button>
-  <button onclick="switchTab('tab-scope', this)">🔭 Telescopio</button>
+  <button onclick="switchTab('tab-scope', this)" class="active">🔭 Telescopio</button>
 </nav>
 
 <main>
-  <div id="tab-sun" class="tab-content active">
+  <div id="tab-sun" class="tab-content">
     <div id="gpsBanner" class="gps-banner">
       <span>📡 <strong>Posizione:</strong> rileva con GPS (smartphone/APK) o IP (PC).</span>
       <button class="gps-btn" onclick="activateGPS()">📍 Rileva posizione</button>
@@ -651,10 +687,10 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
               <option value="">-- Nessuna --</option>
             </select>
             <button class="btn" onclick="saveCurrentPosition()" style="padding:10px 12px;" title="Salva posizione corrente">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
             </button>
             <button class="btn btn-ghost" onclick="deleteSavedPosition()" style="padding:10px 12px;" title="Elimina posizione selezionata">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
             </button>
           </div>
         </div>
@@ -682,16 +718,16 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       <div class="astro-icons">
         <div class="astro-icon-box" onclick="openSolarModal()" style="cursor:pointer;" title="Clicca per i dettagli solari">
           <svg id="icon-sun" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="20" fill="#ffcc00" />
-            <path d="M50 10V20M50 80V90M10 50H20M80 50H90M21.7 21.7L28.3 28.3M71.7 71.7L78.3 78.3M21.7 78.3L28.3 71.7M71.7 28.3L78.3 21.7" stroke="#ffcc00" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="20" fill="#ffcc00"></circle>
+            <path d="M50 10V20M50 80V90M10 50H20M80 50H90M21.7 21.7L28.3 28.3M71.7 71.7L78.3 78.3M21.7 78.3L28.3 71.7M71.7 28.3L78.3 21.7" stroke="#ffcc00" stroke-width="4" stroke-linecap="round"></path>
           </svg>
           <div class="astro-icon-title">Sole</div>
         </div>
         <div class="astro-icon-box" onclick="openMoonModal()" style="cursor:pointer;" title="Clicca per i dettagli lunari">
           <svg id="icon-moon" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="30" fill="#1a1a1a" stroke="#d4af37" stroke-width="1.5"/>
-            <path id="moon-phase-path" d="" fill="#f3e5ab" />
-            <circle cx="50" cy="50" r="30" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+            <circle cx="50" cy="50" r="30" fill="#1a1a1a" stroke="#d4af37" stroke-width="1.5"></circle>
+            <path id="moon-phase-path" d="" fill="#f3e5ab"></path>
+            <circle cx="50" cy="50" r="30" fill="none" stroke="#d4af37" stroke-width="1.5"></circle>
           </svg>
           <div class="astro-icon-title" id="moon-phase-name">Luna</div>
         </div>
@@ -713,13 +749,13 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       </div>
       <div class="filters">
         <strong style="color:var(--accent);">Mostra:</strong>
-        <label><input type="checkbox" id="filtroPianeti" checked onchange="drawMap()"> Pianeti/Sole/Luna</label>
-        <label><input type="checkbox" id="filtroStelle" checked onchange="drawMap()"> Stelle</label>
-        <label><input type="checkbox" id="filtroCostellazioni" checked onchange="drawMap()"> Costellazioni</label>
-        <label><input type="checkbox" id="filtroNebulose" checked onchange="drawMap()"> Nebulose</label>
-        <label><input type="checkbox" id="filtroGalassie" checked onchange="drawMap()"> Galassie</label>
-        <label><input type="checkbox" id="filtroAmmassi" checked onchange="drawMap()"> Ammassi</label>
-        <label><input type="checkbox" id="filtroGriglia" checked onchange="drawMap()"> Griglia</label>
+        <label><input type="checkbox" id="filtroPianeti" checked="" onchange="drawMap()"> Pianeti/Sole/Luna</label>
+        <label><input type="checkbox" id="filtroStelle" checked="" onchange="drawMap()"> Stelle</label>
+        <label><input type="checkbox" id="filtroCostellazioni" checked="" onchange="drawMap()"> Costellazioni</label>
+        <label><input type="checkbox" id="filtroNebulose" checked="" onchange="drawMap()"> Nebulose</label>
+        <label><input type="checkbox" id="filtroGalassie" checked="" onchange="drawMap()"> Galassie</label>
+        <label><input type="checkbox" id="filtroAmmassi" checked="" onchange="drawMap()"> Ammassi</label>
+        <label><input type="checkbox" id="filtroGriglia" checked="" onchange="drawMap()"> Griglia</label>
       </div>
       <div class="skymap-layout">
         <div class="skymap-wrapper">
@@ -731,11 +767,11 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
             <div class="strip-item"><span class="k">Visibilità</span><span class="v" id="stripObjVis">—</span></div>
           </div>
 
-          <div class="skymap-container"><canvas id="skyCanvas" width="1000" height="1000"></canvas></div>
+          <div class="skymap-container"><canvas id="skyCanvas" width="1000" height="1000" style="cursor: grab;"></canvas></div>
 
           <div class="time-slider-inline">
             <input type="range" id="timeSlider" min="-1440" max="1440" value="0" step="10" oninput="onSliderChange()">
-            <div class="time-display-inline" id="sliderTimeDisplay">Ora attuale</div>
+            <div class="time-display-inline" id="sliderTimeDisplay">10:55 (29/10) · Ora attuale</div>
           </div>
           <div class="time-slider-inline">
             <div class="time-quick-btns">
@@ -767,8 +803,8 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
           <div class="side-title">Mappa</div>
           <div class="hud-line"><span>AZ</span><span id="hud-az">0°</span></div>
           <div class="hud-line"><span>ALT</span><span id="hud-alt">45°</span></div>
-          <div class="hud-line"><span>ZOOM</span><span id="hud-zoom">1.0x</span></div>
-          <div class="hud-line"><span>ORA</span><span id="hud-time">--:--</span></div>
+          <div class="hud-line"><span>ZOOM</span><span id="hud-zoom">1.5x</span></div>
+          <div class="hud-line"><span>ORA</span><span id="hud-time">10:55</span></div>
           <button class="map-btn" onclick="resetView()">🔄 Reset Vista</button>
           <button class="map-btn" onclick="zoomIn()">➕ Zoom In</button>
           <button class="map-btn" onclick="zoomOut()">➖ Zoom Out</button>
@@ -779,7 +815,7 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       </div>
 
       <div class="compass-indicator">
-        <span id="compN">N</span><span id="compNE">NE</span><span id="compE">E</span><span id="compSE">SE</span>
+        <span id="compN" class="active">N</span><span id="compNE">NE</span><span id="compE">E</span><span id="compSE">SE</span>
         <span id="compS">S</span><span id="compSO">SO</span><span id="compO">O</span><span id="compNO">NO</span>
       </div>
       <div class="legend">
@@ -796,9 +832,9 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
     <div class="card">
       <h2>🌙 Oggetti visibili stasera</h2>
       <div class="tonight-summary">
-        <div class="big-time" id="tonight-time">--:--</div>
-        <div class="location" id="tonight-location">--</div>
-        <div id="tonight-debug" style="font-size:10px; color:var(--muted); margin-top:5px; opacity:0.7;"></div>
+        <div class="big-time" id="tonight-time">10:57</div>
+        <div class="location" id="tonight-location">41.07°, 14.33° — Notte del giovedì 29 ottobre</div>
+        <div id="tonight-debug" style="font-size:10px; color:var(--muted); margin-top:5px; opacity:0.7;">Riferimento: 29/10/2026 · Refresh auto 1h dopo l'alba</div>
       </div>
       <div class="search-box">
         <input type="text" id="objectSearch" placeholder="🔍 Cerca oggetto (es. M42, Orione, Giove...)" oninput="searchObjects()">
@@ -806,13 +842,13 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       </div>
       <div class="search-results" id="searchResults" style="display:none;"></div>
       <div class="section-divider">🌙 Luna e Pianeti</div>
-      <div id="tonight-planets"></div>
+      <div id="tonight-planets"><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Luna%22%2C%22ra%22%3A83.53585402114561%2C%22dec%22%3A26.914902197834962%7D')" style="border-left: 3px solid var(--accent2); background: rgba(243,229,171,0.05);"><div><span class="object-name">🌙 Luna</span><span class="object-type">Satellite</span><span class="visibility-badge naked">86% ill.</span></div><div style="text-align:right;"><span class="object-alt ">76.3°</span><div style="font-size:10px; color:var(--muted);">max 03:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Urano%22%2C%22ra%22%3A62.83385225037386%2C%22dec%22%3A20.939116379384586%2C%22s%22%3A%22%E2%99%85%22%7D')"><div><span class="object-name">♅ Urano</span></div><div style="text-align:right;"><span class="object-alt ">69.9°</span><div style="font-size:10px; color:var(--muted);">max 01:43</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Marte%22%2C%22ra%22%3A140.37790355272668%2C%22dec%22%3A17.08286152159302%2C%22s%22%3A%22%E2%99%82%22%7D')"><div><span class="object-name">♂ Marte</span></div><div style="text-align:right;"><span class="object-alt ">65.2°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Giove%22%2C%22ra%22%3A146.57732081044577%2C%22dec%22%3A14.152469353697077%2C%22s%22%3A%22%E2%99%83%22%7D')"><div><span class="object-name">♃ Giove</span></div><div style="text-align:right;"><span class="object-alt ">60.8°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Saturno%22%2C%22ra%22%3A9.724630629465635%2C%22dec%22%3A1.2646493713019091%2C%22s%22%3A%22%E2%99%84%22%7D')"><div><span class="object-name">♄ Saturno</span></div><div style="text-align:right;"><span class="object-alt ">50.2°</span><div style="font-size:10px; color:var(--muted);">max 22:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Nettuno%22%2C%22ra%22%3A2.522503921147333%2C%22dec%22%3A-0.4464760740105012%2C%22s%22%3A%22%E2%99%86%22%7D')"><div><span class="object-name">♆ Nettuno</span></div><div style="text-align:right;"><span class="object-alt ">48.5°</span><div style="font-size:10px; color:var(--muted);">max 21:43</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Venere%22%2C%22ra%22%3A203.47993987066053%2C%22dec%22%3A-15.623280725773883%2C%22s%22%3A%22%E2%99%80%22%7D')"><div><span class="object-name">♀ Venere</span></div><div style="text-align:right;"><span class="object-alt low">4.7°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Mercurio%22%2C%22ra%22%3A225.80624994157466%2C%22dec%22%3A-19.5242313119567%2C%22s%22%3A%22%E2%98%BF%22%7D')"><div><span class="object-name">☿ Mercurio</span></div><div style="text-align:right;"><span class="object-alt low">3.4°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div></div>
       <div class="section-divider">✨ Oggetti del cielo profondo</div>
-      <div id="tonight-messier"></div>
+      <div id="tonight-messier"><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M32%22%2C%22ra%22%3A10.67%2C%22dec%22%3A40.87%7D')"><div><span class="object-name">M32</span><span class="object-type">Galassia</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">88.2°</span><div style="font-size:10px; color:var(--muted);">max 22:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M31%20Andromeda%22%2C%22ra%22%3A10.68%2C%22dec%22%3A41.26%7D')"><div><span class="object-name">M31 Andromeda</span><span class="object-type">Galassia</span><span class="visibility-badge naked">occhio nudo</span></div><div style="text-align:right;"><span class="object-alt ">88.2°</span><div style="font-size:10px; color:var(--muted);">max 22:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M33%20Triangolo%22%2C%22ra%22%3A23.46%2C%22dec%22%3A30.66%7D')"><div><span class="object-name">M33 Triangolo</span><span class="object-type">Galassia</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">79.6°</span><div style="font-size:10px; color:var(--muted);">max 23:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M57%20Anello%22%2C%22ra%22%3A283.39%2C%22dec%22%3A33.02%7D')"><div><span class="object-name">M57 Anello</span><span class="object-type">Nebulosa</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">78.8°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M35%22%2C%22ra%22%3A92.27%2C%22dec%22%3A24.33%7D')"><div><span class="object-name">M35</span><span class="object-type">Ammasso</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">73.2°</span><div style="font-size:10px; color:var(--muted);">max 03:43</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M45%20Pleiadi%22%2C%22ra%22%3A56.75%2C%22dec%22%3A24.11%7D')"><div><span class="object-name">M45 Pleiadi</span><span class="object-type">Ammasso</span><span class="visibility-badge naked">occhio nudo</span></div><div style="text-align:right;"><span class="object-alt ">73.0°</span><div style="font-size:10px; color:var(--muted);">max 01:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M27%20Manubrio%22%2C%22ra%22%3A299.9%2C%22dec%22%3A22.72%7D')"><div><span class="object-name">M27 Manubrio</span><span class="object-type">Nebulosa</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">71.6°</span><div style="font-size:10px; color:var(--muted);">max 17:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M1%20Granchio%22%2C%22ra%22%3A83.63%2C%22dec%22%3A22.01%7D')"><div><span class="object-name">M1 Granchio</span><span class="object-type">Nebulosa</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">70.9°</span><div style="font-size:10px; color:var(--muted);">max 03:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M44%20Presepe%22%2C%22ra%22%3A130.1%2C%22dec%22%3A19.98%7D')"><div><span class="object-name">M44 Presepe</span><span class="object-type">Ammasso</span><span class="visibility-badge naked">occhio nudo</span></div><div style="text-align:right;"><span class="object-alt ">68.9°</span><div style="font-size:10px; color:var(--muted);">max 06:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M92%22%2C%22ra%22%3A259.28%2C%22dec%22%3A43.14%7D')"><div><span class="object-name">M92</span><span class="object-type">Ammasso</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">65.0°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M97%20Gufo%22%2C%22ra%22%3A168.7%2C%22dec%22%3A55.02%7D')"><div><span class="object-name">M97 Gufo</span><span class="object-type">Nebulosa</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">63.1°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M15%22%2C%22ra%22%3A322.49%2C%22dec%22%3A12.17%7D')"><div><span class="object-name">M15</span><span class="object-type">Ammasso</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">61.1°</span><div style="font-size:10px; color:var(--muted);">max 19:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M81%20Bode%22%2C%22ra%22%3A148.8%2C%22dec%22%3A69.06%7D')"><div><span class="object-name">M81 Bode</span><span class="object-type">Galassia</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">60.9°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M82%20Sigaro%22%2C%22ra%22%3A148.97%2C%22dec%22%3A69.68%7D')"><div><span class="object-name">M82 Sigaro</span><span class="object-type">Galassia</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">60.3°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M13%20Ercole%22%2C%22ra%22%3A250.42%2C%22dec%22%3A36.46%7D')"><div><span class="object-name">M13 Ercole</span><span class="object-type">Ammasso</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">56.7°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M106%22%2C%22ra%22%3A184.74%2C%22dec%22%3A47.3%7D')"><div><span class="object-name">M106</span><span class="object-type">Galassia</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">53.5°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M78%22%2C%22ra%22%3A86.69%2C%22dec%22%3A0.08%7D')"><div><span class="object-name">M78</span><span class="object-type">Nebulosa</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">49.0°</span><div style="font-size:10px; color:var(--muted);">max 03:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M2%22%2C%22ra%22%3A323.36%2C%22dec%22%3A-0.82%7D')"><div><span class="object-name">M2</span><span class="object-type">Ammasso</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">48.1°</span><div style="font-size:10px; color:var(--muted);">max 19:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M65%22%2C%22ra%22%3A169.73%2C%22dec%22%3A13.09%7D')"><div><span class="object-name">M65</span><span class="object-type">Galassia</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">47.9°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M66%22%2C%22ra%22%3A170.06%2C%22dec%22%3A12.99%7D')"><div><span class="object-name">M66</span><span class="object-type">Galassia</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">47.6°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M42%20Orione%22%2C%22ra%22%3A83.82%2C%22dec%22%3A-5.39%7D')"><div><span class="object-name">M42 Orione</span><span class="object-type">Nebulosa</span><span class="visibility-badge naked">occhio nudo</span></div><div style="text-align:right;"><span class="object-alt ">43.5°</span><div style="font-size:10px; color:var(--muted);">max 03:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M63%20Girasole%22%2C%22ra%22%3A198.84%2C%22dec%22%3A42.03%7D')"><div><span class="object-name">M63 Girasole</span><span class="object-type">Galassia</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">42.4°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M51%20Vortice%22%2C%22ra%22%3A202.47%2C%22dec%22%3A47.19%7D')"><div><span class="object-name">M51 Vortice</span><span class="object-type">Galassia</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">41.8°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M11%20Anatre%20Selvatiche%22%2C%22ra%22%3A282.77%2C%22dec%22%3A-6.27%7D')"><div><span class="object-name">M11 Anatre Selvatiche</span><span class="object-type">Ammasso</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">41.7°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M101%20Girandola%22%2C%22ra%22%3A210.8%2C%22dec%22%3A54.35%7D')"><div><span class="object-name">M101 Girandola</span><span class="object-type">Galassia</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">39.2°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M64%20Occhio%20Nero%22%2C%22ra%22%3A194.18%2C%22dec%22%3A21.68%7D')"><div><span class="object-name">M64 Occhio Nero</span><span class="object-type">Galassia</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">36.0°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M87%22%2C%22ra%22%3A187.71%2C%22dec%22%3A12.39%7D')"><div><span class="object-name">M87</span><span class="object-type">Galassia</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">35.0°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M16%20Aquila%22%2C%22ra%22%3A274.7%2C%22dec%22%3A-13.78%7D')"><div><span class="object-name">M16 Aquila</span><span class="object-type">Nebulosa</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">32.6°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M3%22%2C%22ra%22%3A205.55%2C%22dec%22%3A28.38%7D')"><div><span class="object-name">M3</span><span class="object-type">Ammasso</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">31.2°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M17%20Cigno%22%2C%22ra%22%3A275.2%2C%22dec%22%3A-16.17%7D')"><div><span class="object-name">M17 Cigno</span><span class="object-type">Nebulosa</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">30.4°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M22%22%2C%22ra%22%3A279.1%2C%22dec%22%3A-23.9%7D')"><div><span class="object-name">M22</span><span class="object-type">Ammasso</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt low">23.7°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M20%20Trifida%22%2C%22ra%22%3A270.67%2C%22dec%22%3A-23.03%7D')"><div><span class="object-name">M20 Trifida</span><span class="object-type">Nebulosa</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt low">22.6°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M8%20Laguna%22%2C%22ra%22%3A270.9%2C%22dec%22%3A-24.38%7D')"><div><span class="object-name">M8 Laguna</span><span class="object-type">Nebulosa</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt low">21.4°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M5%22%2C%22ra%22%3A229.64%2C%22dec%22%3A2.08%7D')"><div><span class="object-name">M5</span><span class="object-type">Ammasso</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt low">21.1°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M104%20Sombrero%22%2C%22ra%22%3A189.99%2C%22dec%22%3A-11.62%7D')"><div><span class="object-name">M104 Sombrero</span><span class="object-type">Galassia</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt low">16.1°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M6%20Farfalla%22%2C%22ra%22%3A265.07%2C%22dec%22%3A-32.22%7D')"><div><span class="object-name">M6 Farfalla</span><span class="object-type">Ammasso</span><span class="visibility-badge naked">occhio nudo</span></div><div style="text-align:right;"><span class="object-alt low">12.3°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22M7%20Tolomeo%22%2C%22ra%22%3A268.46%2C%22dec%22%3A-34.79%7D')"><div><span class="object-name">M7 Tolomeo</span><span class="object-type">Ammasso</span><span class="visibility-badge naked">occhio nudo</span></div><div style="text-align:right;"><span class="object-alt low">10.8°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div></div>
       <div class="section-divider">🌫️ Nebulose</div>
-      <div id="tonight-nebulae"></div>
+      <div id="tonight-nebulae"><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Nebulosa%20Nord%20America%20(NGC7000)%22%2C%22ra%22%3A314.7%2C%22dec%22%3A44.3%7D')"><div><span class="object-name">Nebulosa Nord America (NGC7000)</span><span class="visibility-badge naked">occhio nudo</span></div><div style="text-align:right;"><span class="object-alt ">86.6°</span><div style="font-size:10px; color:var(--muted);">max 18:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Nebulosa%20California%20(NGC1499)%22%2C%22ra%22%3A60.8%2C%22dec%22%3A36.4%7D')"><div><span class="object-name">Nebulosa California (NGC1499)</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">85.0°</span><div style="font-size:10px; color:var(--muted);">max 01:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Nebulosa%20Cocoon%20(IC5146)%22%2C%22ra%22%3A328.33%2C%22dec%22%3A47.27%7D')"><div><span class="object-name">Nebulosa Cocoon (IC5146)</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">83.8°</span><div style="font-size:10px; color:var(--muted);">max 19:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Nebulosa%20Velo%20(NGC6960)%22%2C%22ra%22%3A311.5%2C%22dec%22%3A30.7%7D')"><div><span class="object-name">Nebulosa Velo (NGC6960)</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">79.5°</span><div style="font-size:10px; color:var(--muted);">max 18:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Nebulosa%20Pacman%20(NGC281)%22%2C%22ra%22%3A13.3%2C%22dec%22%3A56.62%7D')"><div><span class="object-name">Nebulosa Pacman (NGC281)</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">74.5°</span><div style="font-size:10px; color:var(--muted);">max 22:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Nebulosa%20Bolla%20(NGC7635)%22%2C%22ra%22%3A350.2%2C%22dec%22%3A61.2%7D')"><div><span class="object-name">Nebulosa Bolla (NGC7635)</span><span class="visibility-badge telescope">telescopio</span></div><div style="text-align:right;"><span class="object-alt ">69.8°</span><div style="font-size:10px; color:var(--muted);">max 20:43</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Nebulosa%20Cuore%20(IC1805)%22%2C%22ra%22%3A38.3%2C%22dec%22%3A61.3%7D')"><div><span class="object-name">Nebulosa Cuore (IC1805)</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">69.8°</span><div style="font-size:10px; color:var(--muted);">max 00:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Nebulosa%20Cono%20(NGC2264)%22%2C%22ra%22%3A100.24%2C%22dec%22%3A9.89%7D')"><div><span class="object-name">Nebulosa Cono (NGC2264)</span><span class="visibility-badge naked">occhio nudo</span></div><div style="text-align:right;"><span class="object-alt ">58.8°</span><div style="font-size:10px; color:var(--muted);">max 04:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Nebulosa%20Rosetta%20(NGC2237)%22%2C%22ra%22%3A97.9%2C%22dec%22%3A5%7D')"><div><span class="object-name">Nebulosa Rosetta (NGC2237)</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt ">53.9°</span><div style="font-size:10px; color:var(--muted);">max 04:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Nebulosa%20Helix%20(NGC7293)%22%2C%22ra%22%3A337.4%2C%22dec%22%3A-20.8%7D')"><div><span class="object-name">Nebulosa Helix (NGC7293)</span><span class="visibility-badge binocular">binocolo</span></div><div style="text-align:right;"><span class="object-alt low">28.1°</span><div style="font-size:10px; color:var(--muted);">max 20:03</div></div></div></div>
       <div class="section-divider">⭐ Costellazioni visibili</div>
-      <div id="tonight-constellations"></div>
+      <div id="tonight-constellations"><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Lucertola%22%2C%22ra%22%3A-22.3781%2C%22dec%22%3A43.1234%7D')"><div><span class="object-name">Lucertola</span></div><div style="text-align:right;"><span class="object-alt ">87.9°</span><div style="font-size:10px; color:var(--muted);">max 20:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Andromeda%22%2C%22ra%22%3A-5.4658%2C%22dec%22%3A43.2681%7D')"><div><span class="object-name">Andromeda</span></div><div style="text-align:right;"><span class="object-alt ">87.6°</span><div style="font-size:10px; color:var(--muted);">max 21:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Lince%22%2C%22ra%22%3A125.7088%2C%22dec%22%3A43.1881%7D')"><div><span class="object-name">Lince</span></div><div style="text-align:right;"><span class="object-alt ">87.4°</span><div style="font-size:10px; color:var(--muted);">max 05:43</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Triangolo%22%2C%22ra%22%3A32.3859%2C%22dec%22%3A34.9873%7D')"><div><span class="object-name">Triangolo</span></div><div style="text-align:right;"><span class="object-alt ">83.9°</span><div style="font-size:10px; color:var(--muted);">max 23:43</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Lira%22%2C%22ra%22%3A-76.3738%2C%22dec%22%3A36.8986%7D')"><div><span class="object-name">Lira</span></div><div style="text-align:right;"><span class="object-alt ">81.5°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Perseo%22%2C%22ra%22%3A47.2667%2C%22dec%22%3A49.6133%7D')"><div><span class="object-name">Perseo</span></div><div style="text-align:right;"><span class="object-alt ">81.4°</span><div style="font-size:10px; color:var(--muted);">max 00:43</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Cigno%22%2C%22ra%22%3A-67.5735%2C%22dec%22%3A51.7298%7D')"><div><span class="object-name">Cigno</span></div><div style="text-align:right;"><span class="object-alt ">79.3°</span><div style="font-size:10px; color:var(--muted);">max 17:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Auriga%22%2C%22ra%22%3A81.573%2C%22dec%22%3A28.6075%7D')"><div><span class="object-name">Auriga</span></div><div style="text-align:right;"><span class="object-alt ">77.4°</span><div style="font-size:10px; color:var(--muted);">max 03:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Toro%22%2C%22ra%22%3A81.573%2C%22dec%22%3A28.6075%7D')"><div><span class="object-name">Toro</span></div><div style="text-align:right;"><span class="object-alt ">77.4°</span><div style="font-size:10px; color:var(--muted);">max 03:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Gemelli%22%2C%22ra%22%3A113.9806%2C%22dec%22%3A26.8957%7D')"><div><span class="object-name">Gemelli</span></div><div style="text-align:right;"><span class="object-alt ">75.8°</span><div style="font-size:10px; color:var(--muted);">max 05:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Volpetta%22%2C%22ra%22%3A-61.6346%2C%22dec%22%3A24.0796%7D')"><div><span class="object-name">Volpetta</span></div><div style="text-align:right;"><span class="object-alt ">73.0°</span><div style="font-size:10px; color:var(--muted);">max 17:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Cefeo%22%2C%22ra%22%3A-27.2863%2C%22dec%22%3A58.2013%7D')"><div><span class="object-name">Cefeo</span></div><div style="text-align:right;"><span class="object-alt ">72.9°</span><div style="font-size:10px; color:var(--muted);">max 19:43</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Cassiopea%22%2C%22ra%22%3A14.1772%2C%22dec%22%3A60.7167%7D')"><div><span class="object-name">Cassiopea</span></div><div style="text-align:right;"><span class="object-alt ">70.3°</span><div style="font-size:10px; color:var(--muted);">max 22:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Cancro%22%2C%22ra%22%3A130.8214%2C%22dec%22%3A21.4685%7D')"><div><span class="object-name">Cancro</span></div><div style="text-align:right;"><span class="object-alt ">70.3°</span><div style="font-size:10px; color:var(--muted);">max 06:03</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Ariete%22%2C%22ra%22%3A28.66%2C%22dec%22%3A20.808%7D')"><div><span class="object-name">Ariete</span></div><div style="text-align:right;"><span class="object-alt ">69.7°</span><div style="font-size:10px; color:var(--muted);">max 23:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Freccia%22%2C%22ra%22%3A-60.3107%2C%22dec%22%3A19.4921%7D')"><div><span class="object-name">Freccia</span></div><div style="text-align:right;"><span class="object-alt ">68.4°</span><div style="font-size:10px; color:var(--muted);">max 17:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Leone%20Minore%22%2C%22ra%22%3A163.3279%2C%22dec%22%3A34.2149%7D')"><div><span class="object-name">Leone Minore</span></div><div style="text-align:right;"><span class="object-alt ">65.7°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Giraffa%22%2C%22ra%22%3A57.3803%2C%22dec%22%3A65.526%7D')"><div><span class="object-name">Giraffa</span></div><div style="text-align:right;"><span class="object-alt ">65.5°</span><div style="font-size:10px; color:var(--muted);">max 01:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Orsa%20Maggiore%22%2C%22ra%22%3A167.4159%2C%22dec%22%3A44.4985%7D')"><div><span class="object-name">Orsa Maggiore</span></div><div style="text-align:right;"><span class="object-alt ">65.2°</span><div style="font-size:10px; color:var(--muted);">max 06:23</div></div></div><div class="object-row" onclick="tonightClick('%7B%22n%22%3A%22Delfino%22%2C%22ra%22%3A-50.0905%2C%22dec%22%3A15.9121%7D')"><div><span class="object-name">Delfino</span></div><div style="text-align:right;"><span class="object-alt ">64.8°</span><div style="font-size:10px; color:var(--muted);">max 18:03</div></div></div></div>
     </div>
   </div>
 
@@ -824,51 +860,42 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
         <button class="btn btn-ghost" onclick="document.getElementById('catalogSearch').value=''; renderCatalog();">✕</button>
       </div>
       <div class="cat-tabs" id="catTabs">
-        <button class="cat-tab active" data-cat="all" onclick="setCatalogFilter('all', this)">Tutti</button>
+        <button class="cat-tab" data-cat="all" onclick="setCatalogFilter('all', this)">Tutti</button>
         <button class="cat-tab" data-cat="planet" onclick="setCatalogFilter('planet', this)">🪐 Pianeti / Sole / Luna</button>
         <button class="cat-tab" data-cat="star" onclick="setCatalogFilter('star', this)">⭐ Stelle</button>
-        <button class="cat-tab" data-cat="constellation" onclick="setCatalogFilter('constellation', this)">✨ Costellazioni</button>
+        <button class="cat-tab active" data-cat="constellation" onclick="setCatalogFilter('constellation', this)">✨ Costellazioni</button>
         <button class="cat-tab" data-cat="nebula" onclick="setCatalogFilter('nebula', this)">🌫️ Nebulose</button>
         <button class="cat-tab" data-cat="galaxy" onclick="setCatalogFilter('galaxy', this)">🌀 Galassie</button>
         <button class="cat-tab" data-cat="cluster" onclick="setCatalogFilter('cluster', this)">🔵 Ammassi</button>
       </div>
       <div style="font-size:12px; color:var(--muted); margin-bottom:12px;">
-        <span id="cat-count">—</span> oggetti · clicca su una scheda per i dettagli
+        <span id="cat-count">89</span> oggetti · clicca su una scheda per i dettagli
       </div>
-      <div class="cat-grid" id="catalogGrid"></div>
+      <div class="cat-grid" id="catalogGrid"><div class="cat-item" onclick="openCatDetail('const-Andromeda')"><div class="cat-name">Andromeda</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Macchina Pneumatica')"><div class="cat-name">Macchina Pneumatica</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Uccello del Paradiso')"><div class="cat-name">Uccello del Paradiso</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Acquario')"><div class="cat-name">Acquario</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Aquila')"><div class="cat-name">Aquila</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Altare')"><div class="cat-name">Altare</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Ariete')"><div class="cat-name">Ariete</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Auriga')"><div class="cat-name">Auriga</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Boote')"><div class="cat-name">Boote</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Bulino')"><div class="cat-name">Bulino</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Giraffa')"><div class="cat-name">Giraffa</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Cancro')"><div class="cat-name">Cancro</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Cani da Caccia')"><div class="cat-name">Cani da Caccia</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Cane Maggiore')"><div class="cat-name">Cane Maggiore</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Cane Minore')"><div class="cat-name">Cane Minore</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Capricorno')"><div class="cat-name">Capricorno</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Carena')"><div class="cat-name">Carena</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Cassiopea')"><div class="cat-name">Cassiopea</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Centauro')"><div class="cat-name">Centauro</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Cefeo')"><div class="cat-name">Cefeo</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Balena')"><div class="cat-name">Balena</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Camaleonte')"><div class="cat-name">Camaleonte</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Compasso')"><div class="cat-name">Compasso</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Colomba')"><div class="cat-name">Colomba</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Chioma di Berenice')"><div class="cat-name">Chioma di Berenice</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Corona Australe')"><div class="cat-name">Corona Australe</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Corona Boreale')"><div class="cat-name">Corona Boreale</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Corvo')"><div class="cat-name">Corvo</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Cratere')"><div class="cat-name">Cratere</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Croce del Sud')"><div class="cat-name">Croce del Sud</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Cigno')"><div class="cat-name">Cigno</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Delfino')"><div class="cat-name">Delfino</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Pesce Dorato')"><div class="cat-name">Pesce Dorato</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Dragone')"><div class="cat-name">Dragone</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Cavallino')"><div class="cat-name">Cavallino</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Eridano')"><div class="cat-name">Eridano</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Fornace')"><div class="cat-name">Fornace</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Gemelli')"><div class="cat-name">Gemelli</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Gru')"><div class="cat-name">Gru</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Ercole')"><div class="cat-name">Ercole</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Orologio')"><div class="cat-name">Orologio</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Idra')"><div class="cat-name">Idra</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Idra Maschio')"><div class="cat-name">Idra Maschio</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Indiano')"><div class="cat-name">Indiano</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Lucertola')"><div class="cat-name">Lucertola</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Leone')"><div class="cat-name">Leone</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Leone Minore')"><div class="cat-name">Leone Minore</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Lepre')"><div class="cat-name">Lepre</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Bilancia')"><div class="cat-name">Bilancia</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Lupo')"><div class="cat-name">Lupo</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Lince')"><div class="cat-name">Lince</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Lira')"><div class="cat-name">Lira</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Mensa')"><div class="cat-name">Mensa</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Microscopio')"><div class="cat-name">Microscopio</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Unicorno')"><div class="cat-name">Unicorno</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Mosca')"><div class="cat-name">Mosca</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Squadra')"><div class="cat-name">Squadra</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Ottante')"><div class="cat-name">Ottante</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Ofiuco')"><div class="cat-name">Ofiuco</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Orione')"><div class="cat-name">Orione</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Pavone')"><div class="cat-name">Pavone</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Pegaso')"><div class="cat-name">Pegaso</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Perseo')"><div class="cat-name">Perseo</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Fenice')"><div class="cat-name">Fenice</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Pittore')"><div class="cat-name">Pittore</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Pesci')"><div class="cat-name">Pesci</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Pesce Australe')"><div class="cat-name">Pesce Australe</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Poppa')"><div class="cat-name">Poppa</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Bussola')"><div class="cat-name">Bussola</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Reticolo')"><div class="cat-name">Reticolo</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Freccia')"><div class="cat-name">Freccia</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Sagittario')"><div class="cat-name">Sagittario</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Scorpione')"><div class="cat-name">Scorpione</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Scultore')"><div class="cat-name">Scultore</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Scudo')"><div class="cat-name">Scudo</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Serpente')"><div class="cat-name">Serpente</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Serpente')"><div class="cat-name">Serpente</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Sestante')"><div class="cat-name">Sestante</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Toro')"><div class="cat-name">Toro</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Telescopio')"><div class="cat-name">Telescopio</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Triangolo')"><div class="cat-name">Triangolo</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Triangolo Australe')"><div class="cat-name">Triangolo Australe</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Tucano')"><div class="cat-name">Tucano</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Orsa Maggiore')"><div class="cat-name">Orsa Maggiore</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Orsa Minore')"><div class="cat-name">Orsa Minore</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Vele')"><div class="cat-name">Vele</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Vergine')"><div class="cat-name">Vergine</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Pesce Volante')"><div class="cat-name">Pesce Volante</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div><div class="cat-item" onclick="openCatDetail('const-Volpetta')"><div class="cat-name">Volpetta</div><div class="cat-sub">Costellazione</div><span class="cat-tag constellation">constellation</span></div></div>
     </div>
   </div>
 
   <div id="tab-weather" class="tab-content">
     <div class="card">
-      <h2>⛅ Meteo & Qualità Astrofotografia</h2>
+      <h2>⛅ Meteo &amp; Qualità Astrofotografia</h2>
       <div class="weather-status-bar">
-        <div>📍 <span class="ws-loc" id="weather-loc">--</span></div>
-        <div class="ws-updated">🕒 <span id="weather-updated">Mai aggiornato</span></div>
+        <div>📍 <span class="ws-loc" id="weather-loc">41.0723°, 14.3329°</span></div>
+        <div class="ws-updated">🕒 <span id="weather-updated">29/10, 10:57</span></div>
         <button class="btn" onclick="fetchWeather()">🔄 Aggiorna Meteo</button>
-        <span class="msg" id="msg-weather" style="margin:0;"></span>
+        <span class="msg success" id="msg-weather" style="margin: 0px;">✅ Meteo aggiornato.</span>
       </div>
       <div class="weather-section-title">📊 Condizioni Attuali <span class="sub">adesso</span></div>
-      <div class="grid" id="weather-grid">
-        <div class="weather-kpi"><div class="k">Nuvole</div><div class="v small" style="color:var(--muted);">—</div></div>
-        <div class="weather-kpi"><div class="k">Temperatura</div><div class="v small" style="color:var(--muted);">—</div></div>
-        <div class="weather-kpi"><div class="k">Umidità</div><div class="v small" style="color:var(--muted);">—</div></div>
-        <div class="weather-kpi"><div class="k">Vento</div><div class="v small" style="color:var(--muted);">—</div></div>
-      </div>
+      <div class="grid" id="weather-grid"><div class="weather-kpi"><div class="k">Meteo adesso</div><div class="v small">🌤️ Preval. sereno</div></div><div class="weather-kpi"><div class="k">Nuvole</div><div class="v small">42%</div><div class="sub">L 16 · M 36 · H 0</div></div><div class="weather-kpi"><div class="k">Temperatura</div><div class="v small">17°C</div><div class="sub">Percepita 16.3°C</div></div><div class="weather-kpi"><div class="k">Umidità</div><div class="v small">58%</div><div class="sub">Dew 8.6°C</div></div><div class="weather-kpi"><div class="k">Vento</div><div class="v small">2 km/h N</div><div class="sub">Raffiche 8 km/h</div></div><div class="weather-kpi"><div class="k">Score Astro</div><div class="v small" style="color:var(--warn)">62/100</div><div class="sub">Discreto</div></div></div>
       <div class="weather-section-title">🌙 Qualità Notte Prossima <span class="sub">astrofotografia</span></div>
-      <div class="grid" id="quality-grid"></div>
+      <div class="grid" id="quality-grid"><div class="card"><label>Punteggio</label><div class="val">1.0 / 10</div></div><div class="card"><label>Giudizio</label><div class="val" style="color:var(--bad)">Scarso</div></div><div class="card"><label>SQM</label><div class="val">18.17</div></div><div class="card"><label>Nuvole</label><div class="val">42%</div></div></div>
       <div class="weather-section-title">📅 Prossime Notti <span class="sub">clicca per dettagli orari</span></div>
-      <div id="weather-nights-summary" class="nights-summary">
-        <div class="weather-empty">Carica il meteo per vedere il riepilogo delle prossime notti.</div>
-      </div>
+      <div id="weather-nights-summary" class="nights-summary"><div class="night-card active" onclick="selectWeatherDay(0)"><div class="nc-header"><div><div class="nc-date">🌙 Stanotte</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">🌖 81% Luna</div></div><div class="nc-score" style="color:var(--bad);">34</div></div><div class="nc-row"><span>☁️ Nuvole medie</span><span>64%</span></div><div class="nc-row"><span>💧 Umidità media</span><span>74%</span></div><div class="nc-row"><span>💨 Raffiche max</span><span>14 km/h</span></div><div class="nc-row"><span>🌡️ ΔT-Dew min</span><span style="color:var(--warn)">3.0°</span></div><div class="nc-window ">✅ Migliore: 20:00 (90/100)</div></div><div class="night-card " onclick="selectWeatherDay(1)"><div class="nc-header"><div><div class="nc-date">ven 30 ott</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">🌖 72% Luna</div></div><div class="nc-score" style="color:var(--warn);">44</div></div><div class="nc-row"><span>☁️ Nuvole medie</span><span>51%</span></div><div class="nc-row"><span>💧 Umidità media</span><span>76%</span></div><div class="nc-row"><span>💨 Raffiche max</span><span>13 km/h</span></div><div class="nc-row"><span>🌡️ ΔT-Dew min</span><span style="color:var(--warn)">2.6°</span></div><div class="nc-window ">✅ Migliore: 03:00 (57/100)</div></div><div class="night-card " onclick="selectWeatherDay(2)"><div class="nc-header"><div><div class="nc-date">sab 31 ott</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">🌖 61% Luna</div></div><div class="nc-score" style="color:var(--warn);">42</div></div><div class="nc-row"><span>☁️ Nuvole medie</span><span>57%</span></div><div class="nc-row"><span>💧 Umidità media</span><span>73%</span></div><div class="nc-row"><span>💨 Raffiche max</span><span>16 km/h</span></div><div class="nc-row"><span>🌡️ ΔT-Dew min</span><span style="color:var(--warn)">2.7°</span></div><div class="nc-window ">✅ Migliore: 04:00 (63/100)</div></div><div class="night-card " onclick="selectWeatherDay(3)"><div class="nc-header"><div><div class="nc-date">dom 01 nov</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">🌘 49% Luna</div></div><div class="nc-score" style="color:var(--bad);">7</div></div><div class="nc-row"><span>☁️ Nuvole medie</span><span>99%</span></div><div class="nc-row"><span>💧 Umidità media</span><span>65%</span></div><div class="nc-row"><span>💨 Raffiche max</span><span>28 km/h</span></div><div class="nc-row"><span>🌡️ ΔT-Dew min</span><span style="color:var(--ok)">4.9°</span></div><div class="nc-window bad">❌ Nessuna finestra buona</div></div><div class="night-card " onclick="selectWeatherDay(4)"><div class="nc-header"><div><div class="nc-date">lun 02 nov</div><div style="font-size:10px;color:var(--muted);margin-top:2px;">🌘 38% Luna</div></div><div class="nc-score" style="color:var(--bad);">0</div></div><div class="nc-row"><span>☁️ Nuvole medie</span><span>100%</span></div><div class="nc-row"><span>💧 Umidità media</span><span>79%</span></div><div class="nc-row"><span>💨 Raffiche max</span><span>18 km/h</span></div><div class="nc-row"><span>🌡️ ΔT-Dew min</span><span style="color:var(--bad)">1.3°</span></div><div class="nc-window bad">❌ Nessuna finestra buona</div></div></div>
       <div class="weather-section-title">📈 Dettaglio Orario <span class="sub">ogni ora, tutti i dati per astrofotografia</span></div>
-      <div class="weather-day-tabs" id="weather-day-tabs"></div>
+      <div class="weather-day-tabs" id="weather-day-tabs"><button class="active" onclick="selectWeatherDay(0)">OGGI<span class="dow">29/10</span></button><button class="" onclick="selectWeatherDay(1)">VEN<span class="dow">30/10</span></button><button class="" onclick="selectWeatherDay(2)">SAB<span class="dow">31/10</span></button><button class="" onclick="selectWeatherDay(3)">DOM<span class="dow">01/11</span></button><button class="" onclick="selectWeatherDay(4)">LUN<span class="dow">02/11</span></button></div>
       <div class="weather-hourly-wrap">
         <table class="weather-hourly-table" id="weather-hourly-table">
-          <thead id="weather-hourly-head"></thead>
-          <tbody id="weather-hourly-body">
-            <tr><td colspan="13" style="text-align:center; padding:30px; color:var(--muted);">Carica il meteo per vedere i dettagli orari.</td></tr>
-          </tbody>
+          <thead id="weather-hourly-head"><tr><th>Ora</th><th>Meteo</th><th>Temp</th><th>Dew</th><th>ΔT-D</th><th>Umid</th><th>Nuvole</th><th>L/M/H</th><th>Vento</th><th>Raffiche</th><th>Pioggia</th><th>Press</th><th>Vis</th><th>Score</th></tr></thead>
+          <tbody id="weather-hourly-body"><tr class="night-row"><td class="cell-time">00:00</td><td class="cell-weather">☁️</td><td class="">11.5°</td><td>6.8°</td><td class="cell-good"><strong>4.7°</strong></td><td class="">73%</td><td class="cell-bad">81%</td><td style="font-size:10px; color:var(--muted);">0/81/5</td><td>5 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">12</td><td class="">0%</td><td>1020</td><td class="">37km</td><td class="cell-score cell-bad">19</td></tr><tr class="night-row"><td class="cell-time">01:00</td><td class="cell-weather">⛅</td><td class="">11.0°</td><td>6.6°</td><td class="cell-good"><strong>4.4°</strong></td><td class="">74%</td><td class="cell-bad">89%</td><td style="font-size:10px; color:var(--muted);">0/89/0</td><td>5 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">12</td><td class="">0%</td><td>1019</td><td class="">37km</td><td class="cell-score cell-bad">12</td></tr><tr class="night-row"><td class="cell-time">02:00</td><td class="cell-weather">☁️</td><td class="">10.7°</td><td>6.5°</td><td class="cell-good"><strong>4.2°</strong></td><td class="">75%</td><td class="cell-bad">86%</td><td style="font-size:10px; color:var(--muted);">0/86/0</td><td>5 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">12</td><td class="">0%</td><td>1019</td><td class="">36km</td><td class="cell-score cell-bad">15</td></tr><tr class="night-row"><td class="cell-time">03:00</td><td class="cell-weather">⛅</td><td class="">11.0°</td><td>6.6°</td><td class="cell-good"><strong>4.4°</strong></td><td class="">74%</td><td class="cell-bad">72%</td><td style="font-size:10px; color:var(--muted);">0/72/0</td><td>6 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">14</td><td class="">0%</td><td>1019</td><td class="">37km</td><td class="cell-score cell-bad">27</td></tr><tr class="night-row"><td class="cell-time">04:00</td><td class="cell-weather">🌤️</td><td class="">10.4°</td><td>6.7°</td><td class="cell-mid"><strong>3.7°</strong></td><td class="">78%</td><td class="cell-good">40%</td><td style="font-size:10px; color:var(--muted);">0/40/0</td><td>5 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">14</td><td class="">0%</td><td>1019</td><td class="">35km</td><td class="cell-score cell-mid">56</td></tr><tr class="night-row"><td class="cell-time">05:00</td><td class="cell-weather">⛅</td><td class="">9.7°</td><td>6.7°</td><td class="cell-mid"><strong>3.0°</strong></td><td class="cell-mid">82%</td><td class="cell-mid">63%</td><td style="font-size:10px; color:var(--muted);">0/63/0</td><td>5 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">13</td><td class="">0%</td><td>1019</td><td class="">32km</td><td class="cell-score cell-bad">21</td></tr><tr class=""><td class="cell-time">06:00</td><td class="cell-weather">⛅</td><td class="">9.5°</td><td>6.4°</td><td class="cell-mid"><strong>3.1°</strong></td><td class="cell-mid">81%</td><td class="cell-mid">67%</td><td style="font-size:10px; color:var(--muted);">0/67/0</td><td>6 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">13</td><td class="">0%</td><td>1019</td><td class="">32km</td><td class="cell-score cell-bad">28</td></tr><tr class=""><td class="cell-time">07:00</td><td class="cell-weather">⛅</td><td class="">9.1°</td><td>6.5°</td><td class="cell-mid"><strong>2.6°</strong></td><td class="cell-mid">84%</td><td class="cell-mid">63%</td><td style="font-size:10px; color:var(--muted);">0/63/0</td><td>5 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">13</td><td class="">0%</td><td>1019</td><td class="">31km</td><td class="cell-score cell-bad">21</td></tr><tr class=""><td class="cell-time">08:00</td><td class="cell-weather">⛅</td><td class="">10.8°</td><td>7.3°</td><td class="cell-mid"><strong>3.5°</strong></td><td class="">79%</td><td class="cell-bad">74%</td><td style="font-size:10px; color:var(--muted);">0/74/0</td><td>4 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">12</td><td class="">0%</td><td>1020</td><td class="">35km</td><td class="cell-score cell-bad">21</td></tr><tr class=""><td class="cell-time">09:00</td><td class="cell-weather">⛅</td><td class="">14.2°</td><td>9.4°</td><td class="cell-good"><strong>4.8°</strong></td><td class="">73%</td><td class="cell-mid">53%</td><td style="font-size:10px; color:var(--muted);">8/45/0</td><td>2 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">10</td><td class="">0%</td><td>1020</td><td class="">38km</td><td class="cell-score cell-mid">44</td></tr><tr class=""><td class="cell-time">10:00 <span style="color:var(--accent);font-size:9px;">●</span></td><td class="cell-weather">🌤️</td><td class="">17.0°</td><td>8.6°</td><td class="cell-good"><strong>8.4°</strong></td><td class="">58%</td><td class="cell-mid">42%</td><td style="font-size:10px; color:var(--muted);">16/36/0</td><td>2 <span style="font-size:9px;color:var(--muted);">N</span></td><td class="">8</td><td class="">0%</td><td>1020</td><td class="">40km</td><td class="cell-score cell-mid">62</td></tr><tr class=""><td class="cell-time">11:00</td><td class="cell-weather">🌤️</td><td class="">18.7°</td><td>8.9°</td><td class="cell-good"><strong>9.8°</strong></td><td class="">53%</td><td class="cell-good">32%</td><td style="font-size:10px; color:var(--muted);">0/32/0</td><td>3 <span style="font-size:9px;color:var(--muted);">N</span></td><td class="">9</td><td class="">0%</td><td>1020</td><td class="">41km</td><td class="cell-score cell-good">71</td></tr><tr class=""><td class="cell-time">12:00</td><td class="cell-weather">⛅</td><td class="">19.8°</td><td>9.7°</td><td class="cell-good"><strong>10.1°</strong></td><td class="">52%</td><td class="cell-mid">67%</td><td style="font-size:10px; color:var(--muted);">0/67/0</td><td>4 <span style="font-size:9px;color:var(--muted);">N</span></td><td class="">12</td><td class="">0%</td><td>1020</td><td class="">41km</td><td class="cell-score cell-mid">40</td></tr><tr class=""><td class="cell-time">13:00</td><td class="cell-weather">🌤️</td><td class="">20.5°</td><td>9.1°</td><td class="cell-good"><strong>11.4°</strong></td><td class="">48%</td><td class="cell-mid">42%</td><td style="font-size:10px; color:var(--muted);">0/42/0</td><td>5 <span style="font-size:9px;color:var(--muted);">N</span></td><td class="">14</td><td class="">0%</td><td>1019</td><td class="">42km</td><td class="cell-score cell-mid">62</td></tr><tr class=""><td class="cell-time">14:00</td><td class="cell-weather">🌤️</td><td class="">20.7°</td><td>9.0°</td><td class="cell-good"><strong>11.7°</strong></td><td class="">47%</td><td class="cell-mid">42%</td><td style="font-size:10px; color:var(--muted);">4/38/0</td><td>5 <span style="font-size:9px;color:var(--muted);">N</span></td><td class="">15</td><td class="">0%</td><td>1019</td><td class="">42km</td><td class="cell-score cell-mid">62</td></tr><tr class=""><td class="cell-time">15:00</td><td class="cell-weather">⛅</td><td class="">20.7°</td><td>8.6°</td><td class="cell-good"><strong>12.1°</strong></td><td class="">46%</td><td class="cell-mid">51%</td><td style="font-size:10px; color:var(--muted);">24/38/0</td><td>6 <span style="font-size:9px;color:var(--muted);">NO</span></td><td class="">15</td><td class="">0%</td><td>1019</td><td class="">42km</td><td class="cell-score cell-mid">54</td></tr><tr class=""><td class="cell-time">16:00</td><td class="cell-weather">☀️</td><td class="">20.0°</td><td>7.7°</td><td class="cell-good"><strong>12.3°</strong></td><td class="">45%</td><td class="cell-good">4%</td><td style="font-size:10px; color:var(--muted);">0/4/0</td><td>7 <span style="font-size:9px;color:var(--muted);">NO</span></td><td class="">17</td><td class="">0%</td><td>1019</td><td class="">42km</td><td class="cell-score cell-good">96</td></tr><tr class=""><td class="cell-time">17:00</td><td class="cell-weather">🌤️</td><td class="">18.5°</td><td>7.3°</td><td class="cell-good"><strong>11.2°</strong></td><td class="">48%</td><td class="cell-good">35%</td><td style="font-size:10px; color:var(--muted);">0/35/0</td><td>3 <span style="font-size:9px;color:var(--muted);">NO</span></td><td class="">16</td><td class="">0%</td><td>1019</td><td class="">42km</td><td class="cell-score cell-mid">69</td></tr><tr class=""><td class="cell-time">18:00</td><td class="cell-weather">🌤️</td><td class="">17.4°</td><td>8.2°</td><td class="cell-good"><strong>9.2°</strong></td><td class="">55%</td><td class="cell-good">35%</td><td style="font-size:10px; color:var(--muted);">24/20/0</td><td>2 <span style="font-size:9px;color:var(--muted);">E</span></td><td class="">7</td><td class="">0%</td><td>1019</td><td class="">41km</td><td class="cell-score cell-mid">69</td></tr><tr class=""><td class="cell-time">19:00</td><td class="cell-weather">⛅</td><td class="">15.0°</td><td>9.1°</td><td class="cell-good"><strong>5.9°</strong></td><td class="">68%</td><td class="cell-mid">46%</td><td style="font-size:10px; color:var(--muted);">31/31/0</td><td>5 <span style="font-size:9px;color:var(--muted);">E</span></td><td class="">10</td><td class="">0%</td><td>1020</td><td class="">38km</td><td class="cell-score cell-mid">59</td></tr><tr class=""><td class="cell-time">20:00</td><td class="cell-weather">🌤️</td><td class="">13.9°</td><td>8.3°</td><td class="cell-good"><strong>5.6°</strong></td><td class="">69%</td><td class="cell-good">11%</td><td style="font-size:10px; color:var(--muted);">11/0/0</td><td>5 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">10</td><td class="">0%</td><td>1020</td><td class="">38km</td><td class="cell-score cell-good">90</td></tr><tr class="night-row"><td class="cell-time">21:00</td><td class="cell-weather">⛅</td><td class="">12.8°</td><td>7.3°</td><td class="cell-good"><strong>5.5°</strong></td><td class="">69%</td><td class="cell-mid">69%</td><td style="font-size:10px; color:var(--muted);">3/66/0</td><td>5 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">10</td><td class="">0%</td><td>1020</td><td class="">38km</td><td class="cell-score cell-bad">38</td></tr><tr class="night-row"><td class="cell-time">22:00</td><td class="cell-weather">⛅</td><td class="">12.0°</td><td>7.1°</td><td class="cell-good"><strong>4.9°</strong></td><td class="">72%</td><td class="cell-mid">66%</td><td style="font-size:10px; color:var(--muted);">0/66/0</td><td>5 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">11</td><td class="">0%</td><td>1020</td><td class="">37km</td><td class="cell-score cell-bad">33</td></tr><tr class="night-row"><td class="cell-time">23:00</td><td class="cell-weather">⛅</td><td class="">11.5°</td><td>7.0°</td><td class="cell-good"><strong>4.5°</strong></td><td class="">74%</td><td class="cell-mid">67%</td><td style="font-size:10px; color:var(--muted);">0/67/0</td><td>5 <span style="font-size:9px;color:var(--muted);">NE</span></td><td class="">11</td><td class="">0%</td><td>1020</td><td class="">35km</td><td class="cell-score cell-bad">32</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -902,25 +929,25 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
     </div>
   </div>
 
-  <div id="tab-scope" class="tab-content">
+  <div id="tab-scope" class="tab-content active">
     <div class="scope-layout">
       <div class="scope-left-col">
         <div class="scope-hud-outside">
-          <span>AZ <b id="scopeHudAz">--</b></span>
-          <span>ALT <b id="scopeHudAlt">--</b></span>
-          <span>FOV <b id="scopeHudFov">80°</b></span>
-          <span id="scopeHudTrack" style="color:var(--muted)">OFF</span>
+          <span>AZ <b id="scopeHudAz">0.0°</b></span>
+          <span>ALT <b id="scopeHudAlt">41.1°</b></span>
+          <span>FOV <b id="scopeHudFov">64°</b></span>
+          <span id="scopeHudTrack" style="color: var(--ok);">● TRACKING ON</span>
         </div>
 
         <div class="scope-map-wrap" id="scopeMapWrap">
-          <canvas id="scopeCanvas"></canvas>
-          <canvas id="scopeOverlayCanvas"></canvas>
+          <canvas id="scopeCanvas" width="645" height="620" style="width: 645px; height: 620px; cursor: grab;"></canvas>
+          <canvas id="scopeOverlayCanvas" width="645" height="620" style="width: 645px; height: 620px;"></canvas>
           <div class="edge-arrow edge-n" onpointerdown="startEdgeMove('N')" onpointerup="stopEdgeMove()" onpointerleave="stopEdgeMove()" title="Alto (velocità = rate)">▲</div>
           <div class="edge-arrow edge-s" onpointerdown="startEdgeMove('S')" onpointerup="stopEdgeMove()" onpointerleave="stopEdgeMove()" title="Basso (velocità = rate)">▼</div>
           <div class="edge-arrow edge-e" onpointerdown="startEdgeMove('E')" onpointerup="stopEdgeMove()" onpointerleave="stopEdgeMove()" title="Destra (velocità = rate)">▶</div>
           <div class="edge-arrow edge-o" onpointerdown="startEdgeMove('O')" onpointerup="stopEdgeMove()" onpointerleave="stopEdgeMove()" title="Sinistra (velocità = rate)">◀</div>
 
-          <div class="map-tooltip" id="scopeTooltip"></div>
+          <div class="map-tooltip show" id="scopeTooltip" style="left: 1182.5px; top: -291.5px;">AZ 148.4° · ALT 2.1°</div>
 
           <div class="park-overlay" id="parkOverlay">
             <div class="park-icon">🅿️</div>
@@ -940,30 +967,30 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
           </button>
         </div>
 
-        <div class="scope-target-overlay" id="scopeTargetOverlay">
+        <div class="scope-target-overlay open" id="scopeTargetOverlay">
           <div class="target-header">
             <div style="flex:1; min-width:0;">
-              <div class="target-title" id="scopeTargetName">Nessun oggetto selezionato</div>
-              <div class="target-sub" id="scopeTargetMeta">Seleziona un oggetto dal catalogo o dalla mappa</div>
+              <div class="target-title" id="scopeTargetName">Kochab</div>
+              <div class="target-sub" id="scopeTargetMeta">Stella · 👁️ visibile</div>
             </div>
             <button class="target-close" onclick="scopeCloseTarget()">✕</button>
           </div>
           <div class="scope-target-data-row">
-            <div class="tc"><div class="k">RA</div><div class="v" id="scopeTgtRa">--</div></div>
-            <div class="tc"><div class="k">DEC</div><div class="v" id="scopeTgtDec">--</div></div>
-            <div class="tc"><div class="k">ALT</div><div class="v" id="scopeTgtAlt">--</div></div>
-            <div class="tc"><div class="k">AZ</div><div class="v" id="scopeTgtAz">--</div></div>
-            <div class="tc"><div class="k">TRANSIT</div><div class="v" id="scopeTgtTransit">--</div></div>
-            <div class="tc"><div class="k">MAX ALT</div><div class="v" id="scopeTgtMaxAlt">--</div></div>
-            <div class="tc"><div class="k">MAG / DIST</div><div class="v" id="scopeTgtMagDist">--</div></div>
-            <div class="tc"><div class="k">Δ MOUNT</div><div class="v" id="scopeTgtDelta">--</div></div>
+            <div class="tc"><div class="k">RA</div><div class="v" id="scopeTgtRa">14h 50m</div></div>
+            <div class="tc"><div class="k">DEC</div><div class="v" id="scopeTgtDec">+74° 09'</div></div>
+            <div class="tc"><div class="k">ALT</div><div class="v" id="scopeTgtAlt">55.5°</div></div>
+            <div class="tc"><div class="k">AZ</div><div class="v" id="scopeTgtAz">10.1°</div></div>
+            <div class="tc"><div class="k">TRANSIT</div><div class="v" id="scopeTgtTransit">12:22</div></div>
+            <div class="tc"><div class="k">MAX ALT</div><div class="v" id="scopeTgtMaxAlt">55° @10:57</div></div>
+            <div class="tc"><div class="k">MAG / DIST</div><div class="v" id="scopeTgtMagDist">2.1 / —</div></div>
+            <div class="tc"><div class="k">Δ MOUNT</div><div class="v" id="scopeTgtDelta">17.57°</div></div>
           </div>
           <div class="scope-night-chart-wrap">
             <canvas id="scopeNightChart" width="700" height="144"></canvas>
           </div>
           <div class="scope-night-chart-meta">
-            <span id="scopeNightChartLabel">Finestra notturna</span>
-            <span id="scopeNightChartInfo">—</span>
+            <span id="scopeNightChartLabel">Finestra · Kochab</span>
+            <span id="scopeNightChartInfo"><strong>✅ 17:03 → 06:18</strong> · 13h 15m &gt;30°</span>
           </div>
           <div class="target-step-row">
             <div class="step-indicator">
@@ -985,11 +1012,11 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       <div class="scope-panel">
         <div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <span class="conn-badge" id="scopeConnBadge">DISCONNESSO</span>
+            <span class="conn-badge on" id="scopeConnBadge">CONNESSO (CONN)</span>
             <button class="triton-btn" style="flex:0 0 auto; padding:4px 10px; font-size:10px" onclick="scopeToggleConnect()">Connetti</button>
           </div>
           <div class="conn-toggle">
-            <label><input type="radio" name="connType" value="wifi" checked onchange="scopeSetConnType('wifi')"> Wi-Fi</label>
+            <label><input type="radio" name="connType" value="wifi" checked="" onchange="scopeSetConnType('wifi')"> Wi-Fi</label>
             <label><input type="radio" name="connType" value="bt" onchange="scopeSetConnType('bt')"> Bluetooth</label>
             <label><input type="radio" name="connType" value="sim" onchange="scopeSetConnType('sim')"> Simulatore</label>
           </div>
@@ -1004,7 +1031,7 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
             <label style="font-size:9px; margin-bottom:2px;">Protocollo</label>
             <select id="scopeProtocolSelect" class="conn-select" onchange="scopeSetProtocol(this.value)">
               <option value="lx200">LX200 (Meade/AutoStar)</option>
-              <option value="onstep" selected>OnStep</option>
+              <option value="onstep" selected="">OnStep</option>
               <option value="ascom">ASCOM Alpaca</option>
               <option value="nexstar">Celestron NexStar</option>
               <option value="synscan">Sky-Watcher SynScan</option>
@@ -1025,23 +1052,23 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
         </div>
 
         <div class="data-grid">
-          <div class="data-cell"><div class="k">RA</div><div class="v" id="scopeRa">--</div></div>
-          <div class="data-cell"><div class="k">Dec</div><div class="v" id="scopeDec">--</div></div>
-          <div class="data-cell"><div class="k">Alt</div><div class="v" id="scopeAlt">--</div></div>
-          <div class="data-cell"><div class="k">Az</div><div class="v" id="scopeAz">--</div></div>
+          <div class="data-cell"><div class="k">RA</div><div class="v" id="scopeRa">07h 25m</div></div>
+          <div class="data-cell"><div class="k">Dec</div><div class="v" id="scopeDec">+89° 59'</div></div>
+          <div class="data-cell"><div class="k">Alt</div><div class="v" id="scopeAlt">41.1°</div></div>
+          <div class="data-cell"><div class="k">Az</div><div class="v" id="scopeAz">0.0°</div></div>
         </div>
 
         <div class="triton-header">
-          <button class="triton-btn" onclick="scopeHome()">Home</button>
-          <button class="triton-btn" onclick="scopePark()">Park</button>
-          <button class="triton-btn" onclick="scopeUnpark()">Unpark</button>
+          <button class="triton-btn" onclick="scopeHome()" id="btn-home-obs">Home</button>
+          <button class="triton-btn" onclick="scopePark()" id="btn-park-obs">Park</button>
+          <button class="triton-btn" onclick="scopeUnpark()" id="btn-unpark-obs">Unpark</button>
           <button class="triton-btn" onclick="scopeMeridianFlip()">Flip</button>
           <button class="triton-btn goto-btn" id="scopePanelGotoBtn" onclick="scopeSlewToTarget()">🎯 GOTO</button>
         </div>
         <div class="triton-header">
-          <button class="triton-btn" onclick="scopeSetHome()">SET HOME</button>
-          <button class="triton-btn" onclick="scopeSetPark()">SET PARK</button>
-          <button class="triton-btn" onclick="scopeToggleTracking()" id="scopeTrackBtn">Track ON</button>
+          <button class="triton-btn" onclick="scopeSetHome()" id="btn-sethome-obs">SET HOME</button>
+          <button class="triton-btn" onclick="scopeSetPark()" id="btn-setpark-obs">SET PARK</button>
+          <button class="triton-btn active tracking-active" onclick="scopeToggleTracking()" id="scopeTrackBtn">Track OFF</button>
         </div>
 
         <div class="triton-rate">
@@ -1068,8 +1095,8 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
         </div>
 
         <div style="font-size:11px; color:var(--muted); margin-bottom:2px;">Oggetti visibili ora</div>
-        <div class="catalog-list" id="scopeCatalogList"></div>
-        <div class="scope-log" id="scopeLogBody"></div>
+        <div class="catalog-list" id="scopeCatalogList"><div class="catalog-item  " onclick="scopeSelectTargetFromList('M63 Girasole','M63 Girasole','Galassia',198.84,42.03,'{&quot;mag&quot;:8.6,&quot;dist&quot;:&quot;27 M a.l.&quot;}')"><div class="left-info"><div class="icon ">✦</div><div style="min-width:0;flex:1"><div class="name">M63 Girasole</div><div class="meta">Galassia</div></div></div><div class="alt ">87.9°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M51 Vortice','M51 Vortice','Galassia',202.47,47.19,'{&quot;mag&quot;:8.4,&quot;dist&quot;:&quot;23 M a.l.&quot;}')"><div class="left-info"><div class="icon ">✦</div><div style="min-width:0;flex:1"><div class="name">M51 Vortice</div><div class="meta">Galassia</div></div></div><div class="alt ">83.8°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Alkaid','Alkaid','Stella',206.88,49.31,'{&quot;mag&quot;:1.86}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Alkaid</div><div class="meta">Stella</div></div></div><div class="alt ">80.9°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M3','M3','Ammasso',205.55,28.38,'{&quot;mag&quot;:6.2,&quot;dist&quot;:&quot;33.900 a.l.&quot;}')"><div class="left-info"><div class="icon ">❋</div><div style="min-width:0;flex:1"><div class="name">M3</div><div class="meta">Ammasso</div></div></div><div class="alt ">76.9°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M106','M106','Galassia',184.74,47.3,'{&quot;mag&quot;:8.4,&quot;dist&quot;:&quot;24 M a.l.&quot;}')"><div class="left-info"><div class="icon ">✦</div><div style="min-width:0;flex:1"><div class="name">M106</div><div class="meta">Galassia</div></div></div><div class="alt ">76.6°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Mizar','Mizar','Stella',200.98,54.93,'{&quot;mag&quot;:2.23}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Mizar</div><div class="meta">Stella</div></div></div><div class="alt ">76.1°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M101 Girandola','M101 Girandola','Galassia',210.8,54.35,'{&quot;mag&quot;:7.9,&quot;dist&quot;:&quot;21 M a.l.&quot;}')"><div class="left-info"><div class="icon ">✦</div><div style="min-width:0;flex:1"><div class="name">M101 Girandola</div><div class="meta">Galassia</div></div></div><div class="alt ">75.3°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Alioth','Alioth','Stella',193.51,55.96,'{&quot;mag&quot;:1.77}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Alioth</div><div class="meta">Stella</div></div></div><div class="alt ">74.3°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Megrez','Megrez','Stella',183.86,57.03,'{&quot;mag&quot;:3.31}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Megrez</div><div class="meta">Stella</div></div></div><div class="alt ">70.5°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Phecda','Phecda','Stella',178.46,53.69,'{&quot;mag&quot;:2.44}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Phecda</div><div class="meta">Stella</div></div></div><div class="alt ">70.2°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M64 Occhio Nero','M64 Occhio Nero','Galassia',194.18,21.68,'{&quot;mag&quot;:8.5,&quot;dist&quot;:&quot;17 M a.l.&quot;}')"><div class="left-info"><div class="icon ">✦</div><div style="min-width:0;flex:1"><div class="name">M64 Occhio Nero</div><div class="meta">Galassia</div></div></div><div class="alt ">69.7°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Arturo','Arturo','Stella',213.92,19.18,'{&quot;mag&quot;:-0.05}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Arturo</div><div class="meta">Stella</div></div></div><div class="alt ">65.6°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M97 Gufo','M97 Gufo','Nebulosa',168.7,55.02,'{&quot;mag&quot;:9.9,&quot;dist&quot;:&quot;2.600 a.l.&quot;}')"><div class="left-info"><div class="icon ">☁</div><div style="min-width:0;flex:1"><div class="name">M97 Gufo</div><div class="meta">Nebulosa</div></div></div><div class="alt ">64.4°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Merak','Merak','Stella',165.46,56.38,'{&quot;mag&quot;:2.37}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Merak</div><div class="meta">Stella</div></div></div><div class="alt ">62.3°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Dubhe','Dubhe','Stella',165.93,61.75,'{&quot;mag&quot;:1.79}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Dubhe</div><div class="meta">Stella</div></div></div><div class="alt ">60.4°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M87','M87','Galassia',187.71,12.39,'{&quot;mag&quot;:8.6,&quot;dist&quot;:&quot;53 M a.l.&quot;}')"><div class="left-info"><div class="icon ">✦</div><div style="min-width:0;flex:1"><div class="name">M87</div><div class="meta">Galassia</div></div></div><div class="alt ">58.9°</div></div><div class="catalog-item selected " onclick="scopeSelectTargetFromList('Kochab','Kochab','Stella',222.68,74.16,'{&quot;mag&quot;:2.08}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Kochab</div><div class="meta">Stella</div></div></div><div class="alt ">55.5°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M13 Ercole','M13 Ercole','Ammasso',250.42,36.46,'{&quot;mag&quot;:5.8,&quot;dist&quot;:&quot;25.100 a.l.&quot;}')"><div class="left-info"><div class="icon ">❋</div><div style="min-width:0;flex:1"><div class="name">M13 Ercole</div><div class="meta">Ammasso</div></div></div><div class="alt ">52.0°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M81 Bode','M81 Bode','Galassia',148.8,69.06,'{&quot;mag&quot;:6.9,&quot;dist&quot;:&quot;12 M a.l.&quot;}')"><div class="left-info"><div class="icon ">✦</div><div style="min-width:0;flex:1"><div class="name">M81 Bode</div><div class="meta">Galassia</div></div></div><div class="alt ">51.0°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M82 Sigaro','M82 Sigaro','Galassia',148.97,69.68,'{&quot;mag&quot;:8.4,&quot;dist&quot;:&quot;12 M a.l.&quot;}')"><div class="left-info"><div class="icon ">✦</div><div style="min-width:0;flex:1"><div class="name">M82 Sigaro</div><div class="meta">Galassia</div></div></div><div class="alt ">50.9°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M66','M66','Galassia',170.06,12.99,'{&quot;mag&quot;:8.9,&quot;dist&quot;:&quot;36 M a.l.&quot;}')"><div class="left-info"><div class="icon ">✦</div><div style="min-width:0;flex:1"><div class="name">M66</div><div class="meta">Galassia</div></div></div><div class="alt ">50.8°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M65','M65','Galassia',169.73,13.09,'{&quot;mag&quot;:9.3,&quot;dist&quot;:&quot;35 M a.l.&quot;}')"><div class="left-info"><div class="icon ">✦</div><div style="min-width:0;flex:1"><div class="name">M65</div><div class="meta">Galassia</div></div></div><div class="alt ">50.7°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M92','M92','Ammasso',259.28,43.14,'{&quot;mag&quot;:6.4,&quot;dist&quot;:&quot;26.700 a.l.&quot;}')"><div class="left-info"><div class="icon ">❋</div><div style="min-width:0;flex:1"><div class="name">M92</div><div class="meta">Ammasso</div></div></div><div class="alt ">47.9°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Kornephoros','Kornephoros','Stella',247.55,21.49,'{&quot;mag&quot;:2.78}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Kornephoros</div><div class="meta">Stella</div></div></div><div class="alt ">46.6°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Unukalhai','Unukalhai','Stella',236.07,6.43,'{&quot;mag&quot;:2.63}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Unukalhai</div><div class="meta">Stella</div></div></div><div class="alt ">43.6°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M5','M5','Ammasso',229.64,2.08,'{&quot;mag&quot;:5.6,&quot;dist&quot;:&quot;24.500 a.l.&quot;}')"><div class="left-info"><div class="icon ">❋</div><div style="min-width:0;flex:1"><div class="name">M5</div><div class="meta">Ammasso</div></div></div><div class="alt ">43.4°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Polaris','Polaris','Stella',37.95,89.26,'{&quot;mag&quot;:1.98}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Polaris</div><div class="meta">Stella</div></div></div><div class="alt ">40.4°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Regolo','Regolo','Stella',152.09,11.97,'{&quot;mag&quot;:1.35}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Regolo</div><div class="meta">Stella</div></div></div><div class="alt ">38.1°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Spica','Spica','Stella',201.3,-11.16,'{&quot;mag&quot;:0.97}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Spica</div><div class="meta">Stella</div></div></div><div class="alt ">37.8°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M104 Sombrero','M104 Sombrero','Galassia',189.99,-11.62,'{&quot;mag&quot;:8,&quot;dist&quot;:&quot;29 M a.l.&quot;}')"><div class="left-info"><div class="icon ">✦</div><div style="min-width:0;flex:1"><div class="name">M104 Sombrero</div><div class="meta">Galassia</div></div></div><div class="alt ">36.3°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Giove','Giove','Pianeta',146.54550769037908,14.162512401404193,'{}')"><div class="left-info"><div class="icon planet">◉</div><div style="min-width:0;flex:1"><div class="name">Giove</div><div class="meta">Pianeta</div></div></div><div class="alt ">35.6°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Sole','Sole','Sole',213.68131217723246,-13.520343548223165,'{}')"><div class="left-info"><div class="icon ">❋</div><div style="min-width:0;flex:1"><div class="name">Sole</div><div class="meta">Sole</div></div></div><div class="alt ">34.3°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Rasalgethi','Rasalgethi','Stella',258.66,14.39,'{&quot;mag&quot;:3.48}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Rasalgethi</div><div class="meta">Stella</div></div></div><div class="alt ">33.9°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Zubeneschamali','Zubeneschamali','Stella',229.25,-9.38,'{&quot;mag&quot;:2.61}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Zubeneschamali</div><div class="meta">Stella</div></div></div><div class="alt ">33.4°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Venere','Venere','Pianeta',203.60166926721826,-15.729892513259824,'{}')"><div class="left-info"><div class="icon planet">◉</div><div style="min-width:0;flex:1"><div class="name">Venere</div><div class="meta">Pianeta</div></div></div><div class="alt ">33.2°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Marte','Marte','Pianeta',140.24629005985875,17.11818422510919,'{}')"><div class="left-info"><div class="icon planet">◉</div><div style="min-width:0;flex:1"><div class="name">Marte</div><div class="meta">Pianeta</div></div></div><div class="alt ">32.8°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Vega','Vega','Stella',279.23,38.78,'{&quot;mag&quot;:0.03}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Vega</div><div class="meta">Stella</div></div></div><div class="alt ">32.4°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Zubenelgenubi','Zubenelgenubi','Stella',222.72,-16.04,'{&quot;mag&quot;:2.75}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Zubenelgenubi</div><div class="meta">Stella</div></div></div><div class="alt ">29.6°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('Rasalhague','Rasalhague','Stella',263.73,12.56,'{&quot;mag&quot;:2.08}')"><div class="left-info"><div class="icon star">★</div><div style="min-width:0;flex:1"><div class="name">Rasalhague</div><div class="meta">Stella</div></div></div><div class="alt ">29.0°</div></div><div class="catalog-item  " onclick="scopeSelectTargetFromList('M44 Presepe','M44 Presepe','Ammasso',130.1,19.98,'{&quot;mag&quot;:3.7,&quot;dist&quot;:&quot;577 a.l.&quot;}')"><div class="left-info"><div class="icon ">❋</div><div style="min-width:0;flex:1"><div class="name">M44 Presepe</div><div class="meta">Ammasso</div></div></div><div class="alt ">26.9°</div></div></div>
+        <div class="scope-log" id="scopeLogBody"><div class="log-line "><span class="t">[10:49:18]</span>Sistema pronto.</div><div class="log-line "><span class="t">[10:49:18]</span>HOME: Alt 41.1° Az 0.0°</div><div class="log-line "><span class="t">[10:49:18]</span>PARK: Alt 0.0° Az 0.0°</div><div class="log-line ok"><span class="t">[10:49:31]</span>Oggetto: Polaris</div><div class="log-line ok"><span class="t">[10:49:35]</span>Oggetto: M92</div><div class="log-line ok"><span class="t">[10:49:36]</span>Oggetto: Kochab</div><div class="log-line ok"><span class="t">[10:49:54]</span>Oggetto: M92</div><div class="log-line ok"><span class="t">[10:49:54]</span>Oggetto: M92</div><div class="log-line ok"><span class="t">[10:49:55]</span>Oggetto: M82 Sigaro</div><div class="log-line ok"><span class="t">[10:49:55]</span>Oggetto: Megrez</div><div class="log-line "><span class="t">[10:49:59]</span>GOTO Megrez...</div><div class="log-line ok"><span class="t">[10:50:06]</span>✓ Megrez raggiunto.</div><div class="log-line ok"><span class="t">[10:57:15]</span>Oggetto: Kochab</div></div>
       </div>
     </div>
   </div>
@@ -1092,12 +1119,12 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
   </div>
 </div>
 
-<div id="cat-detail-modal" onclick="if(event.target===this)closeCatDetail()">
+<div id="cat-detail-modal" onclick="if(event.target===this)closeCatDetail()" class="">
   <div class="detail-box">
     <button class="close-btn" onclick="closeCatDetail()">×</button>
-    <h3 id="cat-detail-title">Oggetto</h3>
-    <div class="detail-sub" id="cat-detail-sub">—</div>
-    <div class="detail-grid" id="cat-detail-grid"></div>
+    <h3 id="cat-detail-title">Tucano</h3>
+    <div class="detail-sub" id="cat-detail-sub">Costellazione · constellation</div>
+    <div class="detail-grid" id="cat-detail-grid"><div class="detail-row" style="grid-column:1/-1;"><div class="dl">Descrizione</div><div class="dv" style="line-height:1.5;">Costellazione australe; contiene la Piccola Nube di Magellano.</div></div><div class="detail-row"><div class="dl">Area</div><div class="dv">295°q</div></div><div class="detail-row"><div class="dl">Stagione</div><div class="dv">Autunno</div></div><div class="detail-row"><div class="dl">Stelle</div><div class="dv">6</div></div><div class="detail-row"><div class="dl">Alt / Az (ora)</div><div class="dv">-64.5° / 164.3°</div></div><div class="detail-row"><div class="dl">Visibilità</div><div class="dv"><span style="color:var(--bad);font-weight:bold;">❌ Sotto orizzonte</span></div></div></div>
     <div id="obs-chart-container"></div>
     <div class="detail-actions">
       <button class="btn" onclick="catDetailGoto()">🗺️ Vai alla Mappa</button>
@@ -1137,7 +1164,7 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
 <!-- ============ LIVE VIEW MODAL ============ -->
 <div id="lv-modal">
   <div class="lv-container">
-    <video id="lv-video" autoplay playsinline muted></video>
+    <video id="lv-video" autoplay="" playsinline="" muted=""></video>
     <canvas id="lv-canvas"></canvas>
 
     <div class="lv-hud">
@@ -1168,7 +1195,7 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       <button class="lv-menu-item lv-menu-active" id="mi-cam" onclick="lvToggleCamera()">📷 Camera <span class="lv-menu-check">✓</span></button>
       <button class="lv-menu-item" id="mi-grid" onclick="lvToggleGrid()">📐 Griglia coordinate <span class="lv-menu-check">✓</span></button>
       <div class="lv-menu-sep"></div>
-      <div class="lv-menu-sub">Zoom & Vista</div>
+      <div class="lv-menu-sub">Zoom &amp; Vista</div>
       <button class="lv-menu-item" onclick="lvZoomIn()">➕ Ingrandisci</button>
       <button class="lv-menu-item" onclick="lvZoomOut()">➖ Rimpicciolisci</button>
       <button class="lv-menu-item" onclick="lvResetView()">🔄 Reset vista</button>
@@ -2809,20 +2836,20 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   .app-switch-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
 </style>
 
-<div id="app-switcher-container">
+<div id="app-switcher-container" class="">
   <div id="app-switcher-menu">
     <a class="app-switch-btn app-btn-dome" id="btn-goto-dome" href="javascript:void(0);">
-      <svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M4 21v-8"/><path d="M20 21v-8"/><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 5v8"/><path d="M12 10l-3-2"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M3 21h18"></path><path d="M4 21v-8"></path><path d="M20 21v-8"></path><path d="M4 13a8 8 0 0 1 16 0"></path><path d="M12 5v8"></path><path d="M12 10l-3-2"></path></svg>
     </a>
     <a class="app-switch-btn app-btn-telescope" id="btn-goto-telescope" href="javascript:void(0);">
-      <svg viewBox="0 0 24 24"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path><path d="M7 16l-2 6"></path><path d="M3 22h8"/><path d="M10 6l10-3 2 4-10 3-2-4z"></path></svg>
+      <svg viewBox="0 0 24 24"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path><path d="M7 16l-2 6"></path><path d="M3 22h8"></path><path d="M10 6l10-3 2 4-10 3-2-4z"></path></svg>
     </a>
   </div>
-  <button id="app-switcher-toggle" title="Apri menu app">▶</button>
+  <button id="app-switcher-toggle" title="Apri menu app">TUNNEL</button>
 </div>
 
-<div id="app-frame-container" style="display:none; position:fixed; inset:0; z-index:9999999; background:#000;">
-  <iframe id="app-frame" style="width:100%; height:100%; border:none;"></iframe>
+<div id="app-frame-container" style="display: none; position: fixed; inset: 0px; z-index: 9999999; background: rgb(0, 0, 0);">
+  <iframe id="app-frame" style="width:100%; height:100%; border:none;" src="https://egastrodiscover.github.io/EGASTROmount/"></iframe>
 </div>
 
 <script>
@@ -3253,168 +3280,8 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   setInterval(u,1000);u();
 })();
 </script>
-<script>
-/* ============================================================
-   EGASTRO MASTER — PATCH DEFINITIVE INTEGRATE
-   ============================================================ */
-(function() {
-  if (window.__egastroPatched) return;
-  window.__egastroPatched = true;
 
-  function ready() {
-    if (typeof SyncBus === 'undefined') { setTimeout(ready, 100); return; }
-    if (typeof scopeState === 'undefined') { setTimeout(ready, 100); return; }
 
-    function latLon() {
-      var latEl = document.getElementById('lat');
-      var lonEl = document.getElementById('lon');
-      var lat = parseFloat(latEl && latEl.value) || 41.9;
-      var lon = parseFloat(lonEl && lonEl.value) || 12.5;
-      return { lat: lat, lon: lon };
-    }
-
-    // --- GOTO grande ---
-    window.scopeStepAction = function() {
-      if (!scopeState.target) return;
-      var ll = latLon();
-      SyncBus.send('cmd_goto', {
-        ra: scopeState.target.ra, dec: scopeState.target.dec,
-        name: scopeState.target.name || '',
-        latMaster: ll.lat, lonMaster: ll.lon
-      });
-      if (typeof showToast === 'function') showToast('GOTO inviato');
-    };
-
-    // --- Change slew speed (menu a tendina) ---
-    window.changeSlewSpeed = function(val) {
-      var v = parseFloat(val);
-      if (!Number.isFinite(v)) return;
-      SyncBus.send('cmd_speed', { rate: v });
-      if (typeof showToast === 'function') showToast('Velocità inviata');
-    };
-
-    // --- Rate + - (pulsanti) ---
-    window.scopeChangeRate = function(dir) {
-      var rates = [1, 8, 32, 128];
-      var map = { 1:0.005, 8:0.02, 32:0.06, 128:0.2 };
-      var idx = rates.indexOf(scopeState.rate);
-      if (idx === -1) idx = 1;
-      idx = Math.max(0, Math.min(rates.length - 1, idx + dir));
-      scopeState.rate = rates[idx];
-      var rd = document.getElementById('scopeRateDisplay');
-      if (rd) rd.innerText = rates[idx] + 'X';
-      SyncBus.send('cmd_speed', { rate: map[rates[idx]] });
-    };
-
-    // --- STOP con toast ---
-    window.masterStop = function() {
-      SyncBus.send('cmd_stop', {});
-      setTimeout(function(){ SyncBus.send('cmd_stop', {}); }, 200);
-      if (typeof showToast === 'function') showToast('STOP inviato');
-    };
-    window.scopeStopSlewing = window.masterStop;
-    window.scopeEmergencyStop = window.masterStop;
-
-    // --- Sync ---
-    window.scopeSyncMount = function() {
-      if (!scopeState.target) return;
-      SyncBus.send('cmd_sync', { ra: scopeState.target.ra, dec: scopeState.target.dec, name: scopeState.target.name });
-      if (typeof showToast === 'function') showToast('Sync inviato');
-    };
-
-    // --- mount_state: badge + driver + protocol + rate ---
-    SyncBus.on('mount_state', function(d) {
-      if (!d) return;
-      // badge
-      var badge = document.getElementById('scopeConnBadge');
-      if (badge) {
-        if (d.connected) {
-          var lbl = (d.driver || 'CONN').toUpperCase();
-          badge.innerText = 'CONNESSO (' + lbl + ')';
-          badge.classList.add('on');
-        } else {
-          badge.innerText = 'DISCONNESSO';
-          badge.classList.remove('on');
-        }
-      }
-      // radio connType
-      if (d.driver) {
-        var drv = String(d.driver).toUpperCase();
-        var tr = drv === 'SIM' ? 'sim' : drv === 'WIFI' ? 'wifi' : drv === 'BT' ? 'bt' : null;
-        if (tr) {
-          var radio = document.querySelector('input[name="connType"][value="' + tr + '"]');
-          if (radio && !radio.checked) {
-            radio.checked = true;
-            radio.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-          scopeState.connType = tr;
-        }
-      }
-      // protocol
-      if (d.protocol) {
-        var sel = document.getElementById('scopeProtocolSelect');
-        if (sel) sel.value = d.protocol;
-        scopeState.protocol = d.protocol;
-      }
-      // rate
-      if (Number.isFinite(d.rate)) {
-        var rm = { 0.005:1, 0.02:8, 0.06:32, 0.2:128 };
-        scopeState.rate = rm[d.rate] || 8;
-        var rd = document.getElementById('scopeRateDisplay');
-        if (rd) rd.innerText = scopeState.rate + 'X';
-        var ss = document.getElementById('slew-speed');
-        if (ss) ss.value = String(d.rate);
-      }
-      // tracking/park
-      scopeState.connected = !!d.connected;
-      scopeState.tracking = d.tracking && d.tracking !== 'off';
-      scopeState.isParked = !!d.isParked;
-      var po = document.getElementById('parkOverlay');
-      if (po) po.classList.toggle('open', !!d.isParked);
-    });
-
-    // --- risposta a request_master_state ---
-    SyncBus.on('request_master_state', function() {
-      var ll = latLon();
-      SyncBus.send('master_ready', { lat: ll.lat, lon: ll.lon });
-    });
-    SyncBus.on('satellite_ready', function() {
-      var ll = latLon();
-      setTimeout(function() { SyncBus.send('master_ready', { lat: ll.lat, lon: ll.lon }); }, 200);
-    });
-
-    // --- badge sync header ---
-    function updateSyncBadge() {
-      var b = document.getElementById('syncBadge');
-      var d = document.getElementById('syncDot');
-      var t = document.getElementById('syncText');
-      if (!b || !d || !t) return;
-      if (SyncBus.isPeerAlive()) {
-        b.style.borderColor = '#4ade80';
-        b.style.background = 'rgba(74,222,128,0.15)';
-        d.style.color = '#4ade80';
-        t.textContent = 'SYNC OK · ' + (SyncBus.getPeerId() || '?').toUpperCase();
-      } else {
-        b.style.borderColor = '#f87171';
-        b.style.background = 'rgba(248,113,113,0.15)';
-        d.style.color = '#f87171';
-        t.textContent = 'SYNC OFF';
-      }
-    }
-    setInterval(updateSyncBadge, 1000);
-    updateSyncBadge();
-
-    console.log('[MASTER] ✅ PATCH DEFINITIVE ATTIVE');
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', ready);
-  } else {
-    ready();
-  }
-})();
-</script>
-<script id="egastro-complete-final">(function(){if(window.__egastroComplete)return;window.__egastroComplete=true;var RAD=Math.PI/180,DEG=180/Math.PI,FOLLOW_RATE_FAST=8.0,TRACKING_RATES={sidereal:7.2921e-5,solar:7.2722e-5,lunar:7.0237e-5},DEFAULT_HOME_DEC=Math.PI/2;var LocalMS={ra:0,dec:DEFAULT_HOME_DEC,tRA:0,tDEC:DEFAULT_HOME_DEC,homeRA:0,homeDEC:DEFAULT_HOME_DEC,parkRA:0,parkDEC:DEFAULT_HOME_DEC,connected:false,isParked:false,slewMode:"idle",tracking:"off",speedPerStep:0.02,speedLabel:"8x",simulated:false};function normRA(r){r=r%(2*Math.PI);if(r<0)r+=2*Math.PI;if(r>=2*Math.PI)r-=2*Math.PI;return r}function angleDiff(a,b){var d=(b-a)%(2*Math.PI);if(d>Math.PI)d-=2*Math.PI;if(d<=-Math.PI)d+=2*Math.PI;return d}function getLocalAstroCoords(){var d=LocalMS.dec%(2*Math.PI);if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;var decA,off=0;if(d>Math.PI/2){decA=Math.PI-d;off=Math.PI}else if(d<-Math.PI/2){decA=-Math.PI-d;off=Math.PI}else decA=d;return{ra:normRA(LocalMS.ra+off),dec:decA}}var LocalTransport={socket:null,connected:false,wsConnect:function(url,onOk,onErr){this.disconnect();try{this.socket=new WebSocket(url)}catch(e){onErr&&onErr(e);return}var to=setTimeout(function(){if(!LocalTransport.connected){LocalTransport.disconnect();onErr&&onErr(new Error("Timeout"))}},5000);this.socket.onopen=function(){LocalTransport.connected=true;clearTimeout(to);onOk&&onOk()};this.socket.onerror=function(){clearTimeout(to);LocalTransport.connected=false;onErr&&onErr(new Error("WS error"))};this.socket.onclose=function(){clearTimeout(to);LocalTransport.connected=false}},send:function(c){if(this.socket&&this.socket.readyState===WebSocket.OPEN)this.socket.send(c)},disconnect:function(){if(this.socket){try{this.socket.close()}catch(e){}}this.socket=null;this.connected=false}};function localConnect(cfg,protoName){if(LocalMS.connected)return;if(protoName==="sim"){LocalMS.simulated=true;setTimeout(function(){LocalMS.connected=true;updateLocalBadge();if(typeof showToast==="function")showToast("Connesso (SIM locale)")},500);return}LocalTransport.wsConnect(cfg.bridge||"ws://localhost:8080",function(){LocalTransport.send(JSON.stringify({type:"connect",target:"tcp",host:cfg.ip||"192.168.4.1",port:cfg.port||9998}));LocalMS.connected=true;updateLocalBadge()},function(e){console.error(e)})}function localDisconnect(){LocalTransport.disconnect();LocalMS.connected=false;LocalMS.simulated=false;LocalMS.slewMode="idle";updateLocalBadge()}function updateLocalBadge(){var b=document.getElementById("scopeConnBadge");if(!b)return;if(LocalMS.connected){b.innerText="CONNESSO (LOCAL"+(LocalMS.simulated?"-SIM":"")+")";b.classList.add("on")}else{b.innerText="DISCONNESSO";b.classList.remove("on")}}function localGoto(raRad,decRad){var rd=angleDiff(LocalMS.ra,raRad);var dd=decRad-LocalMS.dec;while(dd>Math.PI)dd-=2*Math.PI;while(dd<-Math.PI)dd+=2*Math.PI;var dist=Math.sqrt(rd*rd+dd*dd);if(dist<0.001){LocalMS.slewMode="idle";return}LocalMS.tRA=raRad;LocalMS.tDEC=decRad;LocalMS.slewMode="goto"}function localTick(){var dt=1/60;if(LocalMS.slewMode==="goto"){var rd=angleDiff(LocalMS.ra,LocalMS.tRA);var dd=LocalMS.tDEC-LocalMS.dec;var dist=Math.sqrt(rd*rd+dd*dd);var step=FOLLOW_RATE_FAST*dt;if(dist<0.005){LocalMS.ra=LocalMS.tRA;LocalMS.dec=LocalMS.tDEC;LocalMS.slewMode=LocalMS.tracking!=="off"?"tracking":"idle";return}var f=Math.min(1,step/dist);LocalMS.ra=normRA(LocalMS.ra+rd*f);LocalMS.dec=LocalMS.dec+dd*f}else if(LocalMS.slewMode==="tracking"){var rate=TRACKING_RATES[LocalMS.tracking]||0;if(rate>0)LocalMS.ra=normRA(LocalMS.ra+rate*dt)}}setInterval(localTick,16);window.__LocalMount={MS:LocalMS,connected:function(){return LocalMS.connected},goto:localGoto,stop:function(){LocalMS.slewMode=LocalMS.tracking!=="off"?"tracking":"idle";LocalMS.tRA=LocalMS.ra;LocalMS.tDEC=LocalMS.dec},setTracking:function(m){LocalMS.tracking=m;LocalMS.slewMode=m==="off"?"idle":"tracking"},setSpeed:function(r,l){LocalMS.speedPerStep=r;LocalMS.speedLabel=l},park:function(){LocalMS.isParked=true;if(typeof showToast==="function")showToast("PARK locale")},unpark:function(){LocalMS.isParked=false;if(typeof showToast==="function")showToast("UNPARK locale")},home:function(){var h=getLocalAstroCoords();localGoto(h.ra,h.dec)},setHome:function(){var h=getLocalAstroCoords();LocalMS.homeRA=h.ra;LocalMS.homeDEC=h.dec},setPark:function(){var h=getLocalAstroCoords();LocalMS.parkRA=h.ra;LocalMS.parkDEC=h.dec}};function satAlive(){return typeof SyncBus!=="undefined"&&SyncBus.isPeerAlive()&&SyncBus.getPeerId()==="mount"}function waitScopeState(cb){if(typeof scopeState!=="undefined")return cb();setTimeout(function(){waitScopeState(cb)},100)}waitScopeState(function(){window.scopeToggleConnect=function(){if(satAlive()){SyncBus.send("cmd_connect",{on:!scopeState.connected})}else{if(LocalMS.connected){localDisconnect()}else{var p=document.getElementById("scopeProtocolSelect"),i=document.getElementById("scopeIp"),pt=document.getElementById("scopePort");localConnect({ip:i?i.value:"192.168.4.1",port:pt?parseInt(pt.value):9998,bridge:"ws://localhost:8080"},p?p.value:"sim")}}};window.masterGoto=window.scopeStepAction=window.scopeSlewToTarget=function(ra,dec,name){if(!scopeState.target)return;var raRad=scopeState.target.ra*RAD,decRad=scopeState.target.dec*RAD;if(satAlive()){SyncBus.send("cmd_goto",{ra:scopeState.target.ra,dec:scopeState.target.dec,name:scopeState.target.name||""});if(typeof showToast==="function")showToast("GOTO → satellite")}else{localGoto(raRad,decRad);if(typeof showToast==="function")showToast("GOTO locale: "+(name||scopeState.target.name))}};window.scopeStopSlewing=window.scopeEmergencyStop=window.masterStop=function(){if(satAlive())SyncBus.send("cmd_stop",{});else window.__LocalMount.stop();if(typeof showToast==="function")showToast("STOP")};window.scopePark=function(){if(satAlive())SyncBus.send("cmd_park",{});else window.__LocalMount.park()};window.scopeUnpark=function(){if(satAlive())SyncBus.send("cmd_unpark",{});else window.__LocalMount.unpark()};window.scopeHome=function(){if(satAlive())SyncBus.send("cmd_home",{});else window.__LocalMount.home()};window.scopeSetHome=function(){if(satAlive())SyncBus.send("cmd_set_home",{});else window.__LocalMount.setHome()};window.scopeSetPark=function(){if(satAlive())SyncBus.send("cmd_set_park",{});else window.__LocalMount.setPark()};window.scopeToggleTracking=window.toggleTrackingOn=function(){if(satAlive()){SyncBus.send("cmd_tracking",{on:scopeState.tracking==="off"})}else{window.__LocalMount.setTracking(LocalMS.tracking==="off"?"sidereal":"off")}};window.scopeChangeRate=function(dir){var rates=[1,8,32,128],map={1:0.005,8:0.02,32:0.06,128:0.2};var idx=rates.indexOf(scopeState.rate);if(idx===-1)idx=1;idx=Math.max(0,Math.min(rates.length-1,idx+dir));scopeState.rate=rates[idx];var rd=document.getElementById("scopeRateDisplay");if(rd)rd.innerText=rates[idx]+"X";if(satAlive())SyncBus.send("cmd_speed",{rate:map[rates[idx]]});else window.__LocalMount.setSpeed(map[rates[idx]],rates[idx]+"x")};var dirMap={n:"up",s:"down",e:"right",w:"left",nw:"up-left",ne:"up-right",sw:"down-left",se:"down-right"};window.dPadStart=function(dir,btn){var d=dirMap[dir]||dir;if(btn)btn.classList.add("active");if(satAlive()){SyncBus.send("cmd_manual_start",{dir:d});if(!window.__dpTimer){window.__dpTimer=setInterval(function(){SyncBus.send("cmd_manual_start",{dir:d})},150)}}else{LocalMS.slewMode="manual";var step=0.005;if(d.includes("up"))LocalMS.tDEC+=step;if(d.includes("down"))LocalMS.tDEC-=step;if(d.includes("left"))LocalMS.tRA-=step;if(d.includes("right"))LocalMS.tRA+=step}};window.dPadStop=function(btn){if(window.__dpTimer){clearInterval(window.__dpTimer);window.__dpTimer=null}if(btn)btn.classList.remove("active");document.querySelectorAll(".d-btn").forEach(function(b){b.classList.remove("active")});if(satAlive())SyncBus.send("cmd_manual_stop",{});else window.__LocalMount.stop()};if(typeof SyncBus!=="undefined"){SyncBus.on("mount_state",function(d){if(!d)return;scopeState.connected=!!d.connected;scopeState.tracking=d.tracking&&d.tracking!=="off";scopeState.isParked=!!d.isParked;if(Number.isFinite(d.rate)){var rm={0.005:1,0.02:8,0.06:32,0.2:128};scopeState.rate=rm[d.rate]||8;var rd=document.getElementById("scopeRateDisplay");if(rd)rd.innerText=scopeState.rate+"X"}var badge=document.getElementById("scopeConnBadge");if(badge){badge.innerText=d.connected?"CONNESSO ("+(d.driver||"SAT")+")":"DISCONNESSO";badge.classList.toggle("on",!!d.connected)}var po=document.getElementById("parkOverlay");if(po)po.classList.toggle("open",!!d.isParked);if(typeof updateTrackingBtn==="function")updateTrackingBtn();if(typeof updateStateButtons==="function")updateStateButtons()});var origSend=SyncBus.send.bind(SyncBus);SyncBus.send=function(t,d){if(t==="focus_request")return;return origSend(t,d)}}window.addEventListener("message",function(e){if(e.data==="show-master"){e.stopImmediatePropagation()}if(e.data==="hide-satellite-frame"){var fc=document.getElementById("app-frame-container");if(fc)fc.style.display="none"}},true);var td=document.getElementById("btn-goto-telescope");if(td){td.onclick=function(e){e.preventDefault();var fc=document.getElementById("app-frame-container"),fr=document.getElementById("app-frame");if(!fc||!fr)return;var src=fr.getAttribute("src")||"";if(src.indexOf("EGASTROmount")>=0){fc.style.display="block"}else{fr.src="https://egastrodiscover.github.io/EGASTROmount/";fc.style.display="block"}}}setInterval(function(){if(typeof MS==="undefined"||satAlive())return;MS.ra=LocalMS.ra;MS.dec=LocalMS.dec;MS.tRA=LocalMS.tRA;MS.tDEC=LocalMS.tDEC;MS.slewMode=LocalMS.slewMode;MS.tracking=LocalMS.tracking;MS.isParked=LocalMS.isParked;MS.connected=LocalMS.connected},30);function updateSyncBadge(){var b=document.getElementById("syncBadge"),dot=document.getElementById("syncDot"),t=document.getElementById("syncText");if(!b||!dot||!t)return;if(satAlive()){b.style.borderColor="#4ade80";b.style.background="rgba(74,222,128,0.15)";dot.style.color="#4ade80";t.textContent="SYNC OK · MOUNT"}else{b.style.borderColor="#8bd3ff";b.style.background="rgba(139,211,255,0.15)";dot.style.color="#8bd3ff";t.textContent="STAND-ALONE"}}setInterval(updateSyncBadge,1000);updateSyncBadge();console.log("[MASTER] ✅ FINAL-COMPLETE attivo")})})();</script>
 <script>
 /* === Tab verticale TUNNEL === */
 (function(){
@@ -3491,5 +3358,351 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   setTimeout(apply, 500);
 })();
 </script>
-</body>
-</html>
+
+
+<script id="__obsPermanentJS">(function(){
+  if (window.__obsPermFinal) return;
+  window.__obsPermFinal = true;
+
+  // ============ Caricamento costellazioni (multi-fonte) ============
+  window.loadConstellations = async function(){
+    var urls = [
+      "https://egastrodiscover.github.io/EGASTRO/constellations.json",
+      "https://raw.githubusercontent.com/ofrohn/d3-celestial/master/data/constellations.lines.json",
+      "https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/data/constellations.lines.json"
+    ];
+    for (var i = 0; i < urls.length; i++) {
+      try {
+        var res = await fetch(urls[i] + "?t=" + Date.now(), { signal: AbortSignal.timeout(15000) });
+        if (!res.ok) continue;
+        var data = await res.json();
+        if (!data || !data.features || data.features.length < 20) continue;
+        CONSTELLATIONS = data.features.map(function(f){
+          var segs = (f.geometry && f.geometry.coordinates) || [];
+          var stars = []; var map = new Map();
+          var add = function(ra, dec){
+            var k = ra.toFixed(4) + "," + dec.toFixed(4);
+            if (map.has(k)) return map.get(k);
+            var idx = stars.length;
+            stars.push({ ra: ra, dec: dec, mag: 3 });
+            map.set(k, idx);
+            return idx;
+          };
+          return {
+            name: (f.properties && f.properties.name) || f.id,
+            abbr: f.id,
+            stars: stars,
+            lines: segs.map(function(seg){ return seg.map(function(pt){ return add(pt[0], pt[1]); }); }),
+            area: "—", season: "—",
+            desc: "Costellazione " + ((f.properties && f.properties.name) || f.id)
+          };
+        });
+        if (typeof applyConstellationMeta === "function") applyConstellationMeta();
+        if (typeof rebuildCatalog === "function") rebuildCatalog();
+        if (typeof renderCatalog === "function") renderCatalog();
+        console.log("✅ Costellazioni caricate da:", urls[i], "-", CONSTELLATIONS.length);
+        return;
+      } catch(e) {
+        console.warn("  Fonte fallita:", urls[i], e.message);
+      }
+    }
+    console.warn("⚠️ Tutte le fonti costellazioni fallite - uso fallback");
+  };
+
+  function boot() {
+    if (typeof scopeState === "undefined" || typeof SyncBus === "undefined" || typeof getAltAz !== "function") {
+      return setTimeout(boot, 150);
+    }
+    
+    // Carica costellazioni subito
+    window.loadConstellations();
+    
+    // Flag satellite
+    window.__mountExplicitlyOpened = false;
+    var bt = document.getElementById("btn-goto-telescope");
+    if (bt) {
+      var oc = bt.onclick;
+      bt.onclick = function(e){
+        window.__mountExplicitlyOpened = true;
+        if (oc) return oc.call(this, e);
+      };
+    }
+    
+    // ID pulsanti
+    document.querySelectorAll("#tab-scope .triton-btn").forEach(function(b){
+      var t = (b.innerText || "").trim();
+      if (t === "Home") b.id = "btn-home-obs";
+      else if (t === "Park") b.id = "btn-park-obs";
+      else if (t === "Unpark") b.id = "btn-unpark-obs";
+      else if (t === "SET HOME") b.id = "btn-sethome-obs";
+      else if (t === "SET PARK") b.id = "btn-setpark-obs";
+    });
+    
+    // Mirino su Polaris di default
+    var pol = getAltAz(37.95, 89.26, new Date());
+    scopeState.mountAlt = pol.alt;
+    scopeState.mountAz = pol.az;
+    console.log("🎯 Mirino su Polaris:", pol.alt.toFixed(1) + "° / " + pol.az.toFixed(1) + "°");
+    
+    // Funzioni runtime serializzate
+    window.scopeStepAction = function() {
+    if (!scopeState.target) { console.warn('Nessun target'); return; }
+
+    // ===== STEP 1: GOTO =====
+    if (scopeState.step === 1) {
+      if (!scopeState.connected) { showToast('Connetti prima il mount', true); return; }
+      if (scopeState.isParked)   { showToast('Montatura in PARK', true); return; }
+      if (scopeState.slewing)    { showToast('Slewing in corso...', true); return; }
+
+      var ll = (function(){
+        var a = document.getElementById('lat'), b = document.getElementById('lon');
+        return { lat: parseFloat(a&&a.value)||41.9, lon: parseFloat(b&&b.value)||12.5 };
+      })();
+
+      if (typeof SyncBus !== 'undefined' && window.__mountExplicitlyOpened) {
+        SyncBus.send('cmd_goto', {
+          ra: scopeState.target.ra, dec: scopeState.target.dec,
+          name: scopeState.target.name || '',
+          latMaster: ll.lat, lonMaster: ll.lon
+        });
+      }
+
+      var t = scopeState.target;
+      if (typeof scopeLog === 'function') scopeLog('GOTO ' + t.name + '...', '');
+      var btn = document.getElementById('scopeStepBtn');
+      if (btn) { btn.disabled = true; btn.className = 'btn-goto-large slewing'; }
+
+      scopeMoveToContinuous(getTargetCurrentAltAz, function() {
+        scopeState.step = 2;
+        scopeState.tracking = true;
+        scopeState.trackingTarget = true;
+        var tb = document.getElementById('scopeTrackBtn');
+        if (tb) { tb.innerText = 'Track OFF'; tb.className = 'triton-btn active tracking-active'; }
+        if (btn) btn.disabled = false;
+        if (typeof scopeLog === 'function') scopeLog('✓ ' + t.name + ' raggiunto.', 'ok');
+        if (typeof scopeUpdateStepUI === 'function') scopeUpdateStepUI();
+        if (typeof startTrackingLoop === 'function') startTrackingLoop();
+        updateObsButtons();
+      });
+
+    // ===== STEP 2: CENTER =====
+    } else if (scopeState.step === 2) {
+      var btn = document.getElementById('scopeStepBtn');
+      if (btn) btn.disabled = true;
+      if (typeof scopeLog === 'function') scopeLog('Centratura...', '');
+      scopeAnimatedCenter(function() {
+        scopeState.step = 3;
+        if (btn) btn.disabled = false;
+        if (typeof scopeLog === 'function') scopeLog('✓ Mappa centrata.', 'ok');
+        if (typeof scopeUpdateStepUI === 'function') scopeUpdateStepUI();
+      });
+
+    // ===== STEP 3: SYNC =====
+    } else if (scopeState.step === 3) {
+      if (typeof SyncBus !== 'undefined' && window.__mountExplicitlyOpened) {
+        SyncBus.send('cmd_sync', {
+          ra: scopeState.target.ra, dec: scopeState.target.dec,
+          name: scopeState.target.name
+        });
+      }
+      var tPos = getAltAz(scopeState.target.ra, scopeState.target.dec, state.currentTime);
+      scopeState.mountAlt = tPos.alt;
+      scopeState.mountAz  = tPos.az;
+      scopeState.synced = true;
+      scopeState.syncFlashStart = performance.now();
+      scopeState.step = 0;
+      if (typeof scopeLog === 'function') scopeLog('✓ SYNC su ' + scopeState.target.name + '.', 'ok');
+      if (typeof scopeUpdateStepUI === 'function') scopeUpdateStepUI();
+      if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+      if (typeof scopeDraw === 'function') scopeDraw();
+      showToast('Sync inviato');
+      setTimeout(function(){ if (typeof scopeResetViewToTarget === 'function') scopeResetViewToTarget(); }, 200);
+    }
+  };
+    window.scopeHome = function() {
+    if (typeof scopeState === 'undefined') return;
+    cancelStepAction();
+    if (_origScopeHome) _origScopeHome.apply(this, arguments);
+
+    var hAlt = parseFloat(localStorage.getItem('egastro_home_alt') || 'NaN');
+    var hAz  = parseFloat(localStorage.getItem('egastro_home_az')  || 'NaN');
+    if (!isNaN(hAlt) && !isNaN(hAz)) {
+      setTimeout(function(){
+        if (!scopeState.slewing && !scopeState.isParked) {
+          scopeState.mountAlt = hAlt;
+          scopeState.mountAz  = hAz;
+          if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+          if (typeof scopeDraw === 'function') scopeDraw();
+          updateObsButtons();
+        }
+      }, 2500);
+    }
+  };
+    window.scopePark = function() {
+    if (typeof scopeState === 'undefined') return;
+    cancelStepAction();
+    if (_origScopePark) _origScopePark.apply(this, arguments);
+
+    var pAlt = parseFloat(localStorage.getItem('egastro_park_alt') || 'NaN');
+    var pAz  = parseFloat(localStorage.getItem('egastro_park_az')  || 'NaN');
+    if (!isNaN(pAlt) && !isNaN(pAz)) {
+      setTimeout(function(){
+        if (!scopeState.slewing && scopeState.isParked) {
+          scopeState.mountAlt = pAlt;
+          scopeState.mountAz  = pAz;
+          if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+          if (typeof scopeDraw === 'function') scopeDraw();
+          updateObsButtons();
+        }
+      }, 2500);
+    }
+  };
+    window.scopeToggleConnect = function() {
+    var satelliteReady = window.__mountExplicitlyOpened &&
+                        typeof SyncBus !== 'undefined' &&
+                        SyncBus.isPeerAlive();
+
+    if (satelliteReady) {
+      console.log('📡 Connetti → satellite (sincronizzato)');
+      var on = !(typeof scopeState !== 'undefined' && scopeState.connected);
+      SyncBus.send('cmd_connect', { on: on });
+      return;
+    }
+
+    console.log('🏠 Connetti → locale (stand-alone)');
+    if (_origScopeToggleConnect) {
+      return _origScopeToggleConnect.apply(this, arguments);
+    }
+  };
+    window.scopeUpdateStepUI = function() {
+    var d1 = document.getElementById('stepDot1'), d2 = document.getElementById('stepDot2'), d3 = document.getElementById('stepDot3');
+    var l1 = document.getElementById('stepLine1'), l2 = document.getElementById('stepLine2');
+    var btn = document.getElementById('scopeStepBtn');
+    if (!d1 || !d2 || !d3 || !btn) return;
+    [d1,d2,d3].forEach(function(d){ d.classList.remove('active','done'); });
+    [l1,l2].forEach(function(l){ if (l) l.classList.remove('done'); });
+    btn.className = 'btn-goto-large';
+    btn.disabled = false;
+
+    if (scopeState.step === 1) {
+      d1.classList.add('active');
+      btn.innerText = '🚀 GOTO';
+      btn.disabled = !scopeState.connected || scopeState.isParked;
+    } else if (scopeState.step === 2) {
+      d1.classList.add('done'); if (l1) l1.classList.add('done');
+      d2.classList.add('active');
+      btn.innerText = '🎯 CENTER';
+      btn.className = 'btn-goto-large centered';
+    } else if (scopeState.step === 3) {
+      d1.classList.add('done'); d2.classList.add('done');
+      if (l1) l1.classList.add('done'); if (l2) l2.classList.add('done');
+      d3.classList.add('active');
+      btn.innerText = '⇄ SYNC';
+      btn.className = 'btn-goto-large synced';
+    } else if (scopeState.step === 0) {
+      [d1,d2,d3].forEach(function(d){ d.classList.add('done'); });
+      [l1,l2].forEach(function(l){ if (l) l.classList.add('done'); });
+      btn.innerText = '✓ COMPLETATO';
+      btn.className = 'btn-goto-large synced';
+    }
+  };
+    window.updateObsButtons = function updateObsButtons() {
+    if (typeof scopeState === 'undefined') return;
+
+    var bp  = document.getElementById('btn-park-obs');
+    var bu  = document.getElementById('btn-unpark-obs');
+    var bh  = document.getElementById('btn-home-obs');
+    var bsh = document.getElementById('btn-sethome-obs');
+    var bsp = document.getElementById('btn-setpark-obs');
+    var bt  = document.getElementById('scopeTrackBtn');
+
+    if (bp) bp.classList.toggle('parked-active', !!scopeState.isParked);
+    if (bu) bu.classList.toggle('unpark-active', !!scopeState.isParked);
+
+    if (bh) {
+      var hAlt = parseFloat(localStorage.getItem('egastro_home_alt') || 'NaN');
+      var hAz  = parseFloat(localStorage.getItem('egastro_home_az')  || 'NaN');
+      var atHome = !isNaN(hAlt) && !isNaN(hAz) &&
+                   Math.abs(scopeState.mountAlt - hAlt) < 2 &&
+                   Math.abs(scopeState.mountAz  - hAz)  < 2;
+      bh.classList.toggle('home-active', atHome && !scopeState.isParked);
+    }
+
+    if (bt) {
+      bt.classList.toggle('tracking-active', !!scopeState.tracking);
+      bt.classList.toggle('active', !!scopeState.tracking);
+      bt.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON';
+    }
+
+    if (bsh) bsh.classList.toggle('has-saved', localStorage.getItem('egastro_home_alt') !== null);
+    if (bsp) bsp.classList.toggle('has-saved', localStorage.getItem('egastro_park_alt') !== null);
+
+    var bd = document.getElementById('scopeConnBadge');
+    if (bd) {
+      if (scopeState.connected) { bd.innerText = 'CONNESSO'; bd.classList.add('on'); }
+      else { bd.innerText = 'DISCONNESSO'; bd.classList.remove('on'); }
+    }
+
+    var rd = document.getElementById('scopeRateDisplay');
+    if (rd) rd.innerText = (scopeState.rate || 20) + 'X';
+
+    var po = document.getElementById('parkOverlay');
+    if (po) po.classList.toggle('open', !!scopeState.isParked);
+  };
+    
+    // Handler mount_state (NO posizione override)
+    SyncBus.on("mount_state", function(d){
+      if (!d) return;
+      scopeState.connected = !!d.connected;
+      scopeState.tracking = d.tracking && d.tracking !== "off";
+      scopeState.isParked = !!d.isParked;
+      if (Number.isFinite(d.rate)) {
+        var map = {0.005:1, 0.02:20, 0.06:50, 0.2:100};
+        scopeState.rate = map[d.rate] || scopeState.rate || 20;
+      }
+      if (typeof updateObsButtons === "function") updateObsButtons();
+    });
+    
+    // Badge SYNC
+    function updateSyncBadge(){
+      var b = document.getElementById("syncBadge");
+      var d = document.getElementById("syncDot");
+      var t = document.getElementById("syncText");
+      if (!b || !d || !t) return;
+      var peerAlive = SyncBus.isPeerAlive();
+      var explicit = window.__mountExplicitlyOpened;
+      if (peerAlive && explicit) {
+        b.style.borderColor = "#4ade80";
+        b.style.background = "rgba(74,222,128,0.15)";
+        d.style.color = "#4ade80";
+        t.textContent = "SYNC OK · " + (SyncBus.getPeerId() || "?").toUpperCase();
+      } else {
+        b.style.borderColor = "#f87171";
+        b.style.background = "rgba(248,113,113,0.15)";
+        d.style.color = "#f87171";
+        t.textContent = "SYNC OFF";
+      }
+    }
+    
+    setInterval(function(){
+      updateSyncBadge();
+      if (typeof updateObsButtons === "function") updateObsButtons();
+    }, 500);
+    
+    updateSyncBadge();
+    if (typeof updateObsButtons === "function") updateObsButtons();
+    
+    console.log("✅ Fix permanenti attivi:");
+    console.log("  🎯 Mirino su Polaris");
+    console.log("  🌌 Costellazioni auto-load");
+    console.log("  🚀 GOTO 3-step");
+    console.log("  💡 Pulsanti illuminati");
+    console.log("  📶 SYNC badge stabile");
+  }
+  
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();</script></body></html>
