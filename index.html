@@ -3425,296 +3425,60 @@ if(e.data==="hide-satellite-frame"||e.data==="show-master"){var fc=document.getE
 })();
 </script>
 <!-- ═══════════════════════════════════════════════════════════════════ -->
-<!-- TUNNEL V2 — incollare IDENTICO in ENTRAMBI i file, sopra </body>  -->
-<!-- ═══════════════════════════════════════════════════════════════════ -->
-<script id="egastro-tunnel-v2">
-(function () {
-  'use strict';
-  if (window.__tunnelV2) return;
-  window.__tunnelV2 = true;
-
-  var meta = document.querySelector('meta[name="app-id"]');
-  var MY_APP = meta && meta.content ? String(meta.content).toLowerCase() : '';
-  if (MY_APP !== 'observatory' && MY_APP !== 'mount') {
-    console.warn('[TUNNEL v2] app-id non valido:', MY_APP, '- tunnel disabilitato');
-    return;
+<!-- TUNNEL V2 — incollare IDENTICO in ENTRAMBI i file, sopra 
+<script id="__oneBtnScript">
+(function(){
+'use strict';
+if (window.__oneButton) return;
+window.__oneButton = true;
+var URLS = { observatory: 'https://egastrodiscover.github.io/EGASTRO/', mount: 'https://egastrodiscover.github.io/EGASTROmount/' };
+var SVG_DOME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21v-8"/><path d="M20 21v-8"/><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 5v8"/><path d="M12 10l-3-2"/></svg>';
+var SVG_TEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"/><path d="M7 16l-2 6"/><path d="M3 22h8"/><path d="M10 6l10-3 2 4-10 3-2-4z"/></svg>';
+function buildOne(win, doc, myApp) {
+  var iconToShow = myApp === 'mount' ? SVG_DOME : SVG_TEL;
+  var title = myApp === 'mount' ? 'Torna al Pianeta' : 'Vai al Telescopio';
+  ['tunnel-menu','tunnel-panel','tunnel-toggle','tunnel-frame-container','app-switcher-container','app-switcher-menu','app-switcher-toggle','planet-menu-ultimate','app-frame-container','app-frame','btn-goto-dome','btn-goto-telescope','__oneBtn','__oneFrame'].forEach(function(id){ var e = doc.getElementById(id); if (e) e.remove(); });
+  doc.querySelectorAll('.app-switch-btn,.tab').forEach(function(e){ e.remove(); });
+  if (!doc.getElementById('__oneCSS')) {
+    var st = doc.createElement('style'); st.id = '__oneCSS';
+    st.textContent = '#__oneBtn{position:fixed!important;left:0!important;top:50%!important;transform:translateY(-50%)!important;z-index:2147483647!important;width:52px!important;height:52px!important;border-radius:0 12px 12px 0!important;background:rgba(10,18,32,.95)!important;border:2px solid #d4af37!important;border-left:none!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 0 20px rgba(212,175,55,.5)!important;color:#d4af37!important;transition:all .2s!important;padding:0!important}#__oneBtn:hover{background:#d4af37!important;color:#000!important}#__oneBtn svg{width:24px!important;height:24px!important;pointer-events:none!important}#__oneFrame{position:fixed!important;inset:0!important;z-index:2147483645!important;background:#05070a!important;display:none!important}#__oneFrame iframe{width:100%!important;height:100%!important;border:none!important}';
+    doc.head.appendChild(st);
   }
-
-  var APPS = {
-    observatory: { name: 'Observatory', url: 'https://egastrodiscover.github.io/EGASTRO/' },
-    mount:       { name: 'Mount',       url: 'https://egastrodiscover.github.io/EGASTROmount/' }
-  };
-  var OTHER = MY_APP === 'mount' ? 'observatory' : 'mount';
-
-  var SVG_DOME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21v-8"/><path d="M20 21v-8"/><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 5v8"/><path d="M12 10l-3-2"/></svg>';
-  var SVG_TELESCOPE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"/><path d="M7 16l-2 6"/><path d="M3 22h8"/><path d="M10 6l10-3 2 4-10 3-2-4z"/></svg>';
-  function svgFor(appId) { return appId === 'mount' ? SVG_TELESCOPE : SVG_DOME; }
-
-  var IN_FRAME = false;
-  try { IN_FRAME = window.self !== window.top; } catch (e) { IN_FRAME = true; }
-
-  // ─── Cleanup CONTINUO dei vecchi menu (funziona anche se il vecchio codice resta) ───
-  var OLD_IDS = ['app-switcher-container','app-switcher-menu','app-switcher-toggle',
-                 'planet-menu-ultimate','app-frame-container','app-frame',
-                 'btn-goto-dome','btn-goto-telescope'];
-  function cleanupOld() {
-    OLD_IDS.forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el) { el.remove(); console.log('[TUNNEL v2] rimosso vecchio:', id); }
-    });
-  }
-  cleanupOld();
-  setInterval(cleanupOld, 800);
-
-  try {
-    var obs = new MutationObserver(function (muts) {
-      muts.forEach(function (m) {
-        m.addedNodes.forEach(function (n) {
-          if (!n || n.nodeType !== 1) return;
-          if (n.id && OLD_IDS.indexOf(n.id) !== -1) { n.remove(); }
-        });
-      });
-    });
-    obs.observe(document.documentElement, { childList: true, subtree: true });
-  } catch (e) {}
-
-  // ─── CSS ───
-  if (!document.getElementById('__tunnelV2CSS')) {
-    var style = document.createElement('style');
-    style.id = '__tunnelV2CSS';
-    style.textContent =
-      '#tunnel-menu{position:fixed!important;left:0!important;top:50%!important;' +
-      'transform:translateY(-50%) translateX(calc(-100% + 26px))!important;' +
-      'z-index:2147483647!important;display:flex!important;align-items:center!important;' +
-      'transition:transform .4s cubic-bezier(.34,1.56,.64,1)!important}' +
-      '#tunnel-menu.open{transform:translateY(-50%) translateX(0)!important}' +
-      '#tunnel-panel{background:rgba(10,18,32,.95)!important;' +
-      'border:1px solid rgba(212,175,55,.4)!important;border-left:none!important;' +
-      'border-radius:0 12px 12px 0!important;padding:14px 8px!important;' +
-      'display:flex!important;flex-direction:column!important;gap:12px!important;' +
-      'backdrop-filter:blur(15px)!important;box-shadow:2px 0 10px rgba(0,0,0,.5)!important}' +
-      '.tunnel-app-btn{width:40px!important;height:40px!important;border-radius:50%!important;' +
-      'display:flex!important;align-items:center!important;justify-content:center!important;' +
-      'cursor:pointer!important;transition:all .3s!important;position:relative!important;' +
-      'padding:0!important;background:#0a1220!important}' +
-      '.tunnel-app-btn svg{width:20px!important;height:20px!important;stroke:currentColor!important;' +
-      'fill:none!important;stroke-width:2!important;pointer-events:none!important}' +
-      '.tunnel-app-btn.tunnel-current{border:2px solid #d4af37!important;color:#d4af37!important;' +
-      'box-shadow:0 0 15px rgba(212,175,55,.55),inset 0 0 8px rgba(212,175,55,.15)!important;' +
-      'cursor:default!important}' +
-      '.tunnel-app-btn.tunnel-current::after{content:"\2713"!important;position:absolute!important;' +
-      'bottom:-2px!important;right:-2px!important;width:15px!important;height:15px!important;' +
-      'border-radius:50%!important;background:#4ade80!important;color:#000!important;' +
-      'font-size:10px!important;font-weight:900!important;display:flex!important;' +
-      'align-items:center!important;justify-content:center!important;line-height:1!important;' +
-      'border:1.5px solid #0a1220!important}' +
-      '.tunnel-app-btn.tunnel-other{border:2px solid #8bd3ff!important;color:#8bd3ff!important}' +
-      '.tunnel-app-btn.tunnel-other:hover{background:#8bd3ff!important;color:#000!important;' +
-      'transform:scale(1.1)!important;box-shadow:0 0 20px rgba(139,211,255,.6)!important}' +
-      '#tunnel-toggle{width:26px!important;height:82px!important;' +
-      'writing-mode:vertical-rl!important;text-orientation:mixed!important;' +
-      'font-size:11px!important;font-weight:800!important;letter-spacing:3px!important;' +
-      'font-family:Orbitron,sans-serif!important;color:#d4af37!important;' +
-      'background:rgba(10,18,32,.95)!important;border:1px solid #d4af37!important;' +
-      'border-left:none!important;border-radius:0 8px 8px 0!important;' +
-      'cursor:pointer!important;backdrop-filter:blur(10px)!important;padding:0!important;' +
-      'display:flex!important;align-items:center!important;justify-content:center!important}' +
-      '#tunnel-toggle:hover{background:#d4af37!important;color:#000!important}' +
-      '#tunnel-frame-container{position:fixed!important;inset:0!important;' +
-      'z-index:2147483645!important;background:#05070a!important;display:none!important}' +
-      '#tunnel-frame{width:100%!important;height:100%!important;border:none!important}' +
-      '#tunnel-loading{position:fixed!important;inset:0!important;' +
-      'z-index:2147483646!important;background:#05070a!important;' +
-      'display:none!important;align-items:center!important;justify-content:center!important;' +
-      'color:#d4af37!important;font-family:Orbitron,sans-serif!important;font-size:15px!important;' +
-      'flex-direction:column!important;gap:16px!important;padding:20px!important}' +
-      '#tunnel-loading.show{display:flex!important}' +
-      '#tunnel-loading .spinner{width:48px!important;height:48px!important;' +
-      'border:3px solid rgba(212,175,55,.2)!important;border-top-color:#d4af37!important;' +
-      'border-radius:50%!important;animation:tunnel-spin 1s linear infinite!important}' +
-      '@keyframes tunnel-spin{to{transform:rotate(360deg)}}' +
-      '#tunnel-fallback-btn{padding:10px 20px!important;background:#d4af37!important;' +
-      'color:#000!important;border:none!important;border-radius:8px!important;' +
-      'cursor:pointer!important;font-family:Orbitron,sans-serif!important;' +
-      'font-weight:700!important;font-size:13px!important;margin-top:8px!important}';
-    document.head.appendChild(style);
-  }
-
-  // ─── DOM ───
-  var menu = document.createElement('div');
-  menu.id = 'tunnel-menu';
-
-  var panel = document.createElement('div');
-  panel.id = 'tunnel-panel';
-
-  var currentBtn = document.createElement('button');
-  currentBtn.type = 'button';
-  currentBtn.className = 'tunnel-app-btn tunnel-current';
-  currentBtn.title = APPS[MY_APP].name + ' (sei qui)';
-  currentBtn.innerHTML = svgFor(MY_APP);
-
-  var otherBtn = document.createElement('button');
-  otherBtn.type = 'button';
-  otherBtn.className = 'tunnel-app-btn tunnel-other';
-  otherBtn.title = 'Apri ' + APPS[OTHER].name;
-  otherBtn.innerHTML = svgFor(OTHER);
-
-  panel.appendChild(currentBtn);
-  panel.appendChild(otherBtn);
-
-  var toggle = document.createElement('button');
-  toggle.type = 'button';
-  toggle.id = 'tunnel-toggle';
-  toggle.textContent = 'TUNNEL';
-
-  menu.appendChild(panel);
-  menu.appendChild(toggle);
-
-  var loading = document.createElement('div');
-  loading.id = 'tunnel-loading';
-  loading.innerHTML = '<div class="spinner"></div>' +
-    '<div id="tunnel-loading-text">Caricamento ' + APPS[OTHER].name + '...</div>';
-
-  var frameContainer = document.createElement('div');
-  frameContainer.id = 'tunnel-frame-container';
-  var frame = document.createElement('iframe');
-  frame.id = 'tunnel-frame';
-  frame.setAttribute('allow', 'geolocation; camera; microphone; fullscreen; clipboard-read; clipboard-write');
-  frameContainer.appendChild(frame);
-
-  document.body.appendChild(menu);
-  document.body.appendChild(loading);
-  document.body.appendChild(frameContainer);
-
-  // ─── Eventi ───
-  toggle.addEventListener('click', function (e) {
+  var btn = doc.createElement('button'); btn.id = '__oneBtn'; btn.title = title; btn.innerHTML = iconToShow; doc.body.appendChild(btn);
+  var fc = doc.createElement('div'); fc.id = '__oneFrame';
+  var fr = doc.createElement('iframe'); fr.setAttribute('allow','geolocation; camera; microphone; fullscreen'); fc.appendChild(fr); doc.body.appendChild(fc);
+  btn.onclick = function(e){
     e.preventDefault(); e.stopPropagation();
-    menu.classList.toggle('open');
-  });
-
-  document.addEventListener('click', function (e) {
-    if (menu.classList.contains('open') && !menu.contains(e.target)) {
-      menu.classList.remove('open');
-    }
-  }, true);
-
-  currentBtn.addEventListener('click', function (e) {
-    e.preventDefault(); e.stopPropagation();
-    menu.classList.remove('open');
-  });
-
-  var frameLoaded = false;
-  var loadingTimeout = null;
-
-  frame.addEventListener('load', function () {
-    frameLoaded = true;
-    if (loadingTimeout) { clearTimeout(loadingTimeout); loadingTimeout = null; }
-    loading.classList.remove('show');
-    console.log('[TUNNEL v2] iframe loaded:', frame.src);
-  });
-
-  function showFrame() {
-    frameLoaded = false;
-    loading.classList.add('show');
-    var txt = document.getElementById('tunnel-loading-text');
-    if (txt) txt.textContent = 'Caricamento ' + APPS[OTHER].name + '...';
-    if (!frame.src || frame.src === 'about:blank') {
-      var sep = APPS[OTHER].url.indexOf('?') === -1 ? '?' : '&';
-      frame.src = APPS[OTHER].url + sep + 'tunnel=1&t=' + Date.now();
-    }
-    frameContainer.style.display = 'block';
-    menu.style.display = 'none';
-
-    if (loadingTimeout) clearTimeout(loadingTimeout);
-    loadingTimeout = setTimeout(function () {
-      if (!frameLoaded) {
-        console.warn('[TUNNEL v2] iframe timeout dopo 10s');
-        var t = document.getElementById('tunnel-loading-text');
-        if (t) {
-          t.innerHTML = 'Impossibile caricare <b>' + APPS[OTHER].name + '</b> nell\'iframe.<br>' +
-            '<span style="color:#f87171;font-size:12px;font-family:Inter">Il browser o il server potrebbero bloccarlo.</span>';
-          var oldBtn = document.getElementById('tunnel-fallback-btn');
-          if (!oldBtn) {
-            var fb = document.createElement('button');
-            fb.id = 'tunnel-fallback-btn';
-            fb.textContent = 'Apri in nuova finestra';
-            fb.onclick = function () {
-              window.open(APPS[OTHER].url, '_blank');
-              hideFrame();
-            };
-            t.parentNode.insertBefore(fb, t.nextSibling);
-          }
-        }
+    if (myApp === 'mount') {
+      if (win.self !== win.top) { try { win.parent.postMessage({type:'one-back'},'*'); } catch(err){} }
+      else { win.location.href = URLS.observatory; }
+    } else {
+      if (!fr.src || fr.src === 'about:blank') {
+        var sep = URLS.mount.indexOf('?') === -1 ? '?' : '&';
+        fr.src = URLS.mount + sep + 't=' + Date.now();
+        fr.addEventListener('load', function(){ setTimeout(function(){ try { if (fr.contentDocument && fr.contentDocument.body) buildOne(fr.contentWindow, fr.contentDocument, 'mount'); } catch(e){} }, 300); }, {once:true});
       }
-    }, 10000);
-  }
-
-  function hideFrame() {
-    frameContainer.style.display = 'none';
-    loading.classList.remove('show');
-    menu.style.display = '';
-    if (loadingTimeout) { clearTimeout(loadingTimeout); loadingTimeout = null; }
-    var fb = document.getElementById('tunnel-fallback-btn');
-    if (fb) fb.remove();
-  }
-
-  otherBtn.addEventListener('click', function (e) {
-    e.preventDefault(); e.stopPropagation();
-    menu.classList.remove('open');
-
-    if (IN_FRAME) {
-      try { window.parent.postMessage({ type: 'tunnel-switch', target: OTHER }, '*'); } catch (err) {}
-      try {
-        if (window.SyncBus && typeof window.SyncBus.send === 'function') {
-          window.SyncBus.send('tunnel_switch', { target: OTHER });
-        }
-      } catch (err) {}
-      return;
-    }
-    showFrame();
-  });
-
-  window.addEventListener('message', function (e) {
-    var d = e.data;
-    if (!d) return;
-    if (typeof d === 'object' && d.type === 'tunnel-switch' && d.target === MY_APP) {
-      if (frameContainer.style.display !== 'none') hideFrame();
-      return;
-    }
-    if (d === 'hide-satellite-frame' || d === 'show-master' || d === 'egastro-close-frame') {
-      if (frameContainer.style.display !== 'none') hideFrame();
-    }
-  });
-
-  try {
-    if (window.SyncBus && typeof window.SyncBus.on === 'function') {
-      window.SyncBus.on('tunnel_switch', function (d) {
-        if (!d || d.target !== MY_APP) return;
-        if (frameContainer.style.display !== 'none') hideFrame();
-      });
-    }
-  } catch (err) {}
-
-  window.__tunnel = {
-    myApp: MY_APP, other: OTHER, openOther: showFrame, close: hideFrame, inFrame: IN_FRAME,
-    debug: function () {
-      console.log('=== TUNNEL DEBUG ===');
-      console.log('  MY_APP:', MY_APP, '(dovrebbe essere "' + MY_APP + '")');
-      console.log('  OTHER:', OTHER);
-      console.log('  IN_FRAME:', IN_FRAME);
-      console.log('  menu presente:', !!document.getElementById('tunnel-menu'));
-      console.log('  btn corrente:', currentBtn.className);
-      console.log('  btn altro:', otherBtn.className);
-      console.log('  frame.src:', frame.src);
-      console.log('  frame display:', frameContainer.style.display);
-      console.log('  Frame caricato?', frameLoaded);
-      console.log('  Vecchi residui:');
-      OLD_IDS.forEach(function (id) { console.log('    ', id + ':', !!document.getElementById(id)); });
+      fc.style.display = 'block'; btn.style.display = 'none';
     }
   };
-
-  console.log('[TUNNEL v2] ✅ Ready · App:', MY_APP, '· Other:', OTHER, '· InFrame:', IN_FRAME);
+  win.addEventListener('message', function(e){ if (e.data === 'one-back') { fc.style.display='none'; btn.style.display=''; } });
+  if (!win.__onePoll) {
+    win.__onePoll = true;
+    win.setInterval(function(){
+      var b = doc.getElementById('__oneBtn'); if (!b) { buildOne(win, doc, myApp); return; }
+      var correct = myApp === 'mount' ? SVG_DOME : SVG_TEL;
+      if (b.innerHTML !== correct) b.innerHTML = correct;
+      ['tunnel-menu','app-switcher-container','planet-menu-ultimate'].forEach(function(id){ var e = doc.getElementById(id); if (e) e.remove(); });
+    }, 500);
+  }
+}
+var detected = (document.querySelector('meta[name="app-id"]')?.content === 'mount') ? 'mount' : 'observatory';
+buildOne(window, document, detected);
+console.log('[ONE-BTN-PERM] Ready:', detected);
 })();
 </script>
+</body>  -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+
 </body>
 </html>
