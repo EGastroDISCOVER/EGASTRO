@@ -559,38 +559,7 @@ g.SyncBus={version:V,appId:A,instanceId:I,isSatellite:A==='mount',transport:bc?'
 console.log('[SyncBus v'+V+' INLINE] '+A+' / '+I+' · '+(bc?'BC':'LS'));
 if(document.readyState==='complete'||document.readyState==='interactive')setTimeout(st,100);else g.addEventListener('load',function(){setTimeout(st,100)})})(window);
 </script>
-<script>
-(function(g){'use strict';if(g.SyncBus)return;var V=3,C='egastro_sync_v'+V,L='egastro_sync_v'+V,LK='egastro_leader_v'+V;
-function aid(){var m=document.querySelector('meta[name="app-id"]');if(m&&m.content){var v=String(m.content).trim().toLowerCase();if(v==='mount'||v==='observatory')return v}if(document.getElementById('dpad-grid'))return'mount';return'observatory'}
-var A=aid(),I=A+'-'+Math.random().toString(36).slice(2,8),bc=null;try{bc=new BroadcastChannel(C)}catch(e){}
-var ls=new Map(),pa=new Map(),pr={alive:!1,id:null,lastSeen:0,helloBackAt:0},ov=0,iv=new Map();
-function mm(t,d,id){return{v:V,type:t,data:d||null,from:A,instance:I,ts:Date.now(),id:id||(Math.random().toString(36).slice(2)+Date.now().toString(36))}}
-function dis(m){if(!m||!m.type||!m.from)return;if(m.from===A)return;pr.alive=!0;pr.id=m.from;pr.lastSeen=Date.now();
-if(m.type==='ping'){snd('pong');return}if(m.type==='pong')return;
-if(m.type==='hello'){var n=Date.now();if(n-pr.helloBackAt>300){pr.helloBackAt=n;setTimeout(function(){snd('hello')},30+Math.random()*50)}return}
-if(m.type==='ack'){var p=pa.get(m.data&&m.data.id);if(p){clearTimeout(p.timer);pa.delete(m.data.id);p.resolve(!0)}return}
-if(m.data&&Number.isFinite(m.data.__v)){var l=iv.get(m.from)||0;if(m.data.__v<=l)return;iv.set(m.from,m.data.__v)}
-if(m.data&&m.data.__needAck&&m.data.__ackId)snd('ack',{id:m.data.__ackId});
-var h=ls.get(m.type);if(h)h.forEach(function(f){try{f(m.data,m)}catch(e){}});
-var a=ls.get('*');if(a)a.forEach(function(f){try{f(m.data,m)}catch(e){}})}
-var lsd=0;function rs(m){if(bc){try{bc.postMessage(m)}catch(e){}}else{try{m.nonce=Math.random();localStorage.setItem(L,JSON.stringify(m))}catch(e){}}}
-function snd(t,d){var n=Date.now();if(n-lsd<16){setTimeout(function(){snd(t,d)},16);return}lsd=n;if(d&&d.__isState)d.__v=++ov;rs(mm(t,d))}
-function swa(t,d,to){return new Promise(function(r){var ai='ack-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),pl=Object.assign({},d||{},{__needAck:!0,__ackId:ai}),m=mm(t,pl),tm=setTimeout(function(){pa.delete(ai);r(!1)},to||4000);pa.set(ai,{resolve:r,timer:tm});rs(m)})}
-function on(t,f){if(!ls.has(t))ls.set(t,[]);ls.get(t).push(f);return function(){var ar=ls.get(t);if(!ar)return;var i=ar.indexOf(f);if(i>=0)ar.splice(i,1)}}
-function glr(){try{return JSON.parse(localStorage.getItem(LK)||'null')}catch(e){return null}}
-function slr(){try{localStorage.setItem(LK,JSON.stringify({instance:I,app:A,expiresAt:Date.now()+6000}))}catch(e){}}
-function il(){if(A!=='mount')return!1;var r=glr();return!!(r&&r.instance===I&&r.expiresAt>Date.now())}
-function rl(){if(A!=='mount')return!1;var r=glr();if(!r||r.expiresAt<=Date.now()){slr();return!0}return r.instance===I}
-var lt=null;function slrr(){if(A!=='mount'||lt)return;rl();lt=setInterval(function(){if(il())slr()},3000)}
-function stlr(){if(lt){clearInterval(lt);lt=null}try{var r=glr();if(r&&r.instance===I)localStorage.removeItem(LK)}catch(e){}}
-if(bc)bc.onmessage=function(e){dis(e.data)};else g.addEventListener('storage',function(e){if(e.key!==L||!e.newValue)return;try{dis(JSON.parse(e.newValue))}catch(e){}});
-var pt=null;function st(){if(pt)return;[100,300,700,1500].forEach(function(ms){setTimeout(function(){snd('hello')},ms)});slrr();pt=setInterval(function(){snd('ping');if(Date.now()-pr.lastSeen>12000){if(pr.alive){pr.alive=!1;var h=ls.get('peer_offline');if(h)h.forEach(function(f){try{f()}catch(e){}})}}},2000)}
-function sp(){if(pt)clearInterval(pt);pt=null;stlr();if(bc)try{bc.close()}catch(e){}}
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){pr.helloBackAt=0;snd('hello')}});
-g.addEventListener('focus',function(){snd('hello')});
-g.SyncBus={version:V,appId:A,instanceId:I,isSatellite:A==='mount',transport:bc?'broadcast':'localStorage',send:snd,sendWithAck:swa,on:on,start:st,stop:sp,isLeader:il,requestLeader:rl,isPeerAlive:function(){return pr.alive},getPeerId:function(){return pr.id},getAppId:function(){return A}};
-if(document.readyState==='complete'||document.readyState==='interactive')setTimeout(st,100);else g.addEventListener('load',function(){setTimeout(st,100)})})(window);
-</script>
+
 </head>
 <body id="appBody">
 
@@ -1676,7 +1645,7 @@ let CONSTELLATIONS = [
 ];
 
 async function loadConstellations() {
-  const urls = ['https://raw.githubusercontent.com/ofrohn/d3-celestial/master/data/constellations.lines.json','https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/data/constellations.lines.json'];
+  const urls = ['https://raw.githubusercontent.com/EGastroDISCOVER/EGASTRO/main/constellations.json?t='+Date.now(),'https://raw.githubusercontent.com/ofrohn/d3-celestial/master/data/constellations.lines.json'];
   for (const url of urls) {
     try {
       const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
@@ -2825,138 +2794,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   <iframe id="app-frame" style="width:100%; height:100%; border:none;"></iframe>
 </div>
 
-<script>
-(function(){
-  'use strict';
-  if (true) return; /* disabled by OK patch */
-  window.__planetSwitcherFixed = true;
 
-  function init() {
-    // --- 1. SALVATAGGIO E RIPRISTINO COORDINATE ---
-    const latInput = document.getElementById('lat');
-    const lonInput = document.getElementById('lon');
-    
-    // Ripristina all'avvio
-    try {
-      const savedCoords = JSON.parse(localStorage.getItem('egastro_last_coords') || '{}');
-      if (savedCoords.lat && savedCoords.lon) {
-        if(latInput) latInput.value = savedCoords.lat;
-        if(lonInput) lonInput.value = savedCoords.lon;
-        if (typeof state !== 'undefined') {
-          state.lat = parseFloat(savedCoords.lat);
-          state.lon = parseFloat(savedCoords.lon);
-          if (typeof updateAll === 'function') updateAll();
-        }
-      }
-    } catch(e) {}
-
-    // Salva ad ogni modifica
-    if (latInput && lonInput) {
-      const saveCoords = () => {
-        localStorage.setItem('egastro_last_coords', JSON.stringify({ lat: latInput.value, lon: lonInput.value }));
-      };
-      latInput.addEventListener('change', saveCoords);
-      lonInput.addEventListener('change', saveCoords);
-    }
-
-    // --- 2. SWITCHER UI ---
-    const sc = document.getElementById('app-switcher-container');
-    const tg = document.getElementById('app-switcher-toggle');
-    if (sc && tg) {
-      tg.removeAttribute('onclick');
-      tg.onclick = function(e) { e.preventDefault(); e.stopPropagation(); const open = sc.classList.toggle('open'); this.innerText = open ? '◀' : '▶'; };
-      document.addEventListener('click', e => { if (!sc.contains(e.target)) { sc.classList.remove('open'); tg.innerText = '▶'; } });
-    }
-
-    const td = document.getElementById('btn-goto-telescope');
-    if (td) {
-      td.onclick = function(e) {
-        e.preventDefault();
-        if (window.parent !== window) { window.parent.postMessage('egastro-close-frame', '*'); return; }
-        
-        let url = 'https://egastrodiscover.github.io/EGASTROmount/';
-        const params = new URLSearchParams();
-        if (typeof state !== 'undefined') {
-          if (Number.isFinite(state.lat)) { params.set('lat', state.lat); params.set('lon', state.lon); }
-          if (state.target && Number.isFinite(state.target.ra)) { params.set('targetName', state.target.n || ''); params.set('targetRa', state.target.ra); params.set('targetDec', state.target.dec); }
-        }
-        if (params.toString()) url += '?' + params.toString();
-        const fc = document.getElementById('app-frame-container'); const fr = document.getElementById('app-frame');
-        if (fc && fr) { fr.src = url; fc.style.display = 'block'; }
-      };
-    }
-
-    window.addEventListener('message', e => {
-      if (e.data === 'egastro-close-frame' || e.data === 'show-master') {
-        const fc = document.getElementById('app-frame-container'); if (fc) fc.style.display = 'none';
-      }
-    });
-
-    // --- 3. SYNC BUS E COMANDI ---
-    if (typeof SyncBus !== 'undefined') {
-      
-      // Funzione per inviare i dati al Satellite
-      const sendActivate = () => {
-        if (typeof state !== 'undefined') {
-          SyncBus.send('sync_activate', { role: 'master', gpsLat: state.lat, gpsLon: state.lon });
-        }
-      };
-      
-      // Invia subito e poi ogni 3 secondi per sicurezza
-      setTimeout(sendActivate, 1000);
-      setInterval(sendActivate, 3000);
-
-      // Ricezione stato dal Satellite
-      SyncBus.on('mount_state', d => {
-        if (!d || typeof scopeState === 'undefined') return;
-        scopeState.connected = !!d.connected;
-        scopeState.tracking  = d.tracking && d.tracking !== 'off';
-        scopeState.isParked  = !!d.isParked;
-        if (Number.isFinite(d.rate)) {
-          const map = {0.005:1, 0.02:20, 0.06:50, 0.2:100};
-          scopeState.rate = map[d.rate] || 20;
-          const rd = document.getElementById('scopeRateDisplay'); if (rd) rd.innerText = scopeState.rate + 'X';
-        }
-        if (Number.isFinite(d.ra) && Number.isFinite(d.dec) && typeof getAltAz === 'function') {
-          const p = getAltAz(d.ra*180/Math.PI, d.dec*180/Math.PI, state.currentTime);
-          if (Number.isFinite(p.alt)) { scopeState.mountAlt = p.alt; scopeState.mountAz = p.az; }
-        }
-        if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-        if (typeof scopeCanvasEl !== 'undefined' && scopeCanvasEl && document.getElementById('tab-scope').classList.contains('active') && typeof scopeDraw === 'function') scopeDraw();
-        const badge = document.getElementById('scopeConnBadge');
-        if (badge) { badge.innerText = scopeState.connected ? 'CONNESSO (satellite)' : 'DISCONNESSO'; badge.classList.toggle('on', scopeState.connected); }
-        const tb = document.getElementById('scopeTrackBtn');
-        if (tb) { tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON'; tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : ''); }
-      });
-
-      // Override comandi per inviarli al Satellite
-      window.scopeToggleConnect = function() {
-        const targetState = !(typeof scopeState !== 'undefined' && scopeState.connected);
-        SyncBus.send('cmd_connect', { on: targetState });
-        if (typeof scopeLog === 'function') scopeLog(`[MASTER] Comando Connetti ${targetState?'ON':'OFF'}`, 'warn');
-      };
-      window.scopeSlewToTarget = function() { if (scopeState.target) SyncBus.send('cmd_goto', { ra: scopeState.target.ra, dec: scopeState.target.dec }); };
-      window.scopeManualMove = function(dir) { SyncBus.send('cmd_manual_start', { dir: dir }); setTimeout(() => SyncBus.send('cmd_manual_stop'), 200); };
-      window.scopePark = function() { SyncBus.send('cmd_park'); };
-      window.scopeUnpark = function() { SyncBus.send('cmd_unpark'); };
-      window.scopeHome = function() { SyncBus.send('cmd_home'); };
-      window.scopeStopSlewing = function() { SyncBus.send('cmd_stop'); };
-      window.scopeEmergencyStop = function() { SyncBus.send('cmd_stop'); };
-      window.scopeSetHome = function() { SyncBus.send('cmd_set_home'); };
-      window.scopeSetPark = function() { SyncBus.send('cmd_set_park'); };
-      window.scopeToggleTracking = function() { SyncBus.send('cmd_tracking', { on: !scopeState.tracking }); };
-      window.scopeChangeRate = function(dir) { 
-        const rates = [1,5,10,20,50,100]; let idx = rates.indexOf(scopeState.rate); idx = Math.max(0, Math.min(rates.length-1, idx+dir)); 
-        scopeState.rate = rates[idx]; if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-        const map = { 1:0.005, 5:0.005, 10:0.02, 20:0.02, 50:0.06, 100:0.2 };
-        SyncBus.send('cmd_speed', { rate: map[scopeState.rate] || 0.02 });
-      };
-    }
-  }
-  
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-})();
-</script>
 <script>
 (function(){
   // 1. RIMOZIONE BANNER (se presente)
@@ -3006,241 +2844,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 })();
 </script>
 
-<script>
-(function () {
-  'use strict';
-  if (typeof SyncBus === 'undefined') { console.error('SyncBus mancante'); return; }
-  if (SyncBus.appId !== 'observatory') { console.warn('app-id atteso: observatory'); }
 
-  const SATELLITE_URL = 'https://egastrodiscover.github.io/EGASTROmount/';
-
-  function toast(m, err) {
-    if (typeof showToast === 'function') { try { showToast(m, !!err); return; } catch (e) {} }
-    console[err ? 'error' : 'log']('[MASTER]', m);
-  }
-
-  /* ============================================================
-     1. APRI SATELLITE (evita duplicati)
-     ============================================================ */
-  function openSatellite(extra) {
-    if (SyncBus.isPeerAlive() && SyncBus.getPeerId() === 'mount') {
-      SyncBus.send('focus_request', {});
-      const fc = document.getElementById('app-frame-container');
-      if (fc) fc.style.display = 'block';
-      toast('Satellite già aperto');
-      return;
-    }
-    const fc = document.getElementById('app-frame-container');
-    const fr = document.getElementById('app-frame');
-    const p = new URLSearchParams();
-    try {
-      if (typeof state !== 'undefined') {
-        if (Number.isFinite(state.lat)) p.set('lat', state.lat);
-        if (Number.isFinite(state.lon)) p.set('lon', state.lon);
-        if (state.target && Number.isFinite(state.target.ra)) {
-          p.set('targetName', state.target.n || '');
-          p.set('targetRa', state.target.ra);
-          p.set('targetDec', state.target.dec);
-        }
-      }
-    } catch (e) {}
-    if (extra) Object.keys(extra).forEach(k => p.set(k, extra[k]));
-    const url = SATELLITE_URL + (p.toString() ? '?' + p.toString() : '');
-    if (fc && fr) { fr.src = url; fc.style.display = 'block'; }
-    else window.open(url, '_blank');
-  }
-
-  /* ============================================================
-     2. COMANDI VERSO IL SATELLITE (con ACK)
-     ============================================================ */
-  async function sendCmd(type, data, retry) {
-    let ok = await SyncBus.sendWithAck(type, data, 4000);
-    if (!ok && retry !== false) {
-      toast('Satellite non risponde, riprovo...', true);
-      openSatellite();
-      await new Promise(r => setTimeout(r, 2500));
-      ok = await SyncBus.sendWithAck(type, data, 4000);
-    }
-    return ok;
-  }
-
-  window.masterGoto = async function (ra, dec, name) {
-    const ok = await sendCmd('cmd_goto', { ra: ra, dec: dec, name: name || '' });
-    toast(ok ? 'GOTO inviato' : 'GOTO fallito', !ok);
-  };
-  window.masterStop = function () {
-    SyncBus.send('cmd_stop', {});
-    setTimeout(() => SyncBus.send('cmd_stop', {}), 200);
-    setTimeout(() => SyncBus.send('cmd_stop', {}), 500);
-    toast('STOP inviato');
-  };
-  window.masterPark    = () => sendCmd('cmd_park').then(ok => toast(ok ? 'PARK ok' : 'PARK fallito', !ok));
-  window.masterUnpark  = () => sendCmd('cmd_unpark').then(ok => toast(ok ? 'UNPARK ok' : 'UNPARK fallito', !ok));
-  window.masterHome    = () => sendCmd('cmd_home').then(ok => toast(ok ? 'HOME ok' : 'HOME fallito', !ok));
-  window.masterSetHome = () => sendCmd('cmd_set_home').then(ok => toast(ok ? 'SET HOME ok' : 'SET HOME fallito', !ok));
-  window.masterSetPark = () => sendCmd('cmd_set_park').then(ok => toast(ok ? 'SET PARK ok' : 'SET PARK fallito', !ok));
-
-  /* ============================================================
-     3. STATO MOUNT RICEVUTO DAL SATELLITE
-     ============================================================ */
-  SyncBus.on('mount_state', function (d) {
-    if (!d) return;
-    if (typeof scopeState !== 'undefined') {
-      scopeState.connected = !!d.connected;
-      scopeState.tracking  = d.tracking && d.tracking !== 'off';
-      scopeState.isParked  = !!d.isParked;
-      if (Number.isFinite(d.ra) && Number.isFinite(d.dec) && typeof getAltAz === 'function') {
-        try {
-          const p = getAltAz(d.ra * 180 / Math.PI, d.dec * 180 / Math.PI, state.currentTime);
-          if (Number.isFinite(p.alt)) { scopeState.mountAlt = p.alt; scopeState.mountAz = p.az; }
-        } catch (e) {}
-      }
-      if (typeof scopeUpdateUI === 'function') { try { scopeUpdateUI(); } catch (e) {} }
-    }
-    const badge = document.getElementById('scopeConnBadge');
-    if (badge) {
-      badge.innerText = d.connected ? 'CONNESSO (sat)' : 'DISCONNESSO';
-      badge.classList.toggle('on', !!d.connected);
-    }
-  });
-
-  SyncBus.on('peer_offline', () => toast('Satellite disconnesso', true));
-  SyncBus.on('satellite_ready', () => { toast('Satellite pronto'); publishStatus(); });
-
-  /* ============================================================
-     4. PUBBLICA STATO GPS + TARGET
-     ============================================================ */
-  let lastSent = null;
-  function publishStatus() {
-    if (!SyncBus.isPeerAlive()) return;
-    try {
-      const payload = {
-        __isState: true,
-        gpsLat: (typeof state !== 'undefined' && Number.isFinite(state.lat)) ? state.lat : null,
-        gpsLon: (typeof state !== 'undefined' && Number.isFinite(state.lon)) ? state.lon : null,
-        target: (typeof state !== 'undefined' && state.target) ? {
-          n: state.target.n, ra: state.target.ra, dec: state.target.dec
-        } : null
-      };
-      const key = JSON.stringify(payload);
-      if (key === lastSent) return;
-      lastSent = key;
-      SyncBus.send('master_state', payload);
-    } catch (e) {}
-  }
-
-  /* ============================================================
-     5. SOSTITUISCI I COMANDI UI (per farli passare dal bus)
-     ============================================================ */
-  window.scopeToggleConnect = function () {
-    const on = !(typeof scopeState !== 'undefined' && scopeState.connected);
-    SyncBus.send('cmd_connect', { on: on });
-  };
-  window.scopeSlewToTarget = function () {
-    if (scopeState && scopeState.target) {
-      window.masterGoto(scopeState.target.ra, scopeState.target.dec, scopeState.target.name);
-    }
-  };
-  window.scopeManualMove = function (dir) {
-    SyncBus.send('cmd_manual_start', { dir: dir });
-    setTimeout(() => SyncBus.send('cmd_manual_stop'), 200);
-  };
-  window.scopePark          = window.masterPark;
-  window.scopeUnpark        = window.masterUnpark;
-  window.scopeHome          = window.masterHome;
-  window.scopeStopSlewing   = window.masterStop;
-  window.scopeEmergencyStop = window.masterStop;
-  window.scopeSetHome       = window.masterSetHome;
-  window.scopeSetPark       = window.masterSetPark;
-  window.scopeToggleTracking = function () {
-    const on = !(typeof scopeState !== 'undefined' && scopeState.tracking);
-    SyncBus.send('cmd_tracking', { on: on });
-  };
-  window.scopeChangeRate = function (dir) {
-    const rates = [1, 5, 10, 20, 50, 100];
-    let idx = rates.indexOf(scopeState.rate);
-    idx = Math.max(0, Math.min(rates.length - 1, idx + dir));
-    scopeState.rate = rates[idx];
-    if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-    const map = { 1: 0.005, 5: 0.005, 10: 0.02, 20: 0.02, 50: 0.06, 100: 0.2 };
-    SyncBus.send('cmd_speed', { rate: map[scopeState.rate] || 0.02 });
-  };
-
-  /* ============================================================
-     6. BOTTONE TELESCOPIO
-     ============================================================ */
-  const td = document.getElementById('btn-goto-telescope');
-  if (td) {
-    td.onclick = function (e) {
-      e.preventDefault();
-      if (window.parent !== window) { window.parent.postMessage('egastro-close-frame', '*'); return; }
-      openSatellite();
-    };
-  }
-
-  /* ============================================================
-     7. MENU SWITCHER
-     ============================================================ */
-  const sc = document.getElementById('app-switcher-container');
-  const tg = document.getElementById('app-switcher-toggle');
-  if (sc && tg) {
-    tg.onclick = function (e) {
-      e.preventDefault(); e.stopPropagation();
-      const open = sc.classList.toggle('open');
-      this.innerText = open ? '◀' : '▶';
-    };
-    document.addEventListener('click', e => {
-      if (!sc.contains(e.target)) { sc.classList.remove('open'); tg.innerText = '▶'; }
-    });
-  }
-
-  /* ============================================================
-     8. COORDINATE PERSISTENTI
-     ============================================================ */
-  const latI = document.getElementById('lat'), lonI = document.getElementById('lon');
-  try {
-    const saved = JSON.parse(localStorage.getItem('egastro_last_coords') || '{}');
-    if (saved.lat && saved.lon) {
-      if (latI) latI.value = saved.lat;
-      if (lonI) lonI.value = saved.lon;
-      if (typeof state !== 'undefined') {
-        state.lat = parseFloat(saved.lat);
-        state.lon = parseFloat(saved.lon);
-        if (typeof updateAll === 'function') updateAll();
-      }
-    }
-  } catch (e) {}
-  function saveCoords() {
-    if (latI && lonI) localStorage.setItem('egastro_last_coords', JSON.stringify({ lat: latI.value, lon: lonI.value }));
-  }
-  if (latI) latI.addEventListener('change', saveCoords);
-  if (lonI) lonI.addEventListener('change', saveCoords);
-
-  /* ============================================================
-     9. postMessage HANDLER
-     ============================================================ */
-  window.addEventListener('message', function (e) {
-    if (e.data === 'egastro-close-frame' || e.data === 'show-master') {
-      const fc = document.getElementById('app-frame-container');
-      if (fc) fc.style.display = 'none';
-    }
-  });
-
-  /* ============================================================
-     10. BOOT
-     ============================================================ */
-  function boot() {
-    SyncBus.send('master_ready', {
-      lat: (typeof state !== 'undefined') ? state.lat : null,
-      lon: (typeof state !== 'undefined') ? state.lon : null
-    });
-    setInterval(publishStatus, 500);
-    console.log('[MASTER] ready · ' + SyncBus.instanceId);
-  }
-  if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(boot, 200);
-  else window.addEventListener('load', () => setTimeout(boot, 200));
-})();
-</script>
 <script>
 (function() {
   function u() {
@@ -3253,166 +2857,455 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   setInterval(u,1000);u();
 })();
 </script>
+
+<script id="egastro-complete-final">(function(){if(window.__egastroComplete)return;window.__egastroComplete=true;var RAD=Math.PI/180,DEG=180/Math.PI,FOLLOW_RATE_FAST=8.0,TRACKING_RATES={sidereal:7.2921e-5,solar:7.2722e-5,lunar:7.0237e-5},DEFAULT_HOME_DEC=Math.PI/2;var LocalMS={ra:0,dec:DEFAULT_HOME_DEC,tRA:0,tDEC:DEFAULT_HOME_DEC,homeRA:0,homeDEC:DEFAULT_HOME_DEC,parkRA:0,parkDEC:DEFAULT_HOME_DEC,connected:false,isParked:false,slewMode:"idle",tracking:"off",speedPerStep:0.02,speedLabel:"8x",simulated:false};function normRA(r){r=r%(2*Math.PI);if(r<0)r+=2*Math.PI;if(r>=2*Math.PI)r-=2*Math.PI;return r}function angleDiff(a,b){var d=(b-a)%(2*Math.PI);if(d>Math.PI)d-=2*Math.PI;if(d<=-Math.PI)d+=2*Math.PI;return d}function getLocalAstroCoords(){var d=LocalMS.dec%(2*Math.PI);if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;var decA,off=0;if(d>Math.PI/2){decA=Math.PI-d;off=Math.PI}else if(d<-Math.PI/2){decA=-Math.PI-d;off=Math.PI}else decA=d;return{ra:normRA(LocalMS.ra+off),dec:decA}}var LocalTransport={socket:null,connected:false,wsConnect:function(url,onOk,onErr){this.disconnect();try{this.socket=new WebSocket(url)}catch(e){onErr&&onErr(e);return}var to=setTimeout(function(){if(!LocalTransport.connected){LocalTransport.disconnect();onErr&&onErr(new Error("Timeout"))}},5000);this.socket.onopen=function(){LocalTransport.connected=true;clearTimeout(to);onOk&&onOk()};this.socket.onerror=function(){clearTimeout(to);LocalTransport.connected=false;onErr&&onErr(new Error("WS error"))};this.socket.onclose=function(){clearTimeout(to);LocalTransport.connected=false}},send:function(c){if(this.socket&&this.socket.readyState===WebSocket.OPEN)this.socket.send(c)},disconnect:function(){if(this.socket){try{this.socket.close()}catch(e){}}this.socket=null;this.connected=false}};function localConnect(cfg,protoName){if(LocalMS.connected)return;if(protoName==="sim"){LocalMS.simulated=true;setTimeout(function(){LocalMS.connected=true;updateLocalBadge();if(typeof showToast==="function")showToast("Connesso (SIM locale)")},500);return}LocalTransport.wsConnect(cfg.bridge||"ws://localhost:8080",function(){LocalTransport.send(JSON.stringify({type:"connect",target:"tcp",host:cfg.ip||"192.168.4.1",port:cfg.port||9998}));LocalMS.connected=true;updateLocalBadge()},function(e){console.error(e)})}function localDisconnect(){LocalTransport.disconnect();LocalMS.connected=false;LocalMS.simulated=false;LocalMS.slewMode="idle";updateLocalBadge()}function updateLocalBadge(){var b=document.getElementById("scopeConnBadge");if(!b)return;if(LocalMS.connected){b.innerText="CONNESSO (LOCAL"+(LocalMS.simulated?"-SIM":"")+")";b.classList.add("on")}else{b.innerText="DISCONNESSO";b.classList.remove("on")}}function localGoto(raRad,decRad){var rd=angleDiff(LocalMS.ra,raRad);var dd=decRad-LocalMS.dec;while(dd>Math.PI)dd-=2*Math.PI;while(dd<-Math.PI)dd+=2*Math.PI;var dist=Math.sqrt(rd*rd+dd*dd);if(dist<0.001){LocalMS.slewMode="idle";return}LocalMS.tRA=raRad;LocalMS.tDEC=decRad;LocalMS.slewMode="goto"}function localTick(){var dt=1/60;if(LocalMS.slewMode==="goto"){var rd=angleDiff(LocalMS.ra,LocalMS.tRA);var dd=LocalMS.tDEC-LocalMS.dec;var dist=Math.sqrt(rd*rd+dd*dd);var step=FOLLOW_RATE_FAST*dt;if(dist<0.005){LocalMS.ra=LocalMS.tRA;LocalMS.dec=LocalMS.tDEC;LocalMS.slewMode=LocalMS.tracking!=="off"?"tracking":"idle";return}var f=Math.min(1,step/dist);LocalMS.ra=normRA(LocalMS.ra+rd*f);LocalMS.dec=LocalMS.dec+dd*f}else if(LocalMS.slewMode==="tracking"){var rate=TRACKING_RATES[LocalMS.tracking]||0;if(rate>0)LocalMS.ra=normRA(LocalMS.ra+rate*dt)}}setInterval(localTick,16);window.__LocalMount={MS:LocalMS,connected:function(){return LocalMS.connected},goto:localGoto,stop:function(){LocalMS.slewMode=LocalMS.tracking!=="off"?"tracking":"idle";LocalMS.tRA=LocalMS.ra;LocalMS.tDEC=LocalMS.dec},setTracking:function(m){LocalMS.tracking=m;LocalMS.slewMode=m==="off"?"idle":"tracking"},setSpeed:function(r,l){LocalMS.speedPerStep=r;LocalMS.speedLabel=l},park:function(){LocalMS.isParked=true;if(typeof showToast==="function")showToast("PARK locale")},unpark:function(){LocalMS.isParked=false;if(typeof showToast==="function")showToast("UNPARK locale")},home:function(){var h=getLocalAstroCoords();localGoto(h.ra,h.dec)},setHome:function(){var h=getLocalAstroCoords();LocalMS.homeRA=h.ra;LocalMS.homeDEC=h.dec},setPark:function(){var h=getLocalAstroCoords();LocalMS.parkRA=h.ra;LocalMS.parkDEC=h.dec}};function satAlive(){return typeof SyncBus!=="undefined"&&SyncBus.isPeerAlive()&&SyncBus.getPeerId()==="mount"}function waitScopeState(cb){if(typeof scopeState!=="undefined")return cb();setTimeout(function(){waitScopeState(cb)},100)}waitScopeState(function(){window.scopeToggleConnect=function(){if(satAlive()){SyncBus.send("cmd_connect",{on:!scopeState.connected})}else{if(LocalMS.connected){localDisconnect()}else{var p=document.getElementById("scopeProtocolSelect"),i=document.getElementById("scopeIp"),pt=document.getElementById("scopePort");localConnect({ip:i?i.value:"192.168.4.1",port:pt?parseInt(pt.value):9998,bridge:"ws://localhost:8080"},p?p.value:"sim")}}};window.masterGoto=window.scopeStepAction=window.scopeSlewToTarget=function(ra,dec,name){if(!scopeState.target)return;var raRad=scopeState.target.ra*RAD,decRad=scopeState.target.dec*RAD;if(satAlive()){SyncBus.send("cmd_goto",{ra:scopeState.target.ra,dec:scopeState.target.dec,name:scopeState.target.name||""});if(typeof showToast==="function")showToast("GOTO → satellite")}else{localGoto(raRad,decRad);if(typeof showToast==="function")showToast("GOTO locale: "+(name||scopeState.target.name))}};window.scopeStopSlewing=window.scopeEmergencyStop=window.masterStop=function(){if(satAlive())SyncBus.send("cmd_stop",{});else window.__LocalMount.stop();if(typeof showToast==="function")showToast("STOP")};window.scopePark=function(){if(satAlive())SyncBus.send("cmd_park",{});else window.__LocalMount.park()};window.scopeUnpark=function(){if(satAlive())SyncBus.send("cmd_unpark",{});else window.__LocalMount.unpark()};window.scopeHome=function(){if(satAlive())SyncBus.send("cmd_home",{});else window.__LocalMount.home()};window.scopeSetHome=function(){if(satAlive())SyncBus.send("cmd_set_home",{});else window.__LocalMount.setHome()};window.scopeSetPark=function(){if(satAlive())SyncBus.send("cmd_set_park",{});else window.__LocalMount.setPark()};window.scopeToggleTracking=window.toggleTrackingOn=function(){if(satAlive()){SyncBus.send("cmd_tracking",{on:scopeState.tracking==="off"})}else{window.__LocalMount.setTracking(LocalMS.tracking==="off"?"sidereal":"off")}};window.scopeChangeRate=function(dir){var rates=[1,8,32,128],map={1:0.005,8:0.02,32:0.06,128:0.2};var idx=rates.indexOf(scopeState.rate);if(idx===-1)idx=1;idx=Math.max(0,Math.min(rates.length-1,idx+dir));scopeState.rate=rates[idx];var rd=document.getElementById("scopeRateDisplay");if(rd)rd.innerText=rates[idx]+"X";if(satAlive())SyncBus.send("cmd_speed",{rate:map[rates[idx]]});else window.__LocalMount.setSpeed(map[rates[idx]],rates[idx]+"x")};var dirMap={n:"up",s:"down",e:"right",w:"left",nw:"up-left",ne:"up-right",sw:"down-left",se:"down-right"};window.dPadStart=function(dir,btn){var d=dirMap[dir]||dir;if(btn)btn.classList.add("active");if(satAlive()){SyncBus.send("cmd_manual_start",{dir:d});if(!window.__dpTimer){window.__dpTimer=setInterval(function(){SyncBus.send("cmd_manual_start",{dir:d})},150)}}else{LocalMS.slewMode="manual";var step=0.005;if(d.includes("up"))LocalMS.tDEC+=step;if(d.includes("down"))LocalMS.tDEC-=step;if(d.includes("left"))LocalMS.tRA-=step;if(d.includes("right"))LocalMS.tRA+=step}};window.dPadStop=function(btn){if(window.__dpTimer){clearInterval(window.__dpTimer);window.__dpTimer=null}if(btn)btn.classList.remove("active");document.querySelectorAll(".d-btn").forEach(function(b){b.classList.remove("active")});if(satAlive())SyncBus.send("cmd_manual_stop",{});else window.__LocalMount.stop()};if(typeof SyncBus!=="undefined"){SyncBus.on("mount_state",function(d){if(!d)return;scopeState.connected=!!d.connected;scopeState.tracking=d.tracking&&d.tracking!=="off";scopeState.isParked=!!d.isParked;if(Number.isFinite(d.rate)){var rm={0.005:1,0.02:8,0.06:32,0.2:128};scopeState.rate=rm[d.rate]||8;var rd=document.getElementById("scopeRateDisplay");if(rd)rd.innerText=scopeState.rate+"X"}var badge=document.getElementById("scopeConnBadge");if(badge){badge.innerText=d.connected?"CONNESSO ("+(d.driver||"SAT")+")":"DISCONNESSO";badge.classList.toggle("on",!!d.connected)}var po=document.getElementById("parkOverlay");if(po)po.classList.toggle("open",!!d.isParked);if(typeof updateTrackingBtn==="function")updateTrackingBtn();if(typeof updateStateButtons==="function")updateStateButtons()});var origSend=SyncBus.send.bind(SyncBus);SyncBus.send=function(t,d){if(t==="focus_request")return;return origSend(t,d)}}window.addEventListener("message",function(e){if(e.data==="show-master"){e.stopImmediatePropagation()}if(e.data==="hide-satellite-frame"){var fc=document.getElementById("app-frame-container");if(fc)fc.style.display="none"}},true);var td=document.getElementById("btn-goto-telescope");if(td){td.onclick=function(e){e.preventDefault();var fc=document.getElementById("app-frame-container"),fr=document.getElementById("app-frame");if(!fc||!fr)return;var src=fr.getAttribute("src")||"";if(src.indexOf("EGASTROmount")>=0){fc.style.display="block"}else{fr.src="https://egastrodiscover.github.io/EGASTROmount/";fc.style.display="block"}}}setInterval(function(){if(typeof MS==="undefined"||satAlive())return;MS.ra=LocalMS.ra;MS.dec=LocalMS.dec;MS.tRA=LocalMS.tRA;MS.tDEC=LocalMS.tDEC;MS.slewMode=LocalMS.slewMode;MS.tracking=LocalMS.tracking;MS.isParked=LocalMS.isParked;MS.connected=LocalMS.connected},30);function updateSyncBadge(){var b=document.getElementById("syncBadge"),dot=document.getElementById("syncDot"),t=document.getElementById("syncText");if(!b||!dot||!t)return;if(satAlive()){b.style.borderColor="#4ade80";b.style.background="rgba(74,222,128,0.15)";dot.style.color="#4ade80";t.textContent="SYNC OK · MOUNT"}else{b.style.borderColor="#8bd3ff";b.style.background="rgba(139,211,255,0.15)";dot.style.color="#8bd3ff";t.textContent="STAND-ALONE"}}setInterval(updateSyncBadge,1000);updateSyncBadge();console.log("[MASTER] ✅ FINAL-COMPLETE attivo")})})();</script>
 <script>
-/* ============================================================
-   EGASTRO MASTER — PATCH DEFINITIVE INTEGRATE
-   ============================================================ */
-(function() {
-  if (window.__egastroPatched) return;
-  window.__egastroPatched = true;
+/* ============ PIANETA — PATCH DEFINITIVA v7 ============ */
+(function () {
+  'use strict';
+  if (window.__pV7) return; window.__pV7 = true;
 
-  function ready() {
-    if (typeof SyncBus === 'undefined') { setTimeout(ready, 100); return; }
-    if (typeof scopeState === 'undefined') { setTimeout(ready, 100); return; }
+  function ready(cb, n) {
+    n = n || 0;
+    if (typeof SyncBus !== 'undefined' && typeof scopeState !== 'undefined' && typeof getAltAz === 'function') return cb();
+    if (n > 150) return console.error('[PLAN] deps timeout');
+    setTimeout(function () { ready(cb, n + 1); }, 100);
+  }
 
-    function latLon() {
-      var latEl = document.getElementById('lat');
-      var lonEl = document.getElementById('lon');
-      var lat = parseFloat(latEl && latEl.value) || 41.9;
-      var lon = parseFloat(lonEl && lonEl.value) || 12.5;
-      return { lat: lat, lon: lon };
+  /* Ritorno da satellite */
+  window.addEventListener('message', function (e) {
+    if (e.data === 'show-master' || e.data === 'egastro-close-frame') {
+      var fc = document.getElementById('app-frame-container');
+      if (fc) {
+        fc.style.display = 'none';
+        var ifr = fc.querySelector('iframe');
+        if (ifr) ifr.src = 'about:blank';
+      }
+    }
+  });
+
+  ready(function () {
+    var peerAlive = function () {
+      try { return SyncBus.isPeerAlive() && SyncBus.getPeerId() === 'mount'; } catch (e) { return false; }
+    };
+
+    /* ---------- BADGE STABILE (no sfarfallio) ---------- */
+    var styleEl = document.createElement('style');
+    styleEl.id = '__badgeStyleV7';
+    document.head.appendChild(styleEl);
+
+    function updateBadgeStyle() {
+      var alive = peerAlive();
+      styleEl.textContent = alive
+        ? '#syncBadge{border-color:#4ade80!important;background:rgba(74,222,128,0.15)!important}#syncDot{color:#4ade80!important}#syncText{white-space:nowrap!important;color:#4ade80!important}'
+        : '#syncBadge{border-color:#8bd3ff!important;background:rgba(139,211,255,0.15)!important}#syncDot{color:#8bd3ff!important}#syncText{white-space:nowrap!important;color:#8bd3ff!important}';
+    }
+    setInterval(updateBadgeStyle, 400);
+    updateBadgeStyle();
+
+    /* Forza testo stabile (intercetta scritture con trattino) */
+    var textEl = document.getElementById('syncText');
+    if (textEl && !textEl._v7patched) {
+      textEl._v7patched = true;
+      var desc = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent');
+      if (desc && desc.set) {
+        Object.defineProperty(textEl, 'textContent', {
+          configurable: true,
+          get: function () { return desc.get.call(this); },
+          set: function (v) {
+            var s = String(v);
+            if (s.indexOf('STAND-ALONE') !== -1) s = 'STAND ALONE';
+            if (s.indexOf('SYNC OFF') !== -1) s = 'STAND ALONE';
+            desc.set.call(this, s);
+          }
+        });
+      }
     }
 
-    // --- GOTO grande ---
-    window.scopeStepAction = function() {
+    /* ---------- TUNNEL: styling + handler ---------- */
+    var sc = document.getElementById('app-switcher-container');
+    var tg = document.getElementById('app-switcher-toggle');
+    if (sc && tg) {
+      /* Assicura che il container sia visibile e sopra tutto */
+      sc.style.cssText = 'position:fixed!important;top:50%!important;left:0!important;transform:translateY(-50%) translateX(calc(-100% + 30px))!important;z-index:999999!important;display:flex!important;align-items:center!important;transition:transform .35s cubic-bezier(.34,1.56,.64,1)!important;';
+
+      tg.textContent = 'TUNNEL';
+      tg.style.cssText = 'width:28px!important;height:88px!important;writing-mode:vertical-rl!important;text-orientation:mixed!important;font-size:11px!important;font-weight:800!important;letter-spacing:3px!important;font-family:Orbitron,sans-serif!important;color:#d4af37!important;background:rgba(10,18,32,0.95)!important;border:1px solid #d4af37!important;border-left:none!important;border-radius:0 8px 8px 0!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;backdrop-filter:blur(10px)!important;padding:0!important;';
+
+      /* Toggle apertura */
+      var openToggle = function () {
+        sc.classList.toggle('open');
+        sc.style.transform = sc.classList.contains('open')
+          ? 'translateY(-50%) translateX(0)'
+          : 'translateY(-50%) translateX(calc(-100% + 30px))';
+      };
+      tg.onclick = function (e) { e.preventDefault(); e.stopPropagation(); openToggle(); };
+
+      /* Chiudi cliccando fuori */
+      document.addEventListener('click', function (e) {
+        if (!sc.contains(e.target) && sc.classList.contains('open')) {
+          sc.classList.remove('open');
+          sc.style.transform = 'translateY(-50%) translateX(calc(-100% + 30px))';
+        }
+      }, true);
+
+      /* Bottone dome (verso pianeta) → disabilitato */
+      var btnDome = document.getElementById('btn-goto-dome');
+      if (btnDome) {
+        btnDome.style.pointerEvents = 'none';
+        btnDome.style.opacity = '0.35';
+      }
+
+      /* Bottone telescope → apre satellite */
+      var btnTel = document.getElementById('btn-goto-telescope');
+      if (btnTel) {
+        btnTel.onclick = function (e) {
+          e.preventDefault();
+          var fc = document.getElementById('app-frame-container');
+          var fr = document.getElementById('app-frame');
+          if (!fc || !fr) return;
+          var params = new URLSearchParams();
+          try {
+            if (Number.isFinite(state.lat)) { params.set('lat', state.lat); params.set('lon', state.lon); }
+            if (state.target && Number.isFinite(state.target.ra)) {
+              params.set('targetName', state.target.n || '');
+              params.set('targetRa', state.target.ra);
+              params.set('targetDec', state.target.dec);
+            }
+          } catch (err) {}
+          var url = 'https://egastrodiscover.github.io/EGASTROmount/';
+          if (params.toString()) url += '?' + params.toString();
+          fr.src = url;
+          fc.style.display = 'block';
+        };
+      }
+      console.log('[PLAN v7] Tunnel pronto');
+    }
+
+    /* ---------- COSTELLAZIONI da raw GitHub ---------- */
+    function parseConstellations(data) {
+      if (!data || !data.features || data.features.length < 10) throw new Error('formato');
+      return data.features.map(function (f) {
+        var segs = (f.geometry && f.geometry.coordinates) || [];
+        var stars = [], map = {};
+        var add = function (ra, dec) {
+          if (!isFinite(ra) || !isFinite(dec)) return -1;
+          var k = ra.toFixed(4) + ',' + dec.toFixed(4);
+          if (map[k] !== undefined) return map[k];
+          var i = stars.length; stars.push({ ra: ra, dec: dec, mag: 3 }); map[k] = i; return i;
+        };
+        return {
+          name: (f.properties && f.properties.name) || f.id,
+          abbr: f.id, stars: stars,
+          lines: segs.map(function (seg) {
+            if (!Array.isArray(seg)) return [];
+            return seg.map(function (pt) {
+              if (!Array.isArray(pt) || pt.length < 2) return -1;
+              return add(pt[0], pt[1]);
+            }).filter(function (i) { return i >= 0; });
+          }).filter(function (l) { return l.length >= 2; }),
+          area: '—', season: '—',
+          desc: 'Costellazione ' + ((f.properties && f.properties.name) || f.id)
+        };
+      }).filter(function (c) { return c.lines.length > 0; });
+    }
+    fetch('https://raw.githubusercontent.com/EGastroDISCOVER/EGASTRO/main/constellations.json?t=' + Date.now())
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var C = parseConstellations(data);
+        CONSTELLATIONS.length = 0;
+        Array.prototype.push.apply(CONSTELLATIONS, C);
+        if (typeof applyConstellationMeta === 'function') applyConstellationMeta();
+        if (typeof rebuildCatalog === 'function') rebuildCatalog();
+        if (typeof drawMap === 'function') drawMap();
+        console.log('[PLAN v7] ✅ Costellazioni: ' + C.length);
+      })
+      .catch(function (e) { console.warn('[PLAN v7] ⚠️ const:', e.message); });
+
+    /* ---------- MIRINO MOUNT sulla mappa Pianeta ---------- */
+    var _origDM = window.drawMap;
+    if (typeof _origDM === 'function' && !window.__mapMirrorV7) {
+      window.__mapMirrorV7 = true;
+      window.drawMap = function () {
+        _origDM.apply(this, arguments);
+        try {
+          var cv = document.getElementById('skyCanvas');
+          if (!cv || typeof project !== 'function') return;
+          var ctx = cv.getContext('2d');
+          var alt = scopeState.mountAlt, az = scopeState.mountAz;
+          var pt = project(alt, az);
+          if (!pt || !pt.visible) return;
+          var now = performance.now(), t = now / 1000;
+          ctx.save();
+
+          /* Anelli flash al connect */
+          if (scopeState.connectFlashStart > 0 && now - scopeState.connectFlashStart < 2500) {
+            var el = now - scopeState.connectFlashStart;
+            for (var k = 0; k < 3; k++) {
+              var ph = ((el / 2500) + k / 3) % 1;
+              var r = 15 + ph * 100;
+              ctx.strokeStyle = 'rgba(74,222,128,' + ((1 - ph) * 0.9) + ')';
+              ctx.lineWidth = 2.5;
+              ctx.beginPath(); ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2); ctx.stroke();
+            }
+          }
+
+          /* Mirino pulsante */
+          ctx.strokeStyle = '#ff4466';
+          ctx.shadowColor = '#ff4466';
+          ctx.shadowBlur = 12;
+          ctx.lineWidth = 2;
+          var r2 = 22 + Math.sin(t * 3) * 3;
+          ctx.beginPath(); ctx.arc(pt.x, pt.y, r2, 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(pt.x - 18, pt.y); ctx.lineTo(pt.x - 6, pt.y);
+          ctx.moveTo(pt.x + 6, pt.y); ctx.lineTo(pt.x + 18, pt.y);
+          ctx.moveTo(pt.x, pt.y - 18); ctx.lineTo(pt.x, pt.y - 6);
+          ctx.moveTo(pt.x, pt.y + 6); ctx.lineTo(pt.x, pt.y + 18);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#ff4466';
+          ctx.font = 'bold 11px Orbitron,sans-serif';
+          ctx.fillText('MOUNT', pt.x + 26, pt.y + 3);
+          ctx.restore();
+        } catch (e) {}
+      };
+      setInterval(function () {
+        var tab = document.getElementById('tab-sky');
+        if (tab && tab.classList.contains('active') && typeof window.drawMap === 'function') window.drawMap();
+      }, 180);
+    }
+
+    /* ---------- TELEMETRIA da satellite ---------- */
+    SyncBus.on('mount_state', function (d) {
+      if (!d) return;
+      var wasConn = scopeState.connected;
+      scopeState.connected = !!d.connected;
+      scopeState.tracking = d.tracking && d.tracking !== 'off';
+      scopeState.isParked = !!d.isParked;
+      if (!wasConn && scopeState.connected) scopeState.connectFlashStart = performance.now();
+
+      if (d.protocol) {
+        scopeState.protocol = d.protocol;
+        var ps = document.getElementById('scopeProtocolSelect');
+        if (ps) ps.value = d.protocol;
+      }
+      if (Number.isFinite(d.rate)) {
+        var rm = { 0.005: 1, 0.02: 8, 0.06: 32, 0.2: 128 };
+        scopeState.rate = rm[d.rate] || 8;
+        var rd = document.getElementById('scopeRateDisplay');
+        if (rd) rd.innerText = scopeState.rate + 'X';
+      }
+      if (Number.isFinite(d.ra) && Number.isFinite(d.dec)) {
+        try {
+          var p = getAltAz(d.ra * 180 / Math.PI, d.dec * 180 / Math.PI, state.currentTime);
+          if (Number.isFinite(p.alt)) { scopeState.mountAlt = p.alt; scopeState.mountAz = p.az; }
+        } catch (e) {}
+      }
+      var bd = document.getElementById('scopeConnBadge');
+      if (bd) {
+        bd.textContent = scopeState.connected ? 'CONNESSO (SATELLITE)' : 'DISCONNESSO';
+        bd.classList.toggle('on', scopeState.connected);
+      }
+      var tb = document.getElementById('scopeTrackBtn');
+      if (tb) { tb.innerText = scopeState.tracking ? 'Track OFF' : 'Track ON'; tb.className = 'triton-btn' + (scopeState.tracking ? ' active' : ''); }
+
+      /* Highlight park/unpark */
+      var pk = document.querySelector('[onclick*="scopePark"]');
+      var up = document.querySelector('[onclick*="scopeUnpark"]');
+      if (pk && !pk._v7patched) {
+        pk._v7patched = true;
+        pk.style.transition = 'all .3s';
+        pk._v7update = function (v) {
+          this.style.background = v ? 'linear-gradient(180deg,#f59e0b,#b45309)' : '';
+          this.style.color = v ? '#fff' : '';
+        };
+      }
+      if (up && !up._v7patched) {
+        up._v7patched = true;
+        up.style.transition = 'all .3s';
+        up._v7update = function (v) {
+          this.style.background = v ? 'linear-gradient(180deg,#ef4444,#b91c1c)' : '';
+          this.style.color = v ? '#fff' : '';
+          this.style.animation = v ? 'pulse 1.5s infinite' : '';
+        };
+      }
+      if (pk && pk._v7update) pk._v7update(scopeState.isParked);
+      if (up && up._v7update) up._v7update(scopeState.isParked);
+
+      if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+      if (typeof scopeDraw === 'function') scopeDraw();
+    });
+
+    /* ---------- COMANDI → satellite ---------- */
+    var cmd = function (t, d) { if (peerAlive()) SyncBus.send(t, d || {}); };
+
+    window.scopeToggleConnect = function () {
+      if (peerAlive()) {
+        var want = !scopeState.connected;
+        SyncBus.send('cmd_connect', { on: want });
+        var lat = parseFloat((document.getElementById('lat') || {}).value);
+        var lon = parseFloat((document.getElementById('lon') || {}).value);
+        if (isFinite(lat) && isFinite(lon)) {
+          SyncBus.send('master_ready', { lat: lat, lon: lon });
+          SyncBus.send('master_state', { __isState: true, gpsLat: lat, gpsLon: lon });
+        }
+        if (typeof scopeLog === 'function') scopeLog('[MASTER] Connetti ' + (want ? 'ON' : 'OFF') + ' → satellite', 'warn');
+        return;
+      }
+      if (scopeState.connected) {
+        scopeState.connected = false; scopeState.tracking = false;
+        var bd = document.getElementById('scopeConnBadge');
+        if (bd) { bd.textContent = 'STAND ALONE'; bd.classList.remove('on'); }
+        return;
+      }
+      var proto = (scopeState.protocol || 'sim').toLowerCase();
+      if (proto === 'sim' || scopeState.connType === 'sim') {
+        setTimeout(function () {
+          scopeState.connected = true;
+          scopeState.connectFlashStart = performance.now();
+          var bd = document.getElementById('scopeConnBadge');
+          if (bd) { bd.textContent = 'CONNESSO (LOCAL-SIM)'; bd.classList.add('on'); }
+        }, 350);
+      }
+    };
+
+    window.scopeSlewToTarget = window.scopeStepAction = function () {
       if (!scopeState.target) return;
-      var ll = latLon();
-      SyncBus.send('cmd_goto', {
-        ra: scopeState.target.ra, dec: scopeState.target.dec,
-        name: scopeState.target.name || '',
-        latMaster: ll.lat, lonMaster: ll.lon
-      });
-      if (typeof showToast === 'function') showToast('GOTO inviato');
+      var t = scopeState.target;
+      var pos = getAltAz(t.ra, t.dec, state.currentTime);
+      if (pos.alt < 0) return;
+      if (peerAlive()) {
+        SyncBus.send('cmd_goto', { ra: t.ra, dec: t.dec, name: t.name || '' });
+        if (typeof scopeLog === 'function') scopeLog('GOTO → satellite', 'ok');
+      }
+      /* Feedback locale immediato */
+      animateSlew(pos.alt, pos.az, 'GOTO ' + (t.name || ''));
     };
 
-    // --- Change slew speed (menu a tendina) ---
-    window.changeSlewSpeed = function(val) {
-      var v = parseFloat(val);
-      if (!Number.isFinite(v)) return;
-      SyncBus.send('cmd_speed', { rate: v });
-      if (typeof showToast === 'function') showToast('Velocità inviata');
-    };
+    /* Slew animato locale con % */
+    var slewRAF = null;
+    function animateSlew(tAlt, tAz, label) {
+      if (slewRAF) cancelAnimationFrame(slewRAF);
+      var sAlt = scopeState.mountAlt, sAz = scopeState.mountAz;
+      var dAz = tAz - sAz;
+      while (dAz > 180) dAz -= 360;
+      while (dAz < -180) dAz += 360;
+      var dAlt = tAlt - sAlt;
+      var dist = Math.sqrt(dAlt * dAlt + dAz * dAz);
+      if (dist < 0.1) return;
+      var dur = Math.max(500, Math.min(20000, dist / 8 * 1000));
+      var start = performance.now();
+      var btn = document.getElementById('scopePanelGotoBtn');
+      var orig = btn ? btn.innerText : '';
+      function step(now) {
+        var t = (now - start) / dur;
+        if (t >= 1) {
+          scopeState.mountAlt = tAlt;
+          scopeState.mountAz = ((tAz % 360) + 360) % 360;
+          slewRAF = null;
+          if (btn) { btn.innerText = '✓ OK'; btn.style.background = 'var(--ok)'; setTimeout(function () { if (!slewRAF) { btn.innerText = orig; btn.style.background = ''; } }, 1500); }
+          return;
+        }
+        var e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        scopeState.mountAlt = sAlt + dAlt * e;
+        scopeState.mountAz = ((sAz + dAz * e) % 360 + 360) % 360;
+        if (btn) btn.innerText = '⏳ ' + Math.round(t * 100) + '% · ' + label;
+        if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+        if (typeof scopeDraw === 'function') scopeDraw();
+        slewRAF = requestAnimationFrame(step);
+      }
+      slewRAF = requestAnimationFrame(step);
+    }
+    window.__animateSlew = animateSlew;
 
-    // --- Rate + - (pulsanti) ---
-    window.scopeChangeRate = function(dir) {
+    window.scopeStopSlewing = window.scopeEmergencyStop = function () {
+      if (slewRAF) { cancelAnimationFrame(slewRAF); slewRAF = null; }
+      cmd('cmd_stop'); setTimeout(function () { cmd('cmd_stop'); }, 200);
+    };
+    window.scopePark = function () {
+      if (peerAlive()) { cmd('cmd_park'); return; }
+      scopeState.isParked = true;
+      animateSlew(scopeState.parkAlt || 45, scopeState.parkAz || 0, 'PARK');
+    };
+    window.scopeUnpark = function () {
+      if (peerAlive()) { cmd('cmd_unpark'); return; }
+      scopeState.isParked = false;
+      animateSlew(scopeState.homeAlt || 45, scopeState.homeAz || 0, 'UNPARK');
+    };
+    window.scopeHome = function () {
+      if (peerAlive()) { cmd('cmd_home'); return; }
+      scopeState.tracking = false;
+      animateSlew(scopeState.homeAlt || 45, scopeState.homeAz || 0, 'HOME');
+    };
+    window.scopeSetHome = function () {
+      scopeState.homeAlt = scopeState.mountAlt;
+      scopeState.homeAz = scopeState.mountAz;
+      try { localStorage.setItem('planet_home_alt', scopeState.homeAlt); localStorage.setItem('planet_home_az', scopeState.homeAz); } catch (e) {}
+      if (peerAlive()) SyncBus.send('cmd_set_home', { alt: scopeState.homeAlt, az: scopeState.homeAz });
+    };
+    window.scopeSetPark = function () {
+      scopeState.parkAlt = scopeState.mountAlt;
+      scopeState.parkAz = scopeState.mountAz;
+      try { localStorage.setItem('planet_park_alt', scopeState.parkAlt); localStorage.setItem('planet_park_az', scopeState.parkAz); } catch (e) {}
+      if (peerAlive()) SyncBus.send('cmd_set_park', { alt: scopeState.parkAlt, az: scopeState.parkAz });
+    };
+    window.scopeToggleTracking = function () {
+      var on = !scopeState.tracking;
+      if (peerAlive()) cmd('cmd_tracking', { on: on });
+      else { scopeState.tracking = on; if (typeof scopeUpdateUI === 'function') scopeUpdateUI(); }
+    };
+    window.scopeChangeRate = function (dir) {
       var rates = [1, 8, 32, 128];
-      var map = { 1:0.005, 8:0.02, 32:0.06, 128:0.2 };
+      var map = { 1: 0.005, 8: 0.02, 32: 0.06, 128: 0.2 };
       var idx = rates.indexOf(scopeState.rate);
       if (idx === -1) idx = 1;
       idx = Math.max(0, Math.min(rates.length - 1, idx + dir));
       scopeState.rate = rates[idx];
       var rd = document.getElementById('scopeRateDisplay');
-      if (rd) rd.innerText = rates[idx] + 'X';
-      SyncBus.send('cmd_speed', { rate: map[rates[idx]] });
+      if (rd) rd.innerText = scopeState.rate + 'X';
+      if (peerAlive()) SyncBus.send('cmd_speed', { rate: map[scopeState.rate] });
     };
-
-    // --- STOP con toast ---
-    window.masterStop = function() {
-      SyncBus.send('cmd_stop', {});
-      setTimeout(function(){ SyncBus.send('cmd_stop', {}); }, 200);
-      if (typeof showToast === 'function') showToast('STOP inviato');
-    };
-    window.scopeStopSlewing = window.masterStop;
-    window.scopeEmergencyStop = window.masterStop;
-
-    // --- Sync ---
-    window.scopeSyncMount = function() {
-      if (!scopeState.target) return;
-      SyncBus.send('cmd_sync', { ra: scopeState.target.ra, dec: scopeState.target.dec, name: scopeState.target.name });
-      if (typeof showToast === 'function') showToast('Sync inviato');
-    };
-
-    // --- mount_state: badge + driver + protocol + rate ---
-    SyncBus.on('mount_state', function(d) {
-      if (!d) return;
-      // badge
-      var badge = document.getElementById('scopeConnBadge');
-      if (badge) {
-        if (d.connected) {
-          var lbl = (d.driver || 'CONN').toUpperCase();
-          badge.innerText = 'CONNESSO (' + lbl + ')';
-          badge.classList.add('on');
-        } else {
-          badge.innerText = 'DISCONNESSO';
-          badge.classList.remove('on');
-        }
-      }
-      // radio connType
-      if (d.driver) {
-        var drv = String(d.driver).toUpperCase();
-        var tr = drv === 'SIM' ? 'sim' : drv === 'WIFI' ? 'wifi' : drv === 'BT' ? 'bt' : null;
-        if (tr) {
-          var radio = document.querySelector('input[name="connType"][value="' + tr + '"]');
-          if (radio && !radio.checked) {
-            radio.checked = true;
-            radio.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-          scopeState.connType = tr;
-        }
-      }
-      // protocol
-      if (d.protocol) {
-        var sel = document.getElementById('scopeProtocolSelect');
-        if (sel) sel.value = d.protocol;
-        scopeState.protocol = d.protocol;
-      }
-      // rate
-      if (Number.isFinite(d.rate)) {
-        var rm = { 0.005:1, 0.02:8, 0.06:32, 0.2:128 };
-        scopeState.rate = rm[d.rate] || 8;
-        var rd = document.getElementById('scopeRateDisplay');
-        if (rd) rd.innerText = scopeState.rate + 'X';
-        var ss = document.getElementById('slew-speed');
-        if (ss) ss.value = String(d.rate);
-      }
-      // tracking/park
-      scopeState.connected = !!d.connected;
-      scopeState.tracking = d.tracking && d.tracking !== 'off';
-      scopeState.isParked = !!d.isParked;
-      var po = document.getElementById('parkOverlay');
-      if (po) po.classList.toggle('open', !!d.isParked);
-    });
-
-    // --- risposta a request_master_state ---
-    SyncBus.on('request_master_state', function() {
-      var ll = latLon();
-      SyncBus.send('master_ready', { lat: ll.lat, lon: ll.lon });
-    });
-    SyncBus.on('satellite_ready', function() {
-      var ll = latLon();
-      setTimeout(function() { SyncBus.send('master_ready', { lat: ll.lat, lon: ll.lon }); }, 200);
-    });
-
-    // --- badge sync header ---
-    function updateSyncBadge() {
-      var b = document.getElementById('syncBadge');
-      var d = document.getElementById('syncDot');
-      var t = document.getElementById('syncText');
-      if (!b || !d || !t) return;
-      if (SyncBus.isPeerAlive()) {
-        b.style.borderColor = '#4ade80';
-        b.style.background = 'rgba(74,222,128,0.15)';
-        d.style.color = '#4ade80';
-        t.textContent = 'SYNC OK · ' + (SyncBus.getPeerId() || '?').toUpperCase();
+    window.scopeManualMove = function (dir) {
+      if (peerAlive()) {
+        SyncBus.send('cmd_manual_start', { dir: dir });
+        setTimeout(function () { SyncBus.send('cmd_manual_stop'); }, 200);
       } else {
-        b.style.borderColor = '#f87171';
-        b.style.background = 'rgba(248,113,113,0.15)';
-        d.style.color = '#f87171';
-        t.textContent = 'SYNC OFF';
+        var step = (scopeState.rate || 8) * 0.05;
+        if (dir.indexOf('up') !== -1) scopeState.mountAlt = Math.min(90, scopeState.mountAlt + step);
+        if (dir.indexOf('down') !== -1) scopeState.mountAlt = Math.max(0, scopeState.mountAlt - step);
+        if (dir.indexOf('left') !== -1) scopeState.mountAz = (scopeState.mountAz - step + 360) % 360;
+        if (dir.indexOf('right') !== -1) scopeState.mountAz = (scopeState.mountAz + step) % 360;
+        if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+        if (typeof scopeDraw === 'function') scopeDraw();
       }
+    };
+
+    /* Init home/park da localStorage (default polare = lat/0) */
+    if (!isFinite(scopeState.homeAlt)) {
+      var lat = parseFloat((document.getElementById('lat') || {}).value) || 41.9;
+      var hA = parseFloat(localStorage.getItem('planet_home_alt'));
+      var hZ = parseFloat(localStorage.getItem('planet_home_az'));
+      var pA = parseFloat(localStorage.getItem('planet_park_alt'));
+      var pZ = parseFloat(localStorage.getItem('planet_park_az'));
+      scopeState.homeAlt = isFinite(hA) ? hA : lat;
+      scopeState.homeAz = isFinite(hZ) ? hZ : 0;
+      scopeState.parkAlt = isFinite(pA) ? pA : lat;
+      scopeState.parkAz = isFinite(pZ) ? pZ : 0;
     }
-    setInterval(updateSyncBadge, 1000);
-    updateSyncBadge();
 
-    console.log('[MASTER] ✅ PATCH DEFINITIVE ATTIVE');
-  }
+    setTimeout(function () { if (peerAlive()) SyncBus.send('request_home_park', {}); }, 1500);
+    SyncBus.on('mount_home_park_data', function (d) {
+      if (!d) return;
+      if (Number.isFinite(d.homeAlt)) scopeState.homeAlt = d.homeAlt;
+      if (Number.isFinite(d.homeAz)) scopeState.homeAz = d.homeAz;
+      if (Number.isFinite(d.parkAlt)) scopeState.parkAlt = d.parkAlt;
+      if (Number.isFinite(d.parkAz)) scopeState.parkAz = d.parkAz;
+    });
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', ready);
-  } else {
-    ready();
-  }
+    console.log('[PLAN v7] ✅ Patch completa');
+  });
 })();
 </script>
-<script id="egastro-complete-final">(function(){if(window.__egastroComplete)return;window.__egastroComplete=true;var RAD=Math.PI/180,DEG=180/Math.PI,FOLLOW_RATE_FAST=8.0,TRACKING_RATES={sidereal:7.2921e-5,solar:7.2722e-5,lunar:7.0237e-5},DEFAULT_HOME_DEC=Math.PI/2;var LocalMS={ra:0,dec:DEFAULT_HOME_DEC,tRA:0,tDEC:DEFAULT_HOME_DEC,homeRA:0,homeDEC:DEFAULT_HOME_DEC,parkRA:0,parkDEC:DEFAULT_HOME_DEC,connected:false,isParked:false,slewMode:"idle",tracking:"off",speedPerStep:0.02,speedLabel:"8x",simulated:false};function normRA(r){r=r%(2*Math.PI);if(r<0)r+=2*Math.PI;if(r>=2*Math.PI)r-=2*Math.PI;return r}function angleDiff(a,b){var d=(b-a)%(2*Math.PI);if(d>Math.PI)d-=2*Math.PI;if(d<=-Math.PI)d+=2*Math.PI;return d}function getLocalAstroCoords(){var d=LocalMS.dec%(2*Math.PI);if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;var decA,off=0;if(d>Math.PI/2){decA=Math.PI-d;off=Math.PI}else if(d<-Math.PI/2){decA=-Math.PI-d;off=Math.PI}else decA=d;return{ra:normRA(LocalMS.ra+off),dec:decA}}var LocalTransport={socket:null,connected:false,wsConnect:function(url,onOk,onErr){this.disconnect();try{this.socket=new WebSocket(url)}catch(e){onErr&&onErr(e);return}var to=setTimeout(function(){if(!LocalTransport.connected){LocalTransport.disconnect();onErr&&onErr(new Error("Timeout"))}},5000);this.socket.onopen=function(){LocalTransport.connected=true;clearTimeout(to);onOk&&onOk()};this.socket.onerror=function(){clearTimeout(to);LocalTransport.connected=false;onErr&&onErr(new Error("WS error"))};this.socket.onclose=function(){clearTimeout(to);LocalTransport.connected=false}},send:function(c){if(this.socket&&this.socket.readyState===WebSocket.OPEN)this.socket.send(c)},disconnect:function(){if(this.socket){try{this.socket.close()}catch(e){}}this.socket=null;this.connected=false}};function localConnect(cfg,protoName){if(LocalMS.connected)return;if(protoName==="sim"){LocalMS.simulated=true;setTimeout(function(){LocalMS.connected=true;updateLocalBadge();if(typeof showToast==="function")showToast("Connesso (SIM locale)")},500);return}LocalTransport.wsConnect(cfg.bridge||"ws://localhost:8080",function(){LocalTransport.send(JSON.stringify({type:"connect",target:"tcp",host:cfg.ip||"192.168.4.1",port:cfg.port||9998}));LocalMS.connected=true;updateLocalBadge()},function(e){console.error(e)})}function localDisconnect(){LocalTransport.disconnect();LocalMS.connected=false;LocalMS.simulated=false;LocalMS.slewMode="idle";updateLocalBadge()}function updateLocalBadge(){var b=document.getElementById("scopeConnBadge");if(!b)return;if(LocalMS.connected){b.innerText="CONNESSO (LOCAL"+(LocalMS.simulated?"-SIM":"")+")";b.classList.add("on")}else{b.innerText="DISCONNESSO";b.classList.remove("on")}}function localGoto(raRad,decRad){var rd=angleDiff(LocalMS.ra,raRad);var dd=decRad-LocalMS.dec;while(dd>Math.PI)dd-=2*Math.PI;while(dd<-Math.PI)dd+=2*Math.PI;var dist=Math.sqrt(rd*rd+dd*dd);if(dist<0.001){LocalMS.slewMode="idle";return}LocalMS.tRA=raRad;LocalMS.tDEC=decRad;LocalMS.slewMode="goto"}function localTick(){var dt=1/60;if(LocalMS.slewMode==="goto"){var rd=angleDiff(LocalMS.ra,LocalMS.tRA);var dd=LocalMS.tDEC-LocalMS.dec;var dist=Math.sqrt(rd*rd+dd*dd);var step=FOLLOW_RATE_FAST*dt;if(dist<0.005){LocalMS.ra=LocalMS.tRA;LocalMS.dec=LocalMS.tDEC;LocalMS.slewMode=LocalMS.tracking!=="off"?"tracking":"idle";return}var f=Math.min(1,step/dist);LocalMS.ra=normRA(LocalMS.ra+rd*f);LocalMS.dec=LocalMS.dec+dd*f}else if(LocalMS.slewMode==="tracking"){var rate=TRACKING_RATES[LocalMS.tracking]||0;if(rate>0)LocalMS.ra=normRA(LocalMS.ra+rate*dt)}}setInterval(localTick,16);window.__LocalMount={MS:LocalMS,connected:function(){return LocalMS.connected},goto:localGoto,stop:function(){LocalMS.slewMode=LocalMS.tracking!=="off"?"tracking":"idle";LocalMS.tRA=LocalMS.ra;LocalMS.tDEC=LocalMS.dec},setTracking:function(m){LocalMS.tracking=m;LocalMS.slewMode=m==="off"?"idle":"tracking"},setSpeed:function(r,l){LocalMS.speedPerStep=r;LocalMS.speedLabel=l},park:function(){LocalMS.isParked=true;if(typeof showToast==="function")showToast("PARK locale")},unpark:function(){LocalMS.isParked=false;if(typeof showToast==="function")showToast("UNPARK locale")},home:function(){var h=getLocalAstroCoords();localGoto(h.ra,h.dec)},setHome:function(){var h=getLocalAstroCoords();LocalMS.homeRA=h.ra;LocalMS.homeDEC=h.dec},setPark:function(){var h=getLocalAstroCoords();LocalMS.parkRA=h.ra;LocalMS.parkDEC=h.dec}};function satAlive(){return typeof SyncBus!=="undefined"&&SyncBus.isPeerAlive()&&SyncBus.getPeerId()==="mount"}function waitScopeState(cb){if(typeof scopeState!=="undefined")return cb();setTimeout(function(){waitScopeState(cb)},100)}waitScopeState(function(){window.scopeToggleConnect=function(){if(satAlive()){SyncBus.send("cmd_connect",{on:!scopeState.connected})}else{if(LocalMS.connected){localDisconnect()}else{var p=document.getElementById("scopeProtocolSelect"),i=document.getElementById("scopeIp"),pt=document.getElementById("scopePort");localConnect({ip:i?i.value:"192.168.4.1",port:pt?parseInt(pt.value):9998,bridge:"ws://localhost:8080"},p?p.value:"sim")}}};window.masterGoto=window.scopeStepAction=window.scopeSlewToTarget=function(ra,dec,name){if(!scopeState.target)return;var raRad=scopeState.target.ra*RAD,decRad=scopeState.target.dec*RAD;if(satAlive()){SyncBus.send("cmd_goto",{ra:scopeState.target.ra,dec:scopeState.target.dec,name:scopeState.target.name||""});if(typeof showToast==="function")showToast("GOTO → satellite")}else{localGoto(raRad,decRad);if(typeof showToast==="function")showToast("GOTO locale: "+(name||scopeState.target.name))}};window.scopeStopSlewing=window.scopeEmergencyStop=window.masterStop=function(){if(satAlive())SyncBus.send("cmd_stop",{});else window.__LocalMount.stop();if(typeof showToast==="function")showToast("STOP")};window.scopePark=function(){if(satAlive())SyncBus.send("cmd_park",{});else window.__LocalMount.park()};window.scopeUnpark=function(){if(satAlive())SyncBus.send("cmd_unpark",{});else window.__LocalMount.unpark()};window.scopeHome=function(){if(satAlive())SyncBus.send("cmd_home",{});else window.__LocalMount.home()};window.scopeSetHome=function(){if(satAlive())SyncBus.send("cmd_set_home",{});else window.__LocalMount.setHome()};window.scopeSetPark=function(){if(satAlive())SyncBus.send("cmd_set_park",{});else window.__LocalMount.setPark()};window.scopeToggleTracking=window.toggleTrackingOn=function(){if(satAlive()){SyncBus.send("cmd_tracking",{on:scopeState.tracking==="off"})}else{window.__LocalMount.setTracking(LocalMS.tracking==="off"?"sidereal":"off")}};window.scopeChangeRate=function(dir){var rates=[1,8,32,128],map={1:0.005,8:0.02,32:0.06,128:0.2};var idx=rates.indexOf(scopeState.rate);if(idx===-1)idx=1;idx=Math.max(0,Math.min(rates.length-1,idx+dir));scopeState.rate=rates[idx];var rd=document.getElementById("scopeRateDisplay");if(rd)rd.innerText=rates[idx]+"X";if(satAlive())SyncBus.send("cmd_speed",{rate:map[rates[idx]]});else window.__LocalMount.setSpeed(map[rates[idx]],rates[idx]+"x")};var dirMap={n:"up",s:"down",e:"right",w:"left",nw:"up-left",ne:"up-right",sw:"down-left",se:"down-right"};window.dPadStart=function(dir,btn){var d=dirMap[dir]||dir;if(btn)btn.classList.add("active");if(satAlive()){SyncBus.send("cmd_manual_start",{dir:d});if(!window.__dpTimer){window.__dpTimer=setInterval(function(){SyncBus.send("cmd_manual_start",{dir:d})},150)}}else{LocalMS.slewMode="manual";var step=0.005;if(d.includes("up"))LocalMS.tDEC+=step;if(d.includes("down"))LocalMS.tDEC-=step;if(d.includes("left"))LocalMS.tRA-=step;if(d.includes("right"))LocalMS.tRA+=step}};window.dPadStop=function(btn){if(window.__dpTimer){clearInterval(window.__dpTimer);window.__dpTimer=null}if(btn)btn.classList.remove("active");document.querySelectorAll(".d-btn").forEach(function(b){b.classList.remove("active")});if(satAlive())SyncBus.send("cmd_manual_stop",{});else window.__LocalMount.stop()};if(typeof SyncBus!=="undefined"){SyncBus.on("mount_state",function(d){if(!d)return;scopeState.connected=!!d.connected;scopeState.tracking=d.tracking&&d.tracking!=="off";scopeState.isParked=!!d.isParked;if(Number.isFinite(d.rate)){var rm={0.005:1,0.02:8,0.06:32,0.2:128};scopeState.rate=rm[d.rate]||8;var rd=document.getElementById("scopeRateDisplay");if(rd)rd.innerText=scopeState.rate+"X"}var badge=document.getElementById("scopeConnBadge");if(badge){badge.innerText=d.connected?"CONNESSO ("+(d.driver||"SAT")+")":"DISCONNESSO";badge.classList.toggle("on",!!d.connected)}var po=document.getElementById("parkOverlay");if(po)po.classList.toggle("open",!!d.isParked);if(typeof updateTrackingBtn==="function")updateTrackingBtn();if(typeof updateStateButtons==="function")updateStateButtons()});var origSend=SyncBus.send.bind(SyncBus);SyncBus.send=function(t,d){if(t==="focus_request")return;return origSend(t,d)}}window.addEventListener("message",function(e){if(e.data==="show-master"){e.stopImmediatePropagation()}if(e.data==="hide-satellite-frame"){var fc=document.getElementById("app-frame-container");if(fc)fc.style.display="none"}},true);var td=document.getElementById("btn-goto-telescope");if(td){td.onclick=function(e){e.preventDefault();var fc=document.getElementById("app-frame-container"),fr=document.getElementById("app-frame");if(!fc||!fr)return;var src=fr.getAttribute("src")||"";if(src.indexOf("EGASTROmount")>=0){fc.style.display="block"}else{fr.src="https://egastrodiscover.github.io/EGASTROmount/";fc.style.display="block"}}}setInterval(function(){if(typeof MS==="undefined"||satAlive())return;MS.ra=LocalMS.ra;MS.dec=LocalMS.dec;MS.tRA=LocalMS.tRA;MS.tDEC=LocalMS.tDEC;MS.slewMode=LocalMS.slewMode;MS.tracking=LocalMS.tracking;MS.isParked=LocalMS.isParked;MS.connected=LocalMS.connected},30);function updateSyncBadge(){var b=document.getElementById("syncBadge"),dot=document.getElementById("syncDot"),t=document.getElementById("syncText");if(!b||!dot||!t)return;if(satAlive()){b.style.borderColor="#4ade80";b.style.background="rgba(74,222,128,0.15)";dot.style.color="#4ade80";t.textContent="SYNC OK · MOUNT"}else{b.style.borderColor="#8bd3ff";b.style.background="rgba(139,211,255,0.15)";dot.style.color="#8bd3ff";t.textContent="STAND-ALONE"}}setInterval(updateSyncBadge,1000);updateSyncBadge();console.log("[MASTER] ✅ FINAL-COMPLETE attivo")})})();</script></body>
+</body>
 </html>
