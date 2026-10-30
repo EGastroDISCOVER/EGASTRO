@@ -2794,7 +2794,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
           return { name: f.properties?.name || f.id, abbr: f.id, stars, lines: segs.map(s=>s.map(p=>add(p[0],p[1]))), area:'—', season:'—', desc:'Costellazione '+(f.properties?.name||f.id) };
         });
 
-        if (typeof applyConstellationMeta === 'function') applyConstellationMeta();
+        if (typeof applyConstellationMeta === 'function') applyConstellationMeta(); /* __fixRebuildCatalog */ if (typeof rebuildCatalog === 'function') rebuildCatalog(); if (typeof renderCatalog === 'function' && document.getElementById('tab-catalog') && document.getElementById('tab-catalog').classList.contains('active')) renderCatalog();
         if (typeof drawMap === 'function') drawMap();
         console.log('✅ Costellazioni caricate in background (' + CONSTELLATIONS.length + ')');
       }
@@ -2943,5 +2943,24 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 <script id="unified-tunnel">
 (function(){"use strict";if(window.__unifiedTunnel)return;window.__unifiedTunnel=true;var MY_APP=(document.querySelector('meta[name="app-id"]')||{}).content||"observatory";var OTHER_URL=MY_APP==="observatory"?"https://egastrodiscover.github.io/EGASTROmount/":"https://egastrodiscover.github.io/EGASTRO/";var ICON=MY_APP==="observatory"?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"/><path d="M7 16l-2 6"/><path d="M3 22h8"/><path d="M10 6l10-3 2 4-10 3-2-4z"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21v-8"/><path d="M20 21v-8"/><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 5v8"/><path d="M12 10l-3-2"/></svg>';var LABEL=MY_APP==="observatory"?"MOUNT":"DOME";var btn=document.createElement("button");btn.id="__tunnelBtn";btn.title=MY_APP==="observatory"?"Apri Montatura":"Apri Osservatorio";btn.innerHTML=ICON+'<span style="font-size:8px;margin-top:2px;letter-spacing:1px;">'+LABEL+"</span>";btn.style.cssText="position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:2147483647;width:54px;height:54px;border-radius:0 12px 12px 0;background:rgba(10,18,32,.95);border:2px solid #d4af37;border-left:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(212,175,55,.5);color:#d4af37;padding:0;font-family:Orbitron,sans-serif";var wrap=document.createElement("div");wrap.id="__tunnelWrap";wrap.style.cssText="position:fixed;inset:0;z-index:2147483645;background:#05070a;display:none;";var frame=document.createElement("iframe");frame.id="__tunnelFrame";frame.style.cssText="width:100%;height:100%;border:none;";frame.setAttribute("allow","geolocation; camera; microphone; fullscreen");wrap.appendChild(frame);document.body.appendChild(btn);document.body.appendChild(wrap);function openTunnel(){if(!frame.getAttribute("data-loaded")){frame.src=OTHER_URL+"?embed=1&t="+Date.now();frame.setAttribute("data-loaded","1");}wrap.style.display="block";btn.style.display="none";}function closeTunnel(){wrap.style.display="none";btn.style.display="flex";}if(window.parent!==window){btn.onclick=function(){try{window.parent.postMessage("close-tunnel","*");}catch(e){}};}else{btn.onclick=openTunnel;}window.addEventListener("message",function(e){if(e.data==="close-tunnel")closeTunnel();});var SK="egastro_sync_state";var _lLat=null,_lLon=null,_lTKey=null;function rs(){try{return JSON.parse(localStorage.getItem(SK)||"{}");}catch(e){return {};}}function ws(o){try{var p=rs();var m=Object.assign({},p,o,{ts:Date.now()});localStorage.setItem(SK,JSON.stringify(m));}catch(e){}}function pub(){if(MY_APP==="observatory"){var s=(typeof state!=="undefined")?state:null;if(!s)return;ws({from:"observatory",coords:{lat:s.lat,lon:s.lon},target:s.target?{n:s.target.n||s.target.name,ra:s.target.ra,dec:s.target.dec}:null});}else{var mo=(typeof MS!=="undefined")?MS:null;if(!mo)return;ws({from:"mount",mount:{connected:mo.connected,tracking:mo.tracking,isParked:mo.isParked,slewMode:mo.slewMode,ra:mo.ra,dec:mo.dec,speed:mo.speedLabel,gps:{lat:mo.gpsLat,lon:mo.gpsLon,active:mo.gpsActive}}});}}function con(){var s=rs();if(!s.from||s.from===MY_APP)return;if(MY_APP==="observatory"){if(s.mount){var b=document.getElementById("syncBadge"),d=document.getElementById("syncDot"),t=document.getElementById("syncText");if(b&&t){if(s.mount.connected){b.style.borderColor="#4ade80";b.style.background="rgba(74,222,128,0.15)";if(d)d.style.color="#4ade80";t.textContent="MOUNT ONLINE";}else{b.style.borderColor="#f87171";b.style.background="rgba(248,113,113,0.15)";if(d)d.style.color="#f87171";t.textContent="MOUNT OFFLINE";}}if(s.mount.gps&&Number.isFinite(s.mount.gps.lat)&&Number.isFinite(s.mount.gps.lon)){if(_lLat!==s.mount.gps.lat||_lLon!==s.mount.gps.lon){_lLat=s.mount.gps.lat;_lLon=s.mount.gps.lon;var la=document.getElementById("lat"),lo=document.getElementById("lon");if(la)la.value=s.mount.gps.lat.toFixed(4);if(lo)lo.value=s.mount.gps.lon.toFixed(4);if(typeof readInputs==="function")readInputs();}}}}else{if(s.coords&&Number.isFinite(s.coords.lat)&&Number.isFinite(s.coords.lon)&&typeof MS!=="undefined"){if(_lLat!==s.coords.lat||_lLon!==s.coords.lon){_lLat=s.coords.lat;_lLon=s.coords.lon;MS.gpsLat=s.coords.lat;MS.gpsLon=s.coords.lon;MS.gpsActive=true;if(typeof updateTelemetry==="function")updateTelemetry();if(typeof updateLinkButtons==="function")updateLinkButtons();}}if(s.target&&typeof scopeSelectTarget==="function"&&typeof scopeState!=="undefined"){var k=s.target.n+"|"+s.target.ra+"|"+s.target.dec;if(_lTKey!==k){_lTKey=k;try{scopeSelectTarget(s.target.n,s.target.n,"Oggetto",s.target.ra,s.target.dec,{});}catch(e){}}}}}setInterval(function(){pub();con();},1000);window.addEventListener("storage",function(e){if(e.key===SK)con();});pub();console.log("[UnifiedTunnel v2] attivo · app =",MY_APP,"· iframe:",window.parent!==window);})();</script>
+
+<script id="__fixPopulateProvinces">
+(function(){
+  function initProvinces(){
+    if (typeof populateProvinces === "function") {
+      var sel = document.getElementById("citySelect");
+      if (sel && sel.options.length <= 1) {
+        populateProvinces();
+        console.log("[Fix] populateProvinces eseguita al caricamento");
+      }
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function(){ setTimeout(initProvinces, 100); });
+  } else {
+    setTimeout(initProvinces, 100);
+  }
+})();
+</script>
 </body>
 </html>
