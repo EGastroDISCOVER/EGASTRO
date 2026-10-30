@@ -2953,31 +2953,34 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
     }
   });
 </script>
-  <!-- TUNNEL PIANETA -->
+<!-- TUNNEL PIANETA DEFINITIVO -->
 <style>
   #my-tunnel-btn {
-    position: fixed; left: 0; top: 50%; transform: translateY(-50%);
-    z-index: 999999; display: block;
+    position: fixed !important; left: 0 !important; top: 50% !important; transform: translateY(-50%) !important;
+    z-index: 999999 !important; display: block !important;
   }
   #my-tunnel-btn button {
-    width: 60px; height: 60px; border-radius: 0 12px 12px 0;
-    background: #0a1220; border: 3px solid #00ff00; /* Verde per vederlo subito */
-    color: #00ff00; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 20px rgba(0,255,0,0.6);
+    width: 64px !important; height: 80px !important; border-radius: 0 12px 12px 0 !important;
+    background: #0a1220 !important; border: 3px solid #00ff00 !important;
+    color: #00ff00 !important; cursor: pointer !important;
+    display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 8px !important;
+    box-shadow: 0 0 20px rgba(0,255,0,0.6) !important;
+    padding: 0 !important;
   }
-  #mount-iframe {
-    display: none; position: fixed; inset: 0;
-    z-index: 999998; background: #000;
+  #my-tunnel-btn button svg { width: 24px !important; height: 24px !important; }
+  #my-tunnel-btn button .tunnel-label {
+    font-family: 'Orbitron', sans-serif !important; font-size: 10px !important; font-weight: 900 !important; letter-spacing: 1px !important; color: #00ff00 !important;
   }
+  #mount-iframe { display: none; position: fixed !important; inset: 0 !important; z-index: 999998 !important; background: #000 !important; }
 </style>
 <div id="my-tunnel-btn">
   <button onclick="window.openTunnel()">
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path><path d="M7 16l-2 6"></path><path d="M3 22h8"></path><path d="M10 6l10-3 2 4-10 3-2-4z"></path></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path><path d="M7 16l-2 6"></path><path d="M3 22h8"></path><path d="M10 6l10-3 2 4-10 3-2-4z"></path></svg>
+    <span class="tunnel-label">TUNNEL</span>
   </button>
 </div>
 <div id="mount-iframe">
-  <iframe id="mount-frame" style="width:100%; height:100%; border:none;"></iframe>
+  <iframe id="mount-frame" style="width:100% !important; height:100% !important; border:none !important;"></iframe>
 </div>
 <script>
   window.openTunnel = function() {
