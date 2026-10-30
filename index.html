@@ -2962,5 +2962,34 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
   }
 })();
 </script>
+
+<!-- __syncGPSObserver — Tappa 1: pubblica GPS/coordinate in localStorage -->
+<script id="__syncGPSObserver">
+(function(){
+  "use strict";
+  if (window.__syncGPSObserver) return;
+  window.__syncGPSObserver = true;
+  var KEY = "egastro_sync_obs";
+  function publish(){
+    try {
+      if (typeof state === "undefined" || !state) return;
+      if (!Number.isFinite(state.lat) || !Number.isFinite(state.lon)) return;
+      var target = state.target ? {
+        n: state.target.n || state.target.name,
+        ra: state.target.ra,
+        dec: state.target.dec
+      } : null;
+      localStorage.setItem(KEY, JSON.stringify({
+        coords: { lat: state.lat, lon: state.lon },
+        target: target,
+        ts: Date.now()
+      }));
+    } catch(e) {}
+  }
+  setInterval(publish, 1000);
+  publish();
+  console.log("[Sync GPS] Observatory publishing attivo");
+})();
+</script>
 </body>
 </html>
