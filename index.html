@@ -778,7 +778,7 @@ console.log('[EG-CORE v1] ✅ Modulo condiviso caricato');
   </div>
   <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)">
   <h1>EGastro <span>DISCOVER</span> <span class="version-badge">v8.1</span></h1>
-<div id="syncBadge" style="display:inline-flex; align-items:center; gap:6px; margin-top:8px; padding:4px 12px; border-radius:20px; border:1.5px solid #6b778c; background:rgba(107,119,140,0.1); font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; transition:all 0.3s; color:#c9d1e3;"><span id="syncDot" style="font-size:14px; color:#6b778c; line-height:1;">●</span><span id="syncText">SYNC INIT...</span></div>
+<div id="" style="display:inline-flex; align-items:center; gap:6px; margin-top:8px; padding:4px 12px; border-radius:20px; border:1.5px solid #6b778c; background:rgba(107,119,140,0.1); font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; transition:all 0.3s; color:#c9d1e3;"><span id="syncDot" style="font-size:14px; color:#6b778c; line-height:1;">●</span><span id="syncText">SYNC INIT...</span></div>
 </header>
 
 <nav id="menu">
@@ -3184,15 +3184,27 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 
 
 <script>
-(function() {
-  function u() {
-    var b=document.getElementById('syncBadge'),d=document.getElementById('syncDot'),t=document.getElementById('syncText');
-    if(!b||!d||!t)return;
-    if(typeof SyncBus==='undefined'){b.style.borderColor='#6b778c';b.style.background='rgba(107,119,140,0.1)';d.style.color='#6b778c';t.textContent='NO BUS';return;}
-    if(SyncBus.isPeerAlive()){b.style.borderColor='#4ade80';b.style.background='rgba(74,222,128,0.15)';d.style.color='#4ade80';t.textContent='SYNC OK · '+(SyncBus.getPeerId()||'?').toUpperCase();}
-    else{b.style.borderColor='#f87171';b.style.background='rgba(248,113,113,0.15)';d.style.color='#f87171';t.textContent='SYNC OFF';}
+(function(){
+  function updateBadge() {
+    const b = document.getElementById('syncBadge');
+    const d = document.getElementById('syncDot');
+    const t = document.getElementById('syncText');
+    if (!b || !d || !t) return;
+    if (typeof SyncBus === 'undefined') { t.textContent = 'NO BUS'; return; }
+    const peerAlive = SyncBus.isPeerAlive();
+    if (peerAlive) {
+      b.style.borderColor = '#4ade80';
+      b.style.background = 'rgba(74,222,128,0.15)';
+      d.style.color = '#4ade80';
+      t.textContent = 'SYNC OK · MASTER';
+    } else {
+      b.style.borderColor = '#fbbf24';
+      b.style.background = 'rgba(251,191,36,0.12)';
+      d.style.color = '#fbbf24';
+      t.textContent = 'STANDALONE';
+    }
   }
-  setInterval(u,1000);u();
+  setInterval(updateBadge, 1000); updateBadge();
 })();
 </script>
 
