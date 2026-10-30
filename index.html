@@ -3189,10 +3189,15 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     const b = document.getElementById('syncBadge');
     const d = document.getElementById('syncDot');
     const t = document.getElementById('syncText');
-    if (!b || !d || !t) return;
-    if (typeof SyncBus === 'undefined') { t.textContent = 'NO BUS'; return; }
+    if (!b || !d || !t || typeof SyncBus === 'undefined') return;
     const peerAlive = SyncBus.isPeerAlive();
-    if (peerAlive) {
+    const readOnly = !!window.__READONLY__;
+    if (peerAlive && readOnly) {
+      b.style.borderColor = '#8bd3ff';
+      b.style.background = 'rgba(139,211,255,0.15)';
+      d.style.color = '#8bd3ff';
+      t.textContent = 'SYNC OK · SLAVE';
+    } else if (peerAlive) {
       b.style.borderColor = '#4ade80';
       b.style.background = 'rgba(74,222,128,0.15)';
       d.style.color = '#4ade80';
