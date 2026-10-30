@@ -2403,6 +2403,171 @@ function loadAllSky() {
   let fu = url; if (!/^https?:\/\//i.test(fu)) { if (/^[\w.-]+(:\d+)?(\/.*)?$/.test(fu)) fu = 'http://'+fu; else return; }
   localStorage.setItem('egastro_allsky_url', fu); const img = document.getElementById('allsky-img'), span = document.querySelector('#allsky-prev span'); const full = fu + (fu.includes('?')?'&':'?') + 't=' + Date.now(); img.style.display = 'block'; if (span) span.style.display = 'none';
   const test = new Image(); test.onload = () => { img.src = full; }; test.onerror = () => { img.style.display = 'none'; if (span) { span.style.display = 'block'; span.innerText = 'Errore.'; } }; test.src = full;
+}  
+  /* ============================================================
+   PANNELLO CONNESSIONE UNIFICATO — Pianeta
+   ============================================================ */
+let __connPanelOpen = false;
+
+function openConnectionPanel() {
+  let panel = document.getElementById('__connPanel');
+  if (panel) { panel.remove(); return; }
+
+  panel = document.createElement('div');
+  panel.id = '__connPanel';
+  panel.style.cssText = `
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    z-index:99999; width:min(92vw,440px); background:#0d121c;
+    border:2px solid #d4af37; border-radius:16px; padding:20px;
+    box-shadow:0 0 60px rgba(212,175,55,0.35); color:#c9d1e3;
+    font-family:'Inter',sans-serif;
+  `;
+  panel.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="font-family:'Orbitron'; color:#d4af37; font-size:16px; letter-spacing:1px;">🔌 Connetti Montatura</h3>
+      <button id="__connClose" style="background:none;border:none;color:#6b778c;font-size:22px;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div style="display:flex; gap:6px; margin-bottom:14px;">
+      <button class="__connTab" data-tab="wifi" style="flex:1; padding:8px; border-radius:8px; border:1px solid #d4af37; background:#d4af37; color:#000; font-weight:700; cursor:pointer; font-size:12px;">📶 WiFi</button>
+      <button class="__connTab" data-tab="bt" style="flex:1; padding:8px; border-radius:8px; border:1px solid #334155; background:#151b26; color:#cbd5e1; font-weight:700; cursor:pointer; font-size:12px;">📡 Bluetooth</button>
+      <button class="__connTab" data-tab="sim" style="flex:1; padding:8px; border-radius:8px; border:1px solid #334155; background:#151b26; color:#cbd5e1; font-weight:700; cursor:pointer; font-size:12px;">🧪 Sim</button>
+    </div>
+    <div id="__connBody"></div>
+    <div id="__connStatus" style="margin-top:12px; font-size:11px; color:#8a9bb5; text-align:center;"></div>
+  `;
+  document.body.appendChild(panel);
+
+  panel.querySelector('#__connClose').onclick = () => panel.remove();
+  panel.querySelectorAll('.__connTab').forEach(tab => {
+    tab.onclick = () => {
+      panel.querySelectorAll('.__connTab').forEach(t => {
+        t.style.background = '#151b26'; t.style.color = '#cbd5e1'; t.style.borderColor = '#334155';
+      });
+      tab.style.background = '#d4af37'; tab.style.color = '#000'; tab.style.borderColor = '#d4af37';
+      renderConnTab(tab.dataset.tab, panel);
+    };
+  });
+  // Precompila con ultimi valori salvati
+  renderConnTab('wifi', panel);
+}
+
+function renderConnTab(type, panel) {
+  const body = panel.querySelector('#__connBody');
+  const saved = JSON.parse(localStorage.getItem('eg:connConfig') || '{}');
+  if (type === 'wifi') {
+    body.innerHTML = `
+      <label style="display:block;font-size:11px;color:#8a9bb5;text-transform:uppercase;margin-bottom:4px;">Protocollo</label>
+      <select id="__wifiProto" style="width:100%;padding:10px;background:#151b26;border:1px solid #334155;color:#fff;border-radius:8px;margin-bottom:10px;font-family:'Inter';">
+        <option value="onstep">OnStep / LX200</option>
+        <option value="ascom_alpaca">ASCOM Alpaca</option>
+        <option value="synscan">SynScan UDP</option>
+      </select>
+      <label style="display:block;font-size:11px;color:#8a9bb5;text-transform:uppercase;margin-bottom:4px;">IP</label>
+      <input id="__wifiIp" type="text" value="${saved.wifiIp || '192.168.4.1'}" style="width:100%;padding:10px;background:#151b26;border:1px solid #334155;color:#fff;border-radius:8px;margin-bottom:10px;font-family:'Orbitron';">
+      <label style="display:block;font-size:11px;color:#8a9bb5;text-transform:uppercase;margin-bottom:4px;">Porta</label>
+      <input id="__wifiPort" type="number" value="${saved.wifiPort || 9998}" style="width:100%;padding:10px;background:#151b26;border:1px solid #334155;color:#fff;border-radius:8px;margin-bottom:10px;font-family:'Orbitron';">
+      <label style="display:block;font-size:11px;color:#8a9bb5;text-transform:uppercase;margin-bottom:4px;">Bridge WebSocket</label>
+      <input id="__wifiBridge" type="text" value="${saved.wifiBridge || 'ws://localhost:8080'}" style="width:100%;padding:10px;background:#151b26;border:1px solid #334155;color:#fff;border-radius:8px;margin-bottom:14px;font-family:'Orbitron';">
+      <button id="__wifiConnect" style="width:100%;padding:12px;background:#4ade80;color:#000;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Orbitron';letter-spacing:1px;">CONNETTI WiFi</button>
+    `;
+    body.querySelector('#__wifiConnect').onclick = () => {
+      const cfg = {
+        type: 'wifi',
+        proto: body.querySelector('#__wifiProto').value,
+        ip: body.querySelector('#__wifiIp').value.trim(),
+        port: parseInt(body.querySelector('#__wifiPort').value, 10),
+        bridge: body.querySelector('#__wifiBridge').value.trim()
+      };
+      localStorage.setItem('eg:connConfig', JSON.stringify({ wifiIp: cfg.ip, wifiPort: cfg.port, wifiBridge: cfg.bridge }));
+      connectMount(cfg, panel);
+    };
+  } else if (type === 'bt') {
+    body.innerHTML = `
+      <label style="display:block;font-size:11px;color:#8a9bb5;text-transform:uppercase;margin-bottom:4px;">Protocollo</label>
+      <select id="__btProto" style="width:100%;padding:10px;background:#151b26;border:1px solid #334155;color:#fff;border-radius:8px;margin-bottom:10px;font-family:'Inter';">
+        <option value="onstep">OnStep BT</option>
+        <option value="synscan">SynScan BT</option>
+      </select>
+      <label style="display:block;font-size:11px;color:#8a9bb5;text-transform:uppercase;margin-bottom:4px;">Nome / MAC</label>
+      <input id="__btDev" type="text" value="${saved.btDev || ''}" placeholder="HC-05 / 00:11:22:33:44:55" style="width:100%;padding:10px;background:#151b26;border:1px solid #334155;color:#fff;border-radius:8px;margin-bottom:10px;font-family:'Orbitron';">
+      <label style="display:block;font-size:11px;color:#8a9bb5;text-transform:uppercase;margin-bottom:4px;">Bridge WebSocket</label>
+      <input id="__btBridge" type="text" value="${saved.btBridge || 'ws://localhost:8081'}" style="width:100%;padding:10px;background:#151b26;border:1px solid #334155;color:#fff;border-radius:8px;margin-bottom:14px;font-family:'Orbitron';">
+      <button id="__btConnect" style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Orbitron';letter-spacing:1px;">CONNETTI Bluetooth</button>
+    `;
+    body.querySelector('#__btConnect').onclick = () => {
+      const cfg = {
+        type: 'bt',
+        proto: body.querySelector('#__btProto').value,
+        dev: body.querySelector('#__btDev').value.trim(),
+        bridge: body.querySelector('#__btBridge').value.trim()
+      };
+      localStorage.setItem('eg:connConfig', JSON.stringify({ btDev: cfg.dev, btBridge: cfg.bridge }));
+      connectMount(cfg, panel);
+    };
+  } else {
+    body.innerHTML = `
+      <p style="font-size:13px; color:#cbd5e1; line-height:1.5; margin-bottom:14px;">
+        Modalità <b>simulatore</b>: nessun hardware richiesto. Ideale per testare l'app e la sincronizzazione con il Satellite.
+      </p>
+      <button id="__simConnect" style="width:100%;padding:12px;background:#eab308;color:#000;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-family:'Orbitron';letter-spacing:1px;">ATTIVA SIMULATORE</button>
+    `;
+    body.querySelector('#__simConnect').onclick = () => {
+      connectMount({ type: 'sim' }, panel);
+    };
+  }
+}
+
+async function connectMount(cfg, panel) {
+  const status = panel.querySelector('#__connStatus');
+  status.textContent = '⏳ Connessione...';
+  status.style.color = '#fbbf24';
+
+  // Notifica al Satellite
+  EGCore.pushCommand('connect', cfg);
+
+  // Se è simulatore, l'app locale fa finta di connettersi
+  if (cfg.type === 'sim') {
+    setTimeout(() => {
+      MS.simulated = true;
+      MS.connected = true;
+      MS.wifiEnabled = false;
+      MS.btEnabled = false;
+      updateLinkButtons();
+      if (typeof finishConnect === 'function') finishConnect();
+      status.textContent = '✅ Connesso (simulatore)';
+      status.style.color = '#4ade80';
+      if (window.showToast) showToast('Simulatore attivo');
+    }, 400);
+    return;
+  }
+
+  // Reale: prova la connessione
+  try {
+    const proto = Protocols[cfg.proto] || Protocols.onstep;
+    const protoCfg = {
+      ip: cfg.ip, port: cfg.port, bridge: cfg.bridge
+    };
+    await new Promise((res, rej) => {
+      proto.connect(protoCfg, res, rej);
+      setTimeout(() => rej(new Error('Timeout')), 8000);
+    });
+    MS.connected = true;
+    MS.wifiEnabled = cfg.type === 'wifi';
+    MS.btEnabled = cfg.type === 'bt';
+    MS.simulated = false;
+    if (cfg.type === 'wifi') { MS.wifiIp = cfg.ip; MS.wifiPort = cfg.port; MS.wifiBridge = cfg.bridge; MS.wifiDriver = cfg.proto; }
+    if (cfg.type === 'bt')   { MS.btDevice = cfg.dev; MS.btBridge = cfg.bridge; MS.btDriver = cfg.proto + '_bt'; }
+    updateLinkButtons();
+    if (typeof finishConnect === 'function') finishConnect();
+    status.textContent = '✅ Connesso';
+    status.style.color = '#4ade80';
+    if (window.showToast) showToast('Montatura connessa via ' + cfg.type.toUpperCase());
+  } catch (err) {
+    MS.connected = false;
+    status.textContent = '❌ ' + (err.message || 'Connessione fallita');
+    status.style.color = '#f87171';
+    if (window.showToast) showToast('Connessione fallita: ' + (err.message || ''), true);
+  }
 }
 function toggleAutoRefresh() { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } if (document.getElementById('allsky-auto').checked) autoTimer = setInterval(loadAllSky, 30000); }
 function loadNina() { const url = document.getElementById('nina-url').value; if (!url) return; const msg = document.getElementById('nina-msg'); msg.innerText = "Tentativo..."; fetch(url+'/api/v2/equipment').then(r => r.json()).then(() => msg.innerText = "Connesso a N.I.N.A.").catch(() => msg.innerText = "Errore CORS."); }
