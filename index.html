@@ -1012,21 +1012,13 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
           <button class="triton-btn" onclick="scopeToggleTracking()" id="scopeTrackBtn">Track ON</button>
         </div>
 
-        <div style="display:flex; gap:6px; margin-top:6px;">
-        <div style="flex:1;"><label style="font-size:9px; margin-bottom:2px; display:block;">Velocità Slew</label>
-        <select id="scopeSlewSpeedSel" class="conn-select" onchange="scopeChangeSlewSpeed(this.value)">
-          <option value="0.005">Lento</option><option value="0.02" selected>Default</option><option value="0.06">Veloce</option><option value="0.2">Veloce Max</option>
-        </select></div>
-        <div style="flex:1;"><label style="font-size:9px; margin-bottom:2px; display:block;">Rate Tracking</label>
-        <select id="scopeTrackMultiplierSel" class="conn-select" onchange="scopeChangeTrackMultiplier(this.value)">
-          <option value="0.5">0.50x</option><option value="0.75">0.75x</option><option value="1" selected>1.00x</option>
-        </select></div>
-      </div>
-      <div class="track-rate-pills">
-        <div class="track-pill active" id="pillSidereal" onclick="scopeSetTrackRate('sidereal')">Siderale</div>
-        <div class="track-pill" id="pillSolar" onclick="scopeSetTrackRate('solar')">Solare</div>
-        <div class="track-pill" id="pillLunar" onclick="scopeSetTrackRate('lunar')">Lunare</div>
-      </div>
+        <div class="triton-rate">
+          <button onclick="scopeChangeRate(-1)">−</button>
+          <span id="scopeRateDisplay">20X</span>
+          <button onclick="scopeChangeRate(1)">+</button>
+        </div>
+        <div class="track-rate-pills">
+          <div class="track-pill active" id="pillSidereal" onclick="scopeSetTrackRate('sidereal')">Siderale</div>
           <div class="track-pill" id="pillSolar" onclick="scopeSetTrackRate('solar')">Solare</div>
           <div class="track-pill" id="pillLunar" onclick="scopeSetTrackRate('lunar')">Lunare</div>
         </div>
@@ -2362,7 +2354,7 @@ function showObjectModal(name, ra, dec) {
 // ============================================================
 //  TELESCOPIO
 // ============================================================
-const scopeState = { connected:false, connType:'wifi', protocol:'onstep', mountType:'gem', ip:'192.168.4.1', port:'9998', btDevice:'', mountAlt:45, mountAz:0, homeAlt:45, homeAz:0, parkAlt:0, parkAz:0, isParked:false, tracking:false, trackRate:'sidereal', trackingTarget:false, slewing:false, slewCancelled:false, target:null, camAlt:45, camAz:0, fov:80, rate:20, trackingMultiplier:1.0, slewSpeed:0.02, synced:false, syncFlashStart:0, connectFlashStart:0, step:1 };
+const scopeState = { connected:false, connType:'wifi', protocol:'onstep', mountType:'gem', ip:'192.168.4.1', port:'9998', btDevice:'', mountAlt:45, mountAz:0, homeAlt:45, homeAz:0, parkAlt:0, parkAz:0, isParked:false, tracking:false, trackRate:'sidereal', trackingTarget:false, slewing:false, slewCancelled:false, target:null, camAlt:45, camAz:0, fov:80, rate:20, synced:false, syncFlashStart:0, connectFlashStart:0, step:1 };
 const TRACKING_RATES = { sidereal:15.041/3600, solar:15.000/3600, lunar:14.492/3600 };
 let scopeCanvasEl, scopeOverlayEl, scopeCtx, scopeOverlayCtx; let scopeW = 800, scopeH = 600;
 let scopeIsDragging = false, scopeLastX = 0, scopeLastY = 0, scopeDragStartX = 0, scopeDragStartY = 0, scopeDragMoved = false; let scopeDragMode = null, edgeMoveInterval = null; const SCOPE_MOUNT_GRAB_RADIUS = 34; const SLEW_SPEED_DEG = 3.5; let trackingRAF = null, trackingLastTime = 0;
@@ -2468,13 +2460,13 @@ function scopeSetTrackRate(rate) {
     scopeLog(`Rate: ${rate}`, "ok");
 }
 
-function scopeMoveToContinuous(targetGetter, onComplete, progressButtonId) { if (scopeState.slewing) { scopeLog("Slewing in corso.", "warn"); return false; } scopeState.slewing = true; scopeState.slewCancelled = false; scopeState.synced = false; let lastTime = performance.now(); const initialTgt = targetGetter(); let dAlt0 = initialTgt.alt - scopeState.mountAlt, dAz0 = initialTgt.az - scopeState.mountAz; while (dAz0 > 180) dAz0 -= 360; while (dAz0 < -180) dAz0 += 360; const initialDist = Math.sqrt(dAlt0*dAlt0 + dAz0*dAz0); scopeState.slewInitialDist = initialDist; function step(time) { if (!scopeState.slewing || scopeState.slewCancelled) { scopeState.slewing = false; return; } let dt = (time-lastTime)/1000; if (!isFinite(dt) || dt<0) dt = 0.016; dt = Math.min(dt, 0.15); lastTime = time; if (!isFinite(scopeState.mountAlt)) scopeState.mountAlt = 0; if (!isFinite(scopeState.mountAz)) scopeState.mountAz = 0; const tgt = targetGetter(); if (!isFinite(tgt.alt) || !isFinite(tgt.az)) { scopeState.slewing = false; return; } let dAlt = tgt.alt - scopeState.mountAlt, dAz = tgt.az - scopeState.mountAz; while (dAz > 180) dAz -= 360; while (dAz < -180) dAz += 360; const dist = Math.sqrt(dAlt*dAlt + dAz*dAz); const stepDist = getSlewSpeedDegPerSec() * dt; const btn = document.getElementById(progressButtonId || 'scopeStepBtn'); if (btn && scopeState.slewing) { const progress = initialDist > 0.01 ? Math.min(99, Math.round((1-dist/initialDist)*100)) : 50; btn.innerText = `SLEWING ${progress}% · ${dist.toFixed(2)}°`; } if (dist <= stepDist) { scopeState.mountAlt = tgt.alt; scopeState.mountAz = norm360(tgt.az); scopeState.slewing = false; scopeUpdateUI(); scopeDraw(); if (onComplete) onComplete(); return; } const factor = stepDist / dist; scopeState.mountAlt = clamp(scopeState.mountAlt + dAlt*factor, -5, 90); scopeState.mountAz = norm360(scopeState.mountAz + dAz*factor); scopeUpdateUI(); scopeDraw(); requestAnimationFrame(step); } requestAnimationFrame(step); return true; }
+function scopeMoveToContinuous(targetGetter, onComplete, progressButtonId) { if (scopeState.slewing) { scopeLog("Slewing in corso.", "warn"); return false; } scopeState.slewing = true; scopeState.slewCancelled = false; scopeState.synced = false; let lastTime = performance.now(); const initialTgt = targetGetter(); let dAlt0 = initialTgt.alt - scopeState.mountAlt, dAz0 = initialTgt.az - scopeState.mountAz; while (dAz0 > 180) dAz0 -= 360; while (dAz0 < -180) dAz0 += 360; const initialDist = Math.sqrt(dAlt0*dAlt0 + dAz0*dAz0); scopeState.slewInitialDist = initialDist; function step(time) { if (!scopeState.slewing || scopeState.slewCancelled) { scopeState.slewing = false; return; } let dt = (time-lastTime)/1000; if (!isFinite(dt) || dt<0) dt = 0.016; dt = Math.min(dt, 0.15); lastTime = time; if (!isFinite(scopeState.mountAlt)) scopeState.mountAlt = 0; if (!isFinite(scopeState.mountAz)) scopeState.mountAz = 0; const tgt = targetGetter(); if (!isFinite(tgt.alt) || !isFinite(tgt.az)) { scopeState.slewing = false; return; } let dAlt = tgt.alt - scopeState.mountAlt, dAz = tgt.az - scopeState.mountAz; while (dAz > 180) dAz -= 360; while (dAz < -180) dAz += 360; const dist = Math.sqrt(dAlt*dAlt + dAz*dAz); const stepDist = SLEW_SPEED_DEG * dt; const btn = document.getElementById(progressButtonId || 'scopeStepBtn'); if (btn && scopeState.slewing) { const progress = initialDist > 0.01 ? Math.min(99, Math.round((1-dist/initialDist)*100)) : 50; btn.innerText = `SLEWING ${progress}% · ${dist.toFixed(2)}°`; } if (dist <= stepDist) { scopeState.mountAlt = tgt.alt; scopeState.mountAz = norm360(tgt.az); scopeState.slewing = false; scopeUpdateUI(); scopeDraw(); if (onComplete) onComplete(); return; } const factor = stepDist / dist; scopeState.mountAlt = clamp(scopeState.mountAlt + dAlt*factor, -5, 90); scopeState.mountAz = norm360(scopeState.mountAz + dAz*factor); scopeUpdateUI(); scopeDraw(); requestAnimationFrame(step); } requestAnimationFrame(step); return true; }
 
 function scopeManualMove(dir) {
     if (!scopeState.connected) { scopeLog("Connetti prima.", "warn"); return; }
     if (scopeState.isParked) { scopeLog("Montatura in PARK.", "err"); return; }
     if (scopeState.slewing) return;
-    const step = getManualStepDeg();
+    const step = scopeState.rate * 0.05;
     if (dir.includes('up')) scopeState.mountAlt = clamp(scopeState.mountAlt + step, 0, 90);
     if (dir.includes('down')) scopeState.mountAlt = clamp(scopeState.mountAlt - step, 0, 90);
     if (dir.includes('left')) scopeState.mountAz = norm360(scopeState.mountAz - step);
@@ -2492,7 +2484,7 @@ function startEdgeMove(dir) {
     scopeState.movingEdge = dir; scopeState.synced = false; scopeState.trackingTarget = false;
     const step = () => {
         if (!scopeState.movingEdge) return;
-        const s = getEdgeStepDeg();
+        const s = scopeState.rate*0.08;
         if (dir==='N') scopeState.mountAlt = clamp(scopeState.mountAlt+s, 0, 90);
         if (dir==='S') scopeState.mountAlt = clamp(scopeState.mountAlt-s, 0, 90);
         if (dir==='E') scopeState.mountAz = norm360(scopeState.mountAz+s);
@@ -2508,12 +2500,7 @@ function startEdgeMove(dir) {
 }
 function stopEdgeMove() { scopeState.movingEdge = null; if (edgeMoveInterval) { clearInterval(edgeMoveInterval); edgeMoveInterval = null; } }
 
-function scopeChangeSlewSpeed(val) { scopeState.slewSpeed = parseFloat(val); const labels = {'0.005':'Lento','0.02':'Default','0.06':'Veloce','0.2':'Veloce Max'}; if (typeof scopeLog === 'function') scopeLog('Slew speed: ' + (labels[val]||val), 'ok'); }
-        function scopeChangeTrackMultiplier(val) { scopeState.trackingMultiplier = parseFloat(val); if (typeof scopeLog === 'function') scopeLog('Tracking rate: ' + val + 'x', 'ok'); }
-        function getManualStepDeg() { const s = scopeState.slewSpeed || 0.02; if (s <= 0.005) return 0.5; if (s <= 0.02) return 1.0; if (s <= 0.06) return 2.0; return 4.0; }
-        function getEdgeStepDeg() { const s = scopeState.slewSpeed || 0.02; if (s <= 0.005) return 0.15; if (s <= 0.02) return 0.4; if (s <= 0.06) return 1.0; return 2.0; }
-        function getSlewSpeedDegPerSec() { const s = scopeState.slewSpeed || 0.02; if (s <= 0.005) return 1.0; if (s <= 0.02) return 3.5; if (s <= 0.06) return 8.0; return 15.0; }
-        function scopeChangeRate(dir) { const rates = [1,5,10,20,50,100]; let idx = rates.indexOf(scopeState.rate); idx = clamp(idx+dir, 0, rates.length-1); scopeState.rate = rates[idx]; scopeUpdateUI(); scopeLog(`Rate manuale: ${scopeState.rate}X`, ''); }
+function scopeChangeRate(dir) { const rates = [1,5,10,20,50,100]; let idx = rates.indexOf(scopeState.rate); idx = clamp(idx+dir, 0, rates.length-1); scopeState.rate = rates[idx]; scopeUpdateUI(); scopeLog(`Rate manuale: ${scopeState.rate}X`, ''); }
 
 function scopeStopSlewing() {
     const proto = Protocols[scopeState.protocol];
@@ -2677,7 +2664,7 @@ function scopeRgbToHex(r,g,b) { return '#'+[r,g,b].map(x => Math.round(x).toStri
 function scopeInterpColor(c1,c2,t) { const a = scopeHexToRgb(c1), b = scopeHexToRgb(c2); return scopeRgbToHex(a.r+(b.r-a.r)*t, a.g+(b.g-a.g)*t, a.b+(b.b-a.b)*t); }
 let scopeAnimActive = false;
 function scopeOverlayLoop() { if (!scopeAnimActive) return; if (document.getElementById('tab-scope').classList.contains('active')) scopeDrawOverlay(); requestAnimationFrame(scopeOverlayLoop); }
-function scopeUpdateUI() { const rd = altAzToRaDec(scopeState.mountAlt, scopeState.mountAz); const s = (id,v) => { const el = document.getElementById(id); if (el) el.innerText = v; }; s('scopeRa', formatRA(rd.ra)); s('scopeDec', formatDec(rd.dec)); s('scopeAlt', scopeState.mountAlt.toFixed(1)+'°'); s('scopeAz', scopeState.mountAz.toFixed(1)+'°'); // rate display via selettori nativi }
+function scopeUpdateUI() { const rd = altAzToRaDec(scopeState.mountAlt, scopeState.mountAz); const s = (id,v) => { const el = document.getElementById(id); if (el) el.innerText = v; }; s('scopeRa', formatRA(rd.ra)); s('scopeDec', formatDec(rd.dec)); s('scopeAlt', scopeState.mountAlt.toFixed(1)+'°'); s('scopeAz', scopeState.mountAz.toFixed(1)+'°'); s('scopeRateDisplay', scopeState.rate+'X'); }
 function scopeZoomIn() { scopeState.fov = clamp(scopeState.fov-10, 10, 150); scopeDraw(); }
 function scopeZoomOut() { scopeState.fov = clamp(scopeState.fov+10, 10, 150); scopeDraw(); }
 function scopeRecenter() { scopeState.camAlt = scopeState.mountAlt; scopeState.camAz = scopeState.mountAz; scopeDraw(); }
