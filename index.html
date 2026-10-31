@@ -1012,11 +1012,7 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
           <button class="triton-btn" onclick="scopeToggleTracking()" id="scopeTrackBtn">Track ON</button>
         </div>
 
-        <div class="triton-rate">
-          <button onclick="scopeChangeRate(-1)">−</button>
-          <span id="scopeRateDisplay">20X</span>
-          <button onclick="scopeChangeRate(1)">+</button>
-        </div>
+        <div class="triton-rate"><button onclick="scopeChangeRate(-1)">−</button><span id="scopeRateDisplay">Default</span><button onclick="scopeChangeRate(1)">+</button></div>
         <div class="track-rate-pills">
           <div class="track-pill active" id="pillSidereal" onclick="scopeSetTrackRate('sidereal')">Siderale</div>
           <div class="track-pill" id="pillSolar" onclick="scopeSetTrackRate('solar')">Solare</div>
@@ -3101,5 +3097,123 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 })();
 </script>
 
+
+<script id="__patch_pianeta_core">
+(function(){
+  // A. SIMULATORE PERFETTO
+  if (typeof Protocols !== 'undefined') {
+    Protocols.sim.sendGoto = function(raHours, decDeg) {
+      const targetRA = raHours * 15 * Math.PI / 180;
+      const targetDEC = decDeg * Math.PI / 180;
+      const mech = mechCoordsForAstro(targetRA, targetDEC, scopeState.dec, false);
+      if (mech) {
+        scopeState.target = { ra: targetRA, dec: targetDEC };
+        scopeState.slewing = true;
+        scopeState.slewMode = 'goto';
+        scopeState.slewStartDist = Math.sqrt(Math.pow(mech.raMech - scopeState.ra, 2) + Math.pow(mech.decMech - scopeState.dec, 2));
+        scopeState.tRA = mech.raMech;
+        scopeState.tDEC = mech.decMech;
+      }
+    };
+    Protocols.sim.sync = function(raHours, decDeg) {
+      scopeState.ra = raHours * 15 * Math.PI / 180;
+      scopeState.dec = decDeg * Math.PI / 180;
+      scopeState.tRA = scopeState.ra; scopeState.tDEC = scopeState.dec;
+    };
+    Protocols.sim.stop = function() { scopeState.slewing = false; scopeState.slewCancelled = true; };
+    Protocols.sim.tracking = function(on) { scopeState.tracking = on ? 'sidereal' : 'off'; };
+    Protocols.sim.park = function() { scopeState.isParked = true; };
+    Protocols.sim.unpark = function() { scopeState.isParked = false; };
+    Protocols.sim.move = function(dir, rate) { /* Movimento manuale simulato */ };
+  }
+
+  // B. GESTIONE VELOCITÀ E RATE (Identica al Satellite)
+  MS.trackingMultiplier = 1.0;
+
+  window.changeTrackingMultiplier = function(val) {
+    MS.trackingMultiplier = parseFloat(val);
+    if (typeof scopeLog === 'function') scopeLog('Tracking rate: ' + val + 'x', 'ok');
+  };
+
+  window.changeSlewSpeed = function(val) {
+    const v = parseFloat(val);
+    MS.speedPerStep = v;
+    const labels = { '0.005': 'Lento', '0.02': 'Default', '0.06': 'Veloce', '0.2': 'Veloce Max' };
+    MS.speedLabel = labels[val] || v;
+    if (val == '0.005') scopeState.rate = 0.5;
+    else if (val == '0.02') scopeState.rate = 1.0;
+    else if (val == '0.06') scopeState.rate = 2.0;
+    else if (val == '0.2') scopeState.rate = 4.0;
+    if (typeof updateSpeedDisplay === 'function') updateSpeedDisplay();
+    if (typeof saveFullState === 'function') saveFullState();
+    if (typeof showToast === 'function') showToast('Slewing: ' + MS.speedLabel);
+  };
+
+  window.scopeChangeRate = function(dir) {
+    const rates = [0.5, 0.75, 1.0];
+    let idx = rates.indexOf(MS.trackingMultiplier || 1.0);
+    idx = Math.max(0, Math.min(rates.length - 1, idx + dir));
+    MS.trackingMultiplier = rates[idx];
+    const sel = document.getElementById('tracking-multiplier');
+    if (sel) sel.value = MS.trackingMultiplier;
+    if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+    if (typeof scopeLog === 'function') scopeLog('Tracking rate: ' + MS.trackingMultiplier + 'x', '');
+  };
+
+  // C. OVERRIDE DEL TRACKING LOOP
+  const origTrackingLoop = window.trackingLoop;
+  window.trackingLoop = function(time) {
+    if (!trackingRAF) return;
+    if (!scopeState.connected || !scopeState.tracking || scopeState.isParked) { trackingRAF = null; return; }
+    const dt = trackingLastTime ? Math.min((time - trackingLastTime) / 1000, 0.2) : 0;
+    trackingLastTime = time;
+    if (dt > 0 && !scopeState.slewing && document.getElementById('tab-scope').classList.contains('active')) {
+      if (scopeState.trackingTarget && scopeState.target) {
+        const p = getAltAz(scopeState.target.ra, scopeState.target.dec, state.currentTime);
+        if (p.alt > 0) { scopeState.mountAlt = p.alt; scopeState.mountAz = p.az; }
+      } else {
+        const baseRate = TRACKING_RATES[scopeState.trackRate] || TRACKING_RATES.sidereal;
+        const multiplier = MS.trackingMultiplier || 1.0;
+        scopeState.mountAz = norm360(scopeState.mountAz + baseRate * multiplier * dt);
+      }
+      if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+      if (typeof scopeDraw === 'function') scopeDraw();
+    }
+    trackingRAF = requestAnimationFrame(window.trackingLoop);
+  };
+
+  const origUpdateUI = window.scopeUpdateUI;
+  window.scopeUpdateUI = function() {
+    if (origUpdateUI) origUpdateUI();
+    const rd = document.getElementById('scopeRateDisplay');
+    if (rd) rd.innerText = MS.speedLabel || 'Default';
+  };
+
+  // D. SINCRONIZZAZIONE (Se SyncBus è attivo, invia e ricevi)
+  if (typeof SyncBus !== 'undefined') {
+    setInterval(function() {
+      if (scopeState.connected) {
+        SyncBus.send('mount_position', { ra: scopeState.mountAlt, dec: scopeState.mountAz });
+      }
+    }, 500);
+
+    SyncBus.on('cmd_connect', function() { if (typeof toggleConnection === 'function') toggleConnection(); });
+    SyncBus.on('cmd_goto', function(d) { if (d && d.ra) _startGoto(d.ra * Math.PI/180, d.dec * Math.PI/180); });
+    SyncBus.on('cmd_stop', function() { if (typeof stopMotion === 'function') stopMotion(); });
+    SyncBus.on('cmd_park', function() { if (typeof parkMount === 'function') parkMount(); });
+    SyncBus.on('cmd_unpark', function() { if (typeof unparkMount === 'function') unparkMount(); });
+    SyncBus.on('cmd_home', function() { if (typeof goHome === 'function') goHome(); });
+    SyncBus.on('cmd_tracking', function(d) { if (d && d.on !== (scopeState.tracking !== 'off') && typeof toggleTrackingOn === 'function') toggleTrackingOn(); });
+    
+    // Invia il target selezionato al Satellite
+    const originalSendTarget = window.sendSkyTargetToTelescope;
+    window.sendSkyTargetToTelescope = function() {
+      if (!state.skyObject) return; const obj = state.skyObject;
+      SyncBus.send('new_target', { name: obj.n || obj.name, ra: obj.ra, dec: obj.dec, type: obj.type || 'Oggetto' });
+      if (originalSendTarget) originalSendTarget();
+    };
+  }
+})();
+</script>
 </body>
 </html>
