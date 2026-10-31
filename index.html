@@ -2991,23 +2991,115 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 </script>
 
 
+<!-- ============ PULSANTE SCOPE ============ -->
+<style>
+  #my-tunnel-btn {
+    position: fixed; left: 0; top: 50%;
+    transform: translateY(-50%);
+    z-index: 999999;
+    width: 54px; height: 54px;
+    border-radius: 0 14px 14px 0;
+    background: rgba(10,18,32,0.95);
+    border: 2px solid #d4af37;
+    border-left: none;
+    box-shadow: 0 0 20px rgba(212,175,55,0.5);
+    color: #d4af37;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+  }
+  #my-tunnel-btn:hover {
+    background: #d4af37;
+    color: #000;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 0 35px rgba(212,175,55,0.95), 0 0 60px rgba(212,175,55,0.5);
+  }
+  #my-tunnel-btn button {
+    background: none; border: none; color: inherit;
+    cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 0; width: 100%; height: 100%;
+    font-family: 'Orbitron', sans-serif;
+  }
+  #my-tunnel-btn svg {
+    width: 26px; height: 26px;
+    display: block; flex-shrink: 0;
+    margin-bottom: 2px;
+    transition: transform 0.4s ease;
+  }
+  #my-tunnel-btn:hover svg { transform: rotate(10deg) scale(1.15); }
+  #my-tunnel-btn span {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px; letter-spacing: 1px;
+    font-weight: bold; line-height: 1;
+  }
+</style>
 
-<!-- Pulsante Originale Pianeta -->
-<div id="my-tunnel-btn" style="position:fixed; left:0; top:50%; transform:translateY(-50%); z-index:999999;">
-  <button onclick="let fc=document.getElementById('mount-iframe');let fr=document.getElementById('mount-frame');if(!fr.src)fr.src='https://egastrodiscover.github.io/EGASTROmount/';fc.style.display='block';this.parentNode.style.display='none';" style="width:50px; height:50px; border-radius:0 10px 10px 0; background:#0a1220; border:2px solid #d4af37; color:#d4af37; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 0 15px rgba(212,175,55,0.5);">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path><path d="M7 16l-2 6"></path><path d="M3 22h8"></path><path d="M10 6l10-3 2 4-10 3-2-4z"></path></svg>
+<div id="my-tunnel-btn" title="Apri Montatura">
+  <button id="my-tunnel-btn-click">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"/>
+      <path d="M7 16l-2 6"/>
+      <path d="M3 22h8"/>
+      <path d="M10 6l10-3 2 4-10 3-2-4z"/>
+    </svg>
+    <span id="my-tunnel-label">SCOPE</span>
   </button>
 </div>
+
 <div id="mount-iframe" style="display:none; position:fixed; inset:0; z-index:999998; background:#000;">
-  <iframe id="mount-frame" style="width:100%; height:100%; border:none;"></iframe>
+  <iframe id="mount-frame" style="width:100%; height:100%; border:none;" allow="geolocation; camera; microphone; fullscreen"></iframe>
 </div>
-<script>
-  window.addEventListener('message', function(e) {
-    if (e.data === 'close-mount-tunnel' || e.data === 'close-tunnel') {
-      document.getElementById('mount-iframe').style.display = 'none';
-      document.getElementById('my-tunnel-btn').style.display = 'block';
-    }
-  });
+
+<script id="__tunnel-observer">
+(function(){
+  function init(){
+    var btnClick = document.getElementById('my-tunnel-btn-click');
+    var label = document.getElementById('my-tunnel-label');
+    var box = document.getElementById('my-tunnel-btn');
+    var wrap = document.getElementById('mount-iframe');
+    var frame = document.getElementById('mount-frame');
+    if (!btnClick || !box || !wrap || !frame) return;
+
+    btnClick.addEventListener('click', function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      // Se siamo DENTRO un iframe (aperti da Satellite) → chiudi e torna al parent
+      if (window.parent !== window) {
+        window.parent.postMessage('close-tunnel', '*');
+        return;
+      }
+
+      // Se iframe aperto → chiudilo
+      if (wrap.style.display === 'block') {
+        wrap.style.display = 'none';
+        box.style.display = 'flex';
+        label.textContent = 'SCOPE';
+        return;
+      }
+
+      // Altrimenti → apri Satellite dentro iframe
+      if (!frame.getAttribute('data-loaded')) {
+        frame.src = 'https://egastrodiscover.github.io/EGASTROmount/?embed=1&t=' + Date.now();
+        frame.setAttribute('data-loaded', '1');
+      }
+      wrap.style.display = 'block';
+      box.style.display = 'none';
+    });
+
+    // Ricevi richiesta di chiusura dal Satellite (quando sei tu il parent)
+    window.addEventListener('message', function(e){
+      if (e.data === 'close-tunnel' || e.data === 'close-mount-tunnel') {
+        wrap.style.display = 'none';
+        box.style.display = 'flex';
+        label.textContent = 'SCOPE';
+      }
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
 </script>
 
-</body></html>
+</body>
+</html>
