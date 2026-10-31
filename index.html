@@ -2839,67 +2839,118 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 
 
 
-<script>
+<!-- TUNNEL V2 — incollare IDENTICO in ENTRAMBI i file, sopra 
+
+<script id="__oneBtnScript">
 (function(){
-  const b = document.getElementById('bannerCostellazioni');
-  if (b) b.remove();
+'use strict';
+if (window.__oneButton) return;
+window.__oneButton = true;
 
-  setTimeout(async () => {
-    if (typeof CONSTELLATIONS === 'undefined') return;
-    try {
-      const res = await fetch('./constellations.json?t=' + Date.now());
-      if (!res.ok) throw new Error('File non trovato');
-      const data = await res.json();
-      
-      if (data && data.features && data.features.length > 10) {
-        CONSTELLATIONS = data.features.map(f => {
-          const segs = f.geometry?.coordinates || [];
-          const stars = []; const map = new Map();
-          const add = (ra,dec) => { const k=ra.toFixed(4)+','+dec.toFixed(4); if(map.has(k)) return map.get(k); const i=stars.length; stars.push({ra,dec,mag:3}); map.set(k,i); return i; };
-          return { name: f.properties?.name || f.id, abbr: f.id, stars, lines: segs.map(s=>s.map(p=>add(p[0],p[1]))), area:'—', season:'—', desc:'Costellazione '+(f.properties?.name||f.id) };
-        });
+var URLS = { observatory: 'https://egastrodiscover.github.io/EGASTRO/', mount: 'https://egastrodiscover.github.io/EGASTROmount/' };
+var SVG_DOME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21v-8"/><path d="M20 21v-8"/><path d="M4 13a8 8 0 0 1 16 0"/><path d="M12 5v8"/><path d="M12 10l-3-2"/></svg>';
+var SVG_TEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"/><path d="M7 16l-2 6"/><path d="M3 22h8"/><path d="M10 6l10-3 2 4-10 3-2-4z"/></svg>';
 
-        if (typeof applyConstellationMeta === 'function') applyConstellationMeta(); 
-        if (typeof rebuildCatalog === 'function') rebuildCatalog(); 
-        if (typeof renderCatalog === 'function' && document.getElementById('tab-catalog') && document.getElementById('tab-catalog').classList.contains('active')) renderCatalog();
-        if (typeof drawMap === 'function') drawMap();
-      }
-    } catch (err) {}
-  }, 800);
+var OLD_IDS = ['tunnel-menu','tunnel-panel','tunnel-toggle','tunnel-frame-container','app-switcher-container','app-switcher-menu','app-switcher-toggle','planet-menu-ultimate','app-frame-container','app-frame','btn-goto-dome','btn-goto-telescope'];
 
-  window.addEventListener('load', () => {
-    const logoImg = document.getElementById('logoImg');
-    const logoFallback = document.getElementById('logoFallback');
-    if (logoImg && logoFallback) {
-      const savedLogo = localStorage.getItem('egastro_logo');
-      logoImg.src = savedLogo ? savedLogo : './icon-192.png'; 
-      logoImg.style.display = 'block';
-      logoFallback.style.display = 'none';
+// Override getElementById: ritorna null per ID vecchi (blocca script vecchi)
+var _origGEBI = document.getElementById.bind(document);
+document.getElementById = function(id) {
+  if (OLD_IDS.indexOf(id) !== -1) return null;
+  return _origGEBI(id);
+};
+// Override setInterval: blocca callback che contengono marker tunnel
+var _origSI = window.setInterval;
+window.setInterval = function(fn, ms) {
+  try {
+    var src = (typeof fn === 'function') ? fn.toString() : String(fn);
+    if (src.indexOf('app-switcher') !== -1 || src.indexOf('planet-menu-ultimate') !== -1) {
+      return 0;
     }
-  });
-})();
-</script>
+  } catch(e) {}
+  return _origSI.apply(this, arguments);
+};
 
-<script>
-(function() {
-  function u() {
-    var b=document.getElementById('syncBadge'),d=document.getElementById('syncDot'),t=document.getElementById('syncText');
-    if(!b||!d||!t)return;
-    if(typeof SyncBus==='undefined'){b.style.borderColor='#6b778c';b.style.background='rgba(107,119,140,0.1)';d.style.color='#6b778c';t.textContent='NO BUS';return;}
-    if(SyncBus.isPeerAlive()){b.style.borderColor='#4ade80';b.style.background='rgba(74,222,128,0.15)';d.style.color='#4ade80';t.textContent='SYNC OK · '+(SyncBus.getPeerId()||'?').toUpperCase();}
-    else{b.style.borderColor='#f87171';b.style.background='rgba(248,113,113,0.15)';d.style.color='#f87171';t.textContent='SYNC OFF';}
+function cleanup() {
+  OLD_IDS.forEach(function(id){ var e = _origGEBI(id); if (e) e.remove(); });
+  document.querySelectorAll('.app-switch-btn,.tab').forEach(function(e){ e.remove(); });
+}
+
+function buildOne(win, doc, myApp) {
+  var iconToShow = myApp === 'mount' ? SVG_DOME : SVG_TEL;
+  var title = myApp === 'mount' ? 'Torna al Pianeta' : 'Vai al Telescopio';
+  cleanup();
+  var ob = _origGEBI('__oneBtn'); if (ob) ob.remove();
+  var of = _origGEBI('__oneFrame'); if (of) of.remove();
+  if (!_origGEBI('__oneCSS')) {
+    var st = doc.createElement('style'); st.id = '__oneCSS';
+    st.textContent = '#__oneBtn{position:fixed!important;left:0!important;top:50%!important;transform:translateY(-50%)!important;z-index:2147483647!important;width:52px!important;height:52px!important;border-radius:0 12px 12px 0!important;background:rgba(10,18,32,.95)!important;border:2px solid #d4af37!important;border-left:none!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:0 0 20px rgba(212,175,55,.5)!important;color:#d4af37!important;padding:0!important}#__oneBtn:hover{background:#d4af37!important;color:#000!important}#__oneBtn svg{width:24px!important;height:24px!important;pointer-events:none!important}#__oneFrame{position:fixed!important;inset:0!important;z-index:2147483645!important;background:#05070a!important;display:none!important}#__oneFrame iframe{width:100%!important;height:100%!important;border:none!important}';
+    doc.head.appendChild(st);
   }
-  setInterval(u,1000);u();
+  var btn = doc.createElement('button'); btn.id = '__oneBtn'; btn.title = title; btn.innerHTML = iconToShow; doc.body.appendChild(btn);
+  var fc = doc.createElement('div'); fc.id = '__oneFrame';
+  var fr = doc.createElement('iframe'); fr.setAttribute('allow','geolocation; camera; microphone; fullscreen'); fc.appendChild(fr); doc.body.appendChild(fc);
+  btn.onclick = function(e){
+    e.preventDefault(); e.stopPropagation();
+    if (myApp === 'mount') {
+      if (win.self !== win.top) { try { win.parent.postMessage({type:'one-back'},'*'); } catch(err){} }
+      else { win.location.href = URLS.observatory; }
+    } else {
+      if (!fr.src || fr.src === 'about:blank') {
+        var sep = URLS.mount.indexOf('?') === -1 ? '?' : '&';
+        fr.src = URLS.mount + sep + 't=' + Date.now();
+        fr.addEventListener('load', function(){ setTimeout(function(){ try { if (fr.contentDocument && fr.contentDocument.body) buildOne(fr.contentWindow, fr.contentDocument, 'mount'); } catch(e){} }, 300); }, {once:true});
+      }
+      fc.style.display = 'block'; btn.style.display = 'none';
+    }
+  };
+  win.addEventListener('message', function(e){ if (e.data === 'one-back') { fc.style.display='none'; btn.style.display=''; } });
+}
+
+var detected = (_origGEBI && document.querySelector('meta[name="app-id"]')?.content === 'mount') ? 'mount' : 'observatory';
+
+function init() {
+  if (!document.body) { setTimeout(init, 50); return; }
+  buildOne(window, document, detected);
+  _origSI.call(window, function(){
+    cleanup();
+    var btn = _origGEBI('__oneBtn');
+    if (!btn) { buildOne(window, document, detected); return; }
+    var correct = detected === 'mount' ? SVG_DOME : SVG_TEL;
+    if (btn.innerHTML !== correct) btn.innerHTML = correct;
+    btn.style.display = '';
+  }, 100);
+  try {
+    new MutationObserver(function(muts){
+      muts.forEach(function(m){
+        m.addedNodes.forEach(function(n){
+          if (n && n.nodeType === 1 && n.id && OLD_IDS.indexOf(n.id) !== -1) n.remove();
+        });
+      });
+    }).observe(document.body, { childList: true, subtree: true });
+  } catch(e) {}
+}
+init();
+console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 })();
 </script>
+</body>  -->
 
-<!-- FIX POPULATE PROVINCES -->
+
+  <!-- SCRIPT TUNNEL UNIFICATO - INCOLLARE IN ENTRAMBI I FILE, PRIMA DI </body> -->
+
+
+
+
 <script id="__fixPopulateProvinces">
 (function(){
   function initProvinces(){
     if (typeof populateProvinces === "function") {
       var sel = document.getElementById("citySelect");
-      if (sel && sel.options.length <= 1) populateProvinces();
+      if (sel && sel.options.length <= 1) {
+        populateProvinces();
+        console.log("[Fix] populateProvinces eseguita al caricamento");
+      }
     }
   }
   if (document.readyState === "loading") {
@@ -2910,7 +2961,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 })();
 </script>
 
-<!-- SYNC GPS OBSERVATORY -->
+<!-- __syncGPSObserver — Tappa 1: pubblica GPS/coordinate in localStorage -->
 <script id="__syncGPSObserver">
 (function(){
   "use strict";
@@ -2921,76 +2972,35 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     try {
       if (typeof state === "undefined" || !state) return;
       if (!Number.isFinite(state.lat) || !Number.isFinite(state.lon)) return;
-      var target = state.target ? { n: state.target.n || state.target.name, ra: state.target.ra, dec: state.target.dec } : null;
-      localStorage.setItem(KEY, JSON.stringify({ coords: { lat: state.lat, lon: state.lon }, target: target, ts: Date.now() }));
+      var target = state.target ? {
+        n: state.target.n || state.target.name,
+        ra: state.target.ra,
+        dec: state.target.dec
+      } : null;
+      localStorage.setItem(KEY, JSON.stringify({
+        coords: { lat: state.lat, lon: state.lon },
+        target: target,
+        ts: Date.now()
+      }));
     } catch(e) {}
   }
   setInterval(publish, 1000);
   publish();
+  console.log("[Sync GPS] Observatory publishing attivo");
 })();
 </script>
 
-<!-- STYLE PULSANTE SCOPE (CSS puro) -->
-<style>
-  #my-tunnel-btn {
-    position: fixed; left: 0; top: 50%;
-    transform: translateY(-50%);
-    z-index: 999999;
-    width: 54px; height: 54px;
-    border-radius: 0 12px 12px 0;
-    background: rgba(10,18,32,0.95);
-    border: 2px solid #d4af37;
-    border-left: none;
-    box-shadow: 0 0 20px rgba(212,175,55,0.5);
-    color: #d4af37;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    cursor: pointer;
-  }
-  #my-tunnel-btn:hover {
-    background: #d4af37;
-    color: #000;
-    transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 0 35px rgba(212,175,55,0.95), 0 0 60px rgba(212,175,55,0.5);
-  }
-  #my-tunnel-btn button {
-    background: none; border: none; color: inherit;
-    cursor: pointer; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 0; width: 100%; height: 100%;
-    font-family: 'Orbitron', sans-serif;
-  }
-  #my-tunnel-btn svg {
-    width: 26px; height: 26px;
-    display: block; flex-shrink: 0;
-    margin-bottom: 2px;
-    transition: transform 0.4s ease;
-  }
-  #my-tunnel-btn:hover svg {
-    transform: rotate(10deg) scale(1.15);
-  }
-  #my-tunnel-btn span {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 8px; letter-spacing: 1px;
-    font-weight: bold; line-height: 1;
-  }
-</style>
 
-<div id="my-tunnel-btn">
-  <button onclick="let fc=document.getElementById('mount-iframe');let fr=document.getElementById('mount-frame');if(!fr.src)fr.src='https://egastrodiscover.github.io/EGASTROmount/';fc.style.display='block';document.getElementById('my-tunnel-btn').style.display='none';">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"/>
-      <path d="M7 16l-2 6"/>
-      <path d="M3 22h8"/>
-      <path d="M10 6l10-3 2 4-10 3-2-4z"/>
-    </svg>
-    <span>SCOPE</span>
+
+<!-- Pulsante Originale Pianeta -->
+<div id="my-tunnel-btn" style="position:fixed; left:0; top:50%; transform:translateY(-50%); z-index:999999;">
+  <button onclick="let fc=document.getElementById('mount-iframe');let fr=document.getElementById('mount-frame');if(!fr.src)fr.src='https://egastrodiscover.github.io/EGASTROmount/';fc.style.display='block';this.parentNode.style.display='none';" style="width:50px; height:50px; border-radius:0 10px 10px 0; background:#0a1220; border:2px solid #d4af37; color:#d4af37; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 0 15px rgba(212,175,55,0.5);">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path><path d="M7 16l-2 6"></path><path d="M3 22h8"></path><path d="M10 6l10-3 2 4-10 3-2-4z"></path></svg>
   </button>
 </div>
-
 <div id="mount-iframe" style="display:none; position:fixed; inset:0; z-index:999998; background:#000;">
-  <iframe id="mount-frame" style="width:100%; height:100%; border:none;" allow="geolocation; camera; microphone; fullscreen"></iframe>
+  <iframe id="mount-frame" style="width:100%; height:100%; border:none;"></iframe>
 </div>
-
 <script>
   window.addEventListener('message', function(e) {
     if (e.data === 'close-mount-tunnel' || e.data === 'close-tunnel') {
@@ -3000,7 +3010,4 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   });
 </script>
 
-</body>
-</html>
-</body>
-</html>
+</body></html>
