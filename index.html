@@ -3179,97 +3179,112 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<script id="__sync_planet_v43">
+
+
+<script id="__sync_planet_v44">
 (function() {
-  console.log("🚀 [Pianeta] Sync Blindato v43 avviato");
+  console.log("🚀 [Pianeta] Motore Sync v44 attivo");
+  if (window.SyncBus) { window.SyncBus.stop(); }
 
-  // 1. BLINDIAMO IL BADGE (Impediamo a vecchi script di sovrascriverlo)
-  const t = document.getElementById('syncText');
-  if (t && !t._locked) {
-      t._locked = true;
-      let _txt = 'SYNC OFF';
-      const block = (v) => v.includes('SYNC') || v.includes('LEADER') || v.includes('SLAVE') || v.includes('OFF') || v.includes('ONLINE');
-      Object.defineProperty(t, 'textContent', { get: () => _txt, set: (v) => { if (block(v)) return; _txt = v; } });
-      Object.defineProperty(t, 'innerText', { get: () => _txt, set: (v) => { if (block(v)) return; _txt = v; } });
-      t.textContent = 'SYNC OFF';
-  }
-  const d = document.getElementById('syncDot');
-  if (d) d.style.color = '#f87171';
-  const b = document.getElementById('syncBadge');
-  if (b) b.style.borderColor = '#f87171';
+  const badge = document.getElementById('syncBadge');
+  const dot = document.getElementById('syncDot');
+  const text = document.getElementById('syncText');
+  let isOnline = false;
 
-  // 2. FUNZIONE PER CAMBIARE STATO BADGE
   function setBadge(online) {
-    if (!t) return;
+    if (isOnline === online) return;
+    isOnline = online;
+    if (!text) return;
     if (online) {
-      t.textContent = 'SYNC ON'; t.style.color = '#4ade80';
-      if(d) d.style.color = '#4ade80'; if(b) b.style.borderColor = '#4ade80';
+      text.textContent = 'SYNC ON'; text.style.color = '#4ade80';
+      if(dot) dot.style.color = '#4ade80'; if(badge) badge.style.borderColor = '#4ade80';
     } else {
-      t.textContent = 'SYNC OFF'; t.style.color = '#f87171';
-      if(d) d.style.color = '#f87171'; if(b) b.style.borderColor = '#f87171';
+      text.textContent = 'SYNC OFF'; text.style.color = '#f87171';
+      if(dot) dot.style.color = '#f87171'; if(badge) badge.style.borderColor = '#f87171';
     }
   }
+  setBadge(false);
 
-  // 3. POLLING: Motore di Sincronizzazione
   let lastLat = null, lastLon = null, lastConn = null;
-  
-  if (window._planetPolling) clearInterval(window._planetPolling);
-  window._planetPolling = setInterval(() => {
-    
-    // A. Invia GPS se cambiato
-    if (typeof state !== 'undefined' && state.lat) {
-      if (state.lat !== lastLat || state.lon !== lastLon) {
-        lastLat = state.lat; lastLon = state.lon;
-        localStorage.setItem('v43_gps', JSON.stringify({ lat: lastLat, lon: lastLon, ts: Date.now() }));
-        console.log('📤 [Pianeta] GPS Inviato:', lastLat, lastLon);
+
+  // 1. Motore di Sincronizzazione (Polling)
+  setInterval(() => {
+    // A. Invia GPS leggendo direttamente gli input HTML
+    const latInput = document.getElementById('lat');
+    const lonInput = document.getElementById('lon');
+    if (latInput && lonInput) {
+      const lat = parseFloat(latInput.value);
+      const lon = parseFloat(lonInput.value);
+      if (!isNaN(lat) && !isNaN(lon) && (lat !== lastLat || lon !== lastLon)) {
+        lastLat = lat; lastLon = lon;
+        localStorage.setItem('v44_gps', JSON.stringify({ lat, lon, ts: Date.now() }));
+        console.log('📤 [Pianeta] GPS Inviato:', lat, lon);
       }
     }
 
-    // B. Invia Connessione se cambiata
+    // B. Invia Connessione
     if (typeof scopeState !== 'undefined') {
       const isConn = scopeState.connected;
       if (isConn !== lastConn) {
         lastConn = isConn;
-        localStorage.setItem('v43_conn', JSON.stringify({ connected: isConn, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
-        console.log('📤 [Pianeta] Connessione Inviata:', isConn);
+        localStorage.setItem('v44_conn', JSON.stringify({ connected: isConn, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
+        console.log('📤 [Pianeta] Conn Inviata:', isConn);
       }
     }
 
-    // C. Ricevi Telemetria (muove la mappa)
-    const raw = localStorage.getItem('v43_telem');
+    // C. Ricevi Telemetria per muovere la mappa e il badge
+    const raw = localStorage.getItem('v44_telem');
     if (raw) {
       try {
         const m = JSON.parse(raw);
-        // Se Mount ha inviato dati negli ultimi 2 secondi
-        if (m && m.ts && (Date.now() - m.ts < 2000)) {
+        if (m.ts && (Date.now() - m.ts < 3000)) {
           setBadge(true);
           if (m.data && typeof scopeState !== 'undefined') {
-            scopeState.connected = true;
-            scopeState.mountAlt = m.data.alt;
-            scopeState.mountAz = m.data.az;
-            scopeState.isParked = m.data.isParked;
-            scopeState.tracking = (m.data.tracking !== 'off');
+            scopeState.connected = true; scopeState.mountAlt = m.data.alt; scopeState.mountAz = m.data.az;
             if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
             if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
           }
-        } else {
-          setBadge(false);
-        }
+        } else { setBadge(false); }
       } catch(e) {}
     }
   }, 500);
 
-  // 4. Intercetta Connetti/Scollega per feedback immediato
-  const origToggle = window.scopeToggleConnect;
+  // 2. Intercetta TUTTI i comandi operativi (Specchio)
+  const sendCmd = (type, extra = {}) => {
+    localStorage.setItem('v44_cmd_' + type, JSON.stringify({ ...extra, ts: Date.now() }));
+    console.log('📤 [Pianeta] Comando Inviato:', type);
+  };
+
+  const origSlew = window.scopeSlewToTarget;
+  window.scopeSlewToTarget = function() {
+    if (origSlew) origSlew();
+    if (scopeState.target) sendCmd('goto', { ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180 });
+  };
+
+  const origPark = window.scopePark;
+  window.scopePark = function() { if (origPark) origPark(); sendCmd('park'); };
+
+  const origUnpark = window.scopeUnpark;
+  window.scopeUnpark = function() { if (origUnpark) origUnpark(); sendCmd('unpark'); };
+
+  const origStop = window.scopeEmergencyStop;
+  window.scopeEmergencyStop = function() { if (origStop) origStop(); sendCmd('stop'); };
+
+  const origTrack = window.scopeToggleTracking;
+  window.scopeToggleTracking = function() {
+    if (origTrack) origTrack();
+    if (typeof scopeState !== 'undefined') sendCmd('tracking', { on: scopeState.tracking });
+  };
+
+  const origConnect = window.scopeToggleConnect;
   window.scopeToggleConnect = function() {
-    if (origToggle) origToggle();
+    if (origConnect) origConnect();
     setTimeout(() => {
       if (typeof scopeState !== 'undefined') {
-        localStorage.setItem('v43_conn', JSON.stringify({ connected: scopeState.connected, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
+        localStorage.setItem('v44_conn', JSON.stringify({ connected: scopeState.connected, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
       }
     }, 100);
   };
-
 })();
 </script>
 </body>  -->
