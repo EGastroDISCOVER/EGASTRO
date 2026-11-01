@@ -3177,70 +3177,71 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<script id="__sync_planet_v41">
+
+
+<script id="__sync_planet_v43">
 (function() {
-  if (window.SyncBus) { window.SyncBus.stop(); }
+  console.log("🚀 [Pianeta] Sync Blindato v43 avviato");
 
-  // 1. Sostituzione fisica del badge (Uccide lo sfarfallio del vecchio codice)
-  const oldB = document.getElementById('syncBadge');
-  let b, d, t;
-  if (oldB && !document.getElementById('syncBadge_v41')) {
-      const newB = oldB.cloneNode(true);
-      newB.id = 'syncBadge_v41';
-      t = newB.querySelector('#syncText'); if (t) t.id = 'syncText_v41';
-      d = newB.querySelector('#syncDot'); if (d) d.id = 'syncDot_v41';
-      oldB.parentNode.replaceChild(newB, oldB);
-      b = newB;
-  } else {
-      b = document.getElementById('syncBadge_v41');
-      t = document.getElementById('syncText_v41');
-      d = document.getElementById('syncDot_v41');
+  // 1. BLINDIAMO IL BADGE (Impediamo a vecchi script di sovrascriverlo)
+  const t = document.getElementById('syncText');
+  if (t && !t._locked) {
+      t._locked = true;
+      let _txt = 'SYNC OFF';
+      const block = (v) => v.includes('SYNC') || v.includes('LEADER') || v.includes('SLAVE') || v.includes('OFF') || v.includes('ONLINE');
+      Object.defineProperty(t, 'textContent', { get: () => _txt, set: (v) => { if (block(v)) return; _txt = v; } });
+      Object.defineProperty(t, 'innerText', { get: () => _txt, set: (v) => { if (block(v)) return; _txt = v; } });
+      t.textContent = 'SYNC OFF';
   }
+  const d = document.getElementById('syncDot');
+  if (d) d.style.color = '#f87171';
+  const b = document.getElementById('syncBadge');
+  if (b) b.style.borderColor = '#f87171';
 
+  // 2. FUNZIONE PER CAMBIARE STATO BADGE
   function setBadge(online) {
     if (!t) return;
     if (online) {
       t.textContent = 'SYNC ON'; t.style.color = '#4ade80';
-      if(d) d.style.color = '#4ade80';
-      if(b) b.style.borderColor = '#4ade80';
+      if(d) d.style.color = '#4ade80'; if(b) b.style.borderColor = '#4ade80';
     } else {
       t.textContent = 'SYNC OFF'; t.style.color = '#f87171';
-      if(d) d.style.color = '#f87171';
-      if(b) b.style.borderColor = '#f87171';
+      if(d) d.style.color = '#f87171'; if(b) b.style.borderColor = '#f87171';
     }
   }
-  setBadge(false);
 
+  // 3. POLLING: Motore di Sincronizzazione
   let lastLat = null, lastLon = null, lastConn = null;
-
-  // 2. Motore di Sincronizzazione
-  if (window._planetSyncEngine) clearInterval(window._planetSyncEngine);
-  window._planetSyncEngine = setInterval(() => {
-    // A. Invia GPS in automatico se cambiato
+  
+  if (window._planetPolling) clearInterval(window._planetPolling);
+  window._planetPolling = setInterval(() => {
+    
+    // A. Invia GPS se cambiato
     if (typeof state !== 'undefined' && state.lat) {
       if (state.lat !== lastLat || state.lon !== lastLon) {
         lastLat = state.lat; lastLon = state.lon;
-        localStorage.setItem('sync_v41_gps', JSON.stringify({ lat: lastLat, lon: lastLon, ts: Date.now() }));
-        console.log('📤 [Pianeta] GPS Inviato in automatico:', lastLat, lastLon);
+        localStorage.setItem('v43_gps', JSON.stringify({ lat: lastLat, lon: lastLon, ts: Date.now() }));
+        console.log('📤 [Pianeta] GPS Inviato:', lastLat, lastLon);
       }
     }
 
-    // B. Invia Connessione in automatico se cambiata
+    // B. Invia Connessione se cambiata
     if (typeof scopeState !== 'undefined') {
       const isConn = scopeState.connected;
       if (isConn !== lastConn) {
         lastConn = isConn;
-        localStorage.setItem('sync_v41_conn', JSON.stringify({ connected: isConn, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
-        console.log('📤 [Pianeta] Stato Connessione:', isConn);
+        localStorage.setItem('v43_conn', JSON.stringify({ connected: isConn, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
+        console.log('📤 [Pianeta] Connessione Inviata:', isConn);
       }
     }
 
-    // C. Ricevi Telemetria da Mount
-    const raw = localStorage.getItem('sync_v41_telem');
+    // C. Ricevi Telemetria (muove la mappa)
+    const raw = localStorage.getItem('v43_telem');
     if (raw) {
       try {
         const m = JSON.parse(raw);
-        if (m && m.ts && (Date.now() - m.ts < 3000)) {
+        // Se Mount ha inviato dati negli ultimi 2 secondi
+        if (m && m.ts && (Date.now() - m.ts < 2000)) {
           setBadge(true);
           if (m.data && typeof scopeState !== 'undefined') {
             scopeState.connected = true;
@@ -3258,16 +3259,17 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
     }
   }, 500);
 
-  // 3. Invia comandi di movimento
-  const origSlew = window.scopeSlewToTarget;
-  window.scopeSlewToTarget = function() {
-    if (origSlew) origSlew();
-    if (scopeState.target) localStorage.setItem('sync_v41_goto', JSON.stringify({ ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180, ts: Date.now() }));
+  // 4. Intercetta Connetti/Scollega per feedback immediato
+  const origToggle = window.scopeToggleConnect;
+  window.scopeToggleConnect = function() {
+    if (origToggle) origToggle();
+    setTimeout(() => {
+      if (typeof scopeState !== 'undefined') {
+        localStorage.setItem('v43_conn', JSON.stringify({ connected: scopeState.connected, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
+      }
+    }, 100);
   };
-  const origPark = window.scopePark;
-  window.scopePark = function() { if (origPark) origPark(); localStorage.setItem('sync_v41_park', JSON.stringify({ ts: Date.now() })); };
-  const origUnpark = window.scopeUnpark;
-  window.scopeUnpark = function() { if (origUnpark) origUnpark(); localStorage.setItem('sync_v41_unpark', JSON.stringify({ ts: Date.now() })); };
+
 })();
 </script>
 </body>  -->
