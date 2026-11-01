@@ -634,7 +634,7 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       <div style="margin-top:20px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <button class="btn" onclick="updateAll()">Aggiorna Dati</button>
         <button class="btn btn-ghost" onclick="getLocation()">📍 Usa GPS</button>
-        <button class="btn btn-live" id="gpsLiveBtn" onclick="toggleGPSLive()">📡 GPS Live</button>
+        <button class="btn btn-live" id="gpsLiveBtn" onclick="toggleGPSLive()">📡 GPS Live</button><button class="btn" id="btn-send-mount" style="background:#4ade80; color:#000; border:none; margin-left:10px;" onclick="sendGpsToMount()">📡 Invia GPS a Mount</button>
         <span class="msg" id="msg-coord" style="margin:0;">Pronto.</span>
       </div>
       <div class="grid" id="sky-quality-grid" style="margin-top:20px;"></div>
@@ -3129,41 +3129,25 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<div id="sync-status-panel" style="position:fixed;bottom:10px;right:10px;padding:10px;border-radius:10px;background:rgba(13,18,28,0.95);color:#fff;font-family:Orbitron,sans-serif;font-size:11px;z-index:99999;border:2px solid #fbbf24;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 15px rgba(0,0,0,0.5);">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-    <span>STATO PIANETA:</span>
-    <span id="sync-status-text" style="color:#fbbf24;font-weight:bold;">PRONTO</span>
-  </div>
+
   <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
 </div>
 
 
 
-<div id="sync-status-panel" style="position:fixed;bottom:10px;right:10px;padding:10px;border-radius:10px;background:rgba(13,18,28,0.95);color:#fff;font-family:Orbitron,sans-serif;font-size:11px;z-index:99999;border:2px solid #fbbf24;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 15px rgba(0,0,0,0.5);">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-    <span>STATO PIANETA:</span>
-    <span id="sync-status-text" style="color:#fbbf24;font-weight:bold;">PRONTO</span>
-  </div>
+
   <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Forza GPS/IP e Invia</button>
 </div>
 
 
 
-<div id="sync-status-panel" style="position:fixed;bottom:10px;right:10px;padding:10px;border-radius:10px;background:rgba(13,18,28,0.95);color:#fff;font-family:Orbitron,sans-serif;font-size:11px;z-index:99999;border:2px solid #fbbf24;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 15px rgba(0,0,0,0.5);">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-    <span>STATO PIANETA:</span>
-    <span id="sync-status-text" style="color:#fbbf24;font-weight:bold;">PRONTO</span>
-  </div>
+
   <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
 </div>
 
 
 
-<div id="sync-status-panel" style="position:fixed;bottom:10px;right:10px;padding:10px;border-radius:10px;background:rgba(13,18,28,0.95);color:#fff;font-family:Orbitron,sans-serif;font-size:11px;z-index:99999;border:2px solid #fbbf24;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 15px rgba(0,0,0,0.5);">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-    <span>STATO PIANETA:</span>
-    <span id="sync-status-text" style="color:#fbbf24;font-weight:bold;">PRONTO</span>
-  </div>
+
   <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
 </div>
 <script id="__ls_sync_planet">
@@ -3240,21 +3224,13 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 </script>
 
 
-<div id="sync-status-panel" style="position:fixed;bottom:10px;right:10px;padding:10px;border-radius:10px;background:rgba(13,18,28,0.95);color:#fff;font-family:Orbitron,sans-serif;font-size:11px;z-index:99999;border:2px solid #fbbf24;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 15px rgba(0,0,0,0.5);">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-    <span>STATO PIANETA:</span>
-    <span id="sync-status-text" style="color:#fbbf24;font-weight:bold;">PRONTO</span>
-  </div>
+
   <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
 </div>
 
 
 
-<div id="sync-status-panel" style="position:fixed;bottom:10px;right:10px;padding:10px;border-radius:10px;background:rgba(13,18,28,0.95);color:#fff;font-family:Orbitron,sans-serif;font-size:11px;z-index:99999;border:2px solid #fbbf24;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 15px rgba(0,0,0,0.5);">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-    <span>STATO PIANETA:</span>
-    <span id="sync-status-text" style="color:#fbbf24;font-weight:bold;">PRONTO</span>
-  </div>
+
   <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
 </div>
 
@@ -3334,6 +3310,73 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
           scopeState.tracking = (m.data.tracking !== 'off');
           if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
           if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
+        }
+      } catch(e) {}
+    }
+  }, 500);
+})();
+</script>
+
+<script id="__sync_planet_v35">
+(function() {
+  const badge = document.getElementById('syncBadge');
+  const dot = document.getElementById('syncDot');
+  const text = document.getElementById('syncText');
+  let lastSentTs = 0;
+
+  function updateBadge(state, label) {
+    if (!badge) return;
+    if (state === 'online') { badge.style.borderColor = '#4ade80'; dot.style.color = '#4ade80'; text.textContent = label || 'ONLINE ✓'; }
+    else if (state === 'wait') { badge.style.borderColor = '#fbbf24'; dot.style.color = '#fbbf24'; text.textContent = label || 'WAIT'; }
+    else { badge.style.borderColor = '#6b778c'; dot.style.color = '#6b778c'; text.textContent = label || 'SYNC OFF'; }
+  }
+
+  window.sendGpsToMount = async function() {
+    const btn = document.getElementById('btn-send-mount');
+    const origText = btn.innerText;
+    btn.innerText = '⏳ Cerco...';
+    
+    let lat = parseFloat(document.getElementById('lat').value);
+    let lon = parseFloat(document.getElementById('lon').value);
+
+    if (!isNaN(lat) && !isNaN(lon)) {
+      localStorage.setItem('egastro_sync_gps', JSON.stringify({ lat, lon, ts: Date.now() }));
+      updateBadge('online', 'INVIATO ✓');
+      btn.innerText = '✅ Inviato!';
+      setTimeout(() => { btn.innerText = origText; }, 3000);
+    } else {
+      btn.innerText = '❌ Errore';
+      setTimeout(() => { btn.innerText = origText; }, 2000);
+    }
+  };
+
+  // Polling: Invia in automatico se le coordinate cambiano
+  setInterval(() => {
+    if (typeof state !== 'undefined' && Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
+      const now = Date.now();
+      if (now - lastSentTs > 2000) {
+        lastSentTs = now;
+        localStorage.setItem('egastro_sync_gps', JSON.stringify({ lat: state.lat, lon: state.lon, ts: now }));
+        if (text.textContent !== 'ONLINE ✓') updateBadge('online', 'GPS OK');
+      }
+    }
+  }, 1000);
+
+  // Ascolta Mount
+  setInterval(() => {
+    const raw = localStorage.getItem('egastro_mount_state');
+    if (raw) {
+      try {
+        const m = JSON.parse(raw);
+        if (m && m.data && typeof scopeState !== 'undefined') {
+          scopeState.connected = true;
+          scopeState.mountAlt = m.data.alt;
+          scopeState.mountAz = m.data.az;
+          scopeState.isParked = m.data.isParked;
+          scopeState.tracking = (m.data.tracking !== 'off');
+          if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+          if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
+          updateBadge('online', 'ONLINE ✓');
         }
       } catch(e) {}
     }
