@@ -3238,109 +3238,99 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<div id="sync-control-panel" style="position:fixed; bottom:20px; right:20px; background:rgba(13,18,28,0.98); border:2px solid #d4af37; border-radius:12px; padding:15px; z-index:99999; box-shadow:0 5px 20px rgba(0,0,0,0.8); font-family:'Inter', sans-serif; width: 280px;">
-  <h3 style="color:#d4af37; margin:0 0 12px 0; font-size:14px; font-family:'Orbitron'; text-transform:uppercase; letter-spacing:1px; text-align:center;">Trasmetti a Mount</h3>
-  <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px; font-size:13px; color:#c9d1e3;">
-    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-      <input type="checkbox" id="send-gps-check" checked style="width:18px; height:18px; accent-color:#d4af37;"> Invia Coordinate GPS
-    </label>
-    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-      <input type="checkbox" id="send-conn-check" checked style="width:18px; height:18px; accent-color:#d4af37;"> Invia Stato Connessione
-    </label>
-  </div>
+
   <button id="btn-send-mount" style="width:100%; padding:12px; background:#d4af37; color:#000; border:none; border-radius:6px; font-weight:900; cursor:pointer; font-family:'Orbitron'; font-size:13px; transition:0.2s;">📡 ESEGUI INVIO</button>
 </div>
 
-<script id="__sync_planet_v37">
+
+
+<script id="__sync_planet_v39">
 (function() {
-  // Uccide il vecchio SyncBus se presente
+  // 1. Spegne il vecchio SyncBus per evitare conflitti sul badge
   if (window.SyncBus) { window.SyncBus.stop(); }
 
   const badge = document.getElementById('syncBadge');
   const dot = document.getElementById('syncDot');
   const text = document.getElementById('syncText');
-  let currentState = 'PRONTO';
   
-  function setBadge(state, label) {
-    if (currentState === state) return; // Evita il flickering se lo stato non cambia
-    currentState = state;
+  let lastLat = null, lastLon = null, lastConn = null;
+  let isOnline = false;
+
+  function setBadge(online) {
+    if (isOnline === online) return; // Evita lo sfarfallio
+    isOnline = online;
     if (!text) return;
-    
-    text.textContent = label;
-    if (state === 'online') { dot.style.color = '#4ade80'; badge.style.borderColor = '#4ade80'; }
-    else if (state === 'wait') { dot.style.color = '#fbbf24'; badge.style.borderColor = '#fbbf24'; }
-    else { dot.style.color = '#6b778c'; badge.style.borderColor = '#6b778c'; }
+    if (online) {
+      text.textContent = 'SYNC ONLINE ✓';
+      dot.style.color = '#4ade80';
+      badge.style.borderColor = '#4ade80';
+    } else {
+      text.textContent = 'SYNC OFFLINE';
+      dot.style.color = '#fbbf24';
+      badge.style.borderColor = '#fbbf24';
+    }
   }
 
-  setBadge('wait', 'PRONTO');
+  setBadge(false);
 
-  // Funzione di Invio
-  window.executeMountSend = function() {
-    const sendGps = document.getElementById('send-gps-check').checked;
-    const sendConn = document.getElementById('send-conn-check').checked;
-    const btn = document.getElementById('btn-send-mount');
-    const now = Date.now();
-    const msgId = 'msg_' + now + '_' + Math.floor(Math.random()*1000);
-    
-    let payload = { id: msgId, ts: now };
-
-    if (sendGps) {
-      const lat = parseFloat(document.getElementById('lat').value);
-      const lon = parseFloat(document.getElementById('lon').value);
-      if (!isNaN(lat) && !isNaN(lon)) {
-        payload.gps = { lat, lon };
-      } else {
-        alert('❌ Coordinate GPS non valide!'); return;
+  // 2. Motore di Sincronizzazione
+  setInterval(() => {
+    // A. Controlla se le coordinate sono cambiate (in automatico)
+    if (typeof state !== 'undefined' && Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
+      if (state.lat !== lastLat || state.lon !== lastLon) {
+        lastLat = state.lat; lastLon = state.lon;
+        localStorage.setItem('egastro_cmd_gps', JSON.stringify({ lat: lastLat, lon: lastLon, ts: Date.now() }));
+        console.log('📤 [Pianeta] Nuove coordinate inviate in automatico:', lastLat, lastLon);
       }
     }
 
-    if (sendConn && typeof scopeState !== 'undefined') {
-      payload.conn = { simulated: scopeState.protocol === 'sim', connected: scopeState.connected };
+    // B. Controlla se lo stato di connessione è cambiato
+    if (typeof scopeState !== 'undefined') {
+      const isConn = scopeState.connected;
+      if (isConn !== lastConn) {
+        lastConn = isConn;
+        localStorage.setItem('egastro_cmd_conn', JSON.stringify({ connected: isConn, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
+        console.log('📤 [Pianeta] Stato connessione specchio:', isConn);
+      }
     }
 
-    if (Object.keys(payload).length > 1) {
-      localStorage.setItem('egastro_cmd_mount', JSON.stringify(payload));
-      console.log('📤 [Pianeta] Inviato:', payload);
-      
-      btn.innerText = '✅ INVIATO CON SUCCESSO!';
-      btn.style.background = '#4ade80';
-      setBadge('online', 'INVIATO ✓');
-      
-      setTimeout(() => {
-        btn.innerText = '📡 ESEGUI INVIO';
-        btn.style.background = '#d4af37';
-      }, 2000);
-    } else {
-      alert('Seleziona almeno un parametro da inviare.');
-    }
-  };
-
-  // Collega il pulsante
-  setTimeout(() => {
-    const btn = document.getElementById('btn-send-mount');
-    if(btn) btn.addEventListener('click', window.executeMountSend);
-  }, 100);
-
-  // Ascolta la risposta di Mount (un solo setInterval, nessun flickering)
-  setInterval(() => {
+    // C. Ascolta la telemetria da Mount
     const raw = localStorage.getItem('egastro_mount_state');
     if (raw) {
       try {
         const m = JSON.parse(raw);
-        if (m && m.data && typeof scopeState !== 'undefined') {
-          scopeState.connected = m.data.connected !== false;
-          scopeState.mountAlt = m.data.alt;
-          scopeState.mountAz = m.data.az;
-          scopeState.isParked = m.data.isParked;
-          scopeState.tracking = (m.data.tracking !== 'off');
-          if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-          if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
-          
-          setBadge('online', 'ONLINE ✓');
+        if (m && m.ts && (Date.now() - m.ts < 3000)) {
+          setBadge(true);
+          if (m.data && typeof scopeState !== 'undefined') {
+            scopeState.mountAlt = m.data.alt;
+            scopeState.mountAz = m.data.az;
+            scopeState.isParked = m.data.isParked;
+            scopeState.tracking = (m.data.tracking !== 'off');
+            if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+            if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
+          }
+        } else {
+          setBadge(false);
         }
       } catch(e) {}
     }
-  }, 1000);
+  }, 500);
+
+  // 3. Invia i comandi operativi a Mount
+  const origSlew = window.scopeSlewToTarget;
+  window.scopeSlewToTarget = function() {
+    if (origSlew) origSlew();
+    if (scopeState.target) localStorage.setItem('egastro_cmd_goto', JSON.stringify({ ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180, ts: Date.now() }));
+  };
+  
+  const origPark = window.scopePark;
+  window.scopePark = function() { if (origPark) origPark(); localStorage.setItem('egastro_cmd_park', JSON.stringify({ ts: Date.now() })); };
+  
+  const origUnpark = window.scopeUnpark;
+  window.scopeUnpark = function() { if (origUnpark) origUnpark(); localStorage.setItem('egastro_cmd_unpark', JSON.stringify({ ts: Date.now() })); };
+
+  const origStop = window.scopeEmergencyStop;
+  window.scopeEmergencyStop = function() { if (origStop) origStop(); localStorage.setItem('egastro_cmd_stop', JSON.stringify({ ts: Date.now() })); };
 })();
 </script>
 </body>  -->
