@@ -3194,6 +3194,144 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 })();
 </script>
 
+
+<div id="unified-badge" style="position:fixed;bottom:10px;right:10px;padding:6px 12px;border-radius:20px;background:rgba(0,0,0,0.85);color:#fbbf24;font-family:Orbitron,sans-serif;font-size:11px;z-index:99999;border:2px solid #fbbf24;font-weight:700;cursor:pointer;" title="Click per forzare GPS">SYNC: WAIT</div>
+<script id="__unified_planet">
+(function(){
+  if (window.__unifiedPlanetActive) return;
+  window.__unifiedPlanetActive = true;
+
+  const CHANNEL = 'egastro_unified_v3';
+  let bc;
+  try { bc = new BroadcastChannel(CHANNEL); } catch(e) { console.error('BroadcastChannel non supportato'); return; }
+  let lastRx = 0;
+  const isAlive = () => Date.now() - lastRx < 5000;
+
+  function log(direction, type, data) {
+    console.log('[PIANETA ' + direction + ']', type, data || '');
+    const b = document.getElementById('unified-badge');
+    if (b) b.title = (direction === 'RX' ? 'Ultimo ricevuto: ' : 'Ultimo inviato: ') + type;
+  }
+
+  function send(type, data) {
+    try { bc.postMessage({ from: 'observatory', type, data, ts: Date.now() }); log('TX', type, data); } catch(e) { console.warn(e); }
+  }
+
+  bc.onmessage = (ev) => {
+    const m = ev.data;
+    if (!m || m.from === 'observatory') return;
+    lastRx = Date.now();
+    log('RX', m.type, m.data);
+
+    if (m.type === 'mount_state' && m.data && typeof scopeState !== 'undefined') {
+      scopeState.connected = m.data.connected;
+      scopeState.mountAlt = m.data.alt;
+      scopeState.mountAz = m.data.az;
+      scopeState.isParked = m.data.isParked;
+      scopeState.tracking = (m.data.tracking !== 'off');
+      if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+      if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
+      const connBadge = document.getElementById('scopeConnBadge');
+      if (connBadge && m.data.connected) { connBadge.innerText = 'CONNESSO (SYNC)'; connBadge.classList.add('on'); }
+    }
+
+    if (m.type === 'sync_ui_park' && typeof scopeState !== 'undefined') {
+      scopeState.isParked = true;
+      const po = document.getElementById('parkOverlay'); if (po) po.classList.add('open');
+    }
+    if (m.type === 'sync_ui_unpark' && typeof scopeState !== 'undefined') {
+      scopeState.isParked = false;
+      const po = document.getElementById('parkOverlay'); if (po) po.classList.remove('open');
+    }
+  };
+
+  // Hook applyCoordinates per inviare GPS reale a Mount
+  const _origApply = window.applyCoordinates;
+  window.applyCoordinates = function(lat, lon, city, acc) {
+    try { if (_origApply) _origApply.apply(this, arguments); } catch(e) { console.error(e); }
+    try { send('sync_gps', { lat, lon, city, acc }); console.log('📍 [PIANETA] GPS condiviso:', lat, lon); } catch(e) {}
+  };
+
+  // Hook connessione
+  const _origConnect = window.scopeToggleConnect;
+  window.scopeToggleConnect = function() {
+    try { if (_origConnect) _origConnect.apply(this, arguments); } catch(e) { console.error(e); }
+    setTimeout(() => {
+      if (typeof scopeState !== 'undefined' && scopeState.connected) {
+        send('sync_connect', { simulated: (scopeState.protocol === 'sim') });
+        console.log('🔗 [PIANETA] Connessione condivisa. Sim:', scopeState.protocol === 'sim');
+      }
+    }, 100);
+  };
+
+  // Hook GOTO
+  const _origGoto = window.scopeSlewToTarget;
+  window.scopeSlewToTarget = function() {
+    try {
+      if (typeof scopeState !== 'undefined' && scopeState.target) {
+        send('cmd_goto', { ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180 });
+      }
+    } catch(e) {}
+    if (_origGoto) _origGoto.apply(this, arguments);
+  };
+
+  // Hook PARK / UNPARK / STOP / TRACKING
+  ['scopePark','scopeUnpark','scopeEmergencyStop','scopeToggleTracking'].forEach(fn => {
+    const orig = window[fn];
+    if (typeof orig !== 'function') return;
+    window[fn] = function() {
+      const cmdType = fn === 'scopePark' ? 'cmd_park' : fn === 'scopeUnpark' ? 'cmd_unpark' : fn === 'scopeEmergencyStop' ? 'cmd_stop' : 'cmd_tracking';
+      try { send(cmdType, fn === 'scopeToggleTracking' ? { on: !scopeState.tracking } : {}); } catch(e) {}
+      try { if (orig) orig.apply(this, arguments); } catch(e) { console.error(e); }
+    };
+  });
+
+  // Badge aggiornamento
+  setInterval(() => {
+    const b = document.getElementById('unified-badge');
+    if (!b) return;
+    const alive = isAlive();
+    b.textContent = 'SYNC: ' + (alive ? 'ONLINE ✓' : 'WAIT');
+    b.style.color = alive ? '#4ade80' : '#fbbf24';
+    b.style.borderColor = alive ? '#4ade80' : '#fbbf24';
+  }, 500);
+
+  // Click badge = forza GPS REALE con permessi
+  document.getElementById('unified-badge').onclick = async () => {
+    if (!navigator.geolocation) { alert('GPS non supportato dal browser'); return; }
+    try {
+      const perm = await navigator.permissions.query({ name: 'geolocation' });
+      console.log('Stato permesso GPS:', perm.state);
+      if (perm.state === 'denied') { alert('❌ GPS BLOCCATO. Vai su Chrome → Impostazioni sito → Geolocalizzazione → Consenti.'); return; }
+    } catch(e) {}
+    console.log('Richiesta GPS in corso...');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        console.log('✅ GPS OK:', pos.coords.latitude, pos.coords.longitude, '±', pos.coords.accuracy, 'm');
+        if (window.applyCoordinates) window.applyCoordinates(pos.coords.latitude, pos.coords.longitude, 'GPS REALE', pos.coords.accuracy);
+        alert('📍 GPS Pianeta:
+' + pos.coords.latitude.toFixed(5) + ', ' + pos.coords.longitude.toFixed(5) + '
+Precisione: ±' + Math.round(pos.coords.accuracy) + 'm');
+      },
+      (err) => {
+        console.error('❌ GPS Error:', err.code, err.message);
+        alert('Errore GPS:
+Codice ' + err.code + '
+' + err.message + '
+
+Suggerimenti:
+- Serve HTTPS (non file://)
+- Consenti la posizione nel browser
+- Verifica che il GPS del PC/telefono sia attivo');
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+    );
+  };
+
+  console.log('✅ [PIANETA] Canale UnifiedSync attivo');
+})();
+</script>
+
 </body>  -->
 
 
