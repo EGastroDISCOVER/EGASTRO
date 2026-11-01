@@ -3244,9 +3244,11 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<script id="__sync_planet_v39">
+
+
+<script id="__sync_planet_final">
 (function() {
-  // 1. Spegne il vecchio SyncBus per evitare conflitti sul badge
+  // 1. Spegne il vecchio SyncBus
   if (window.SyncBus) { window.SyncBus.stop(); }
 
   const badge = document.getElementById('syncBadge');
@@ -3256,52 +3258,56 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
   let lastLat = null, lastLon = null, lastConn = null;
   let isOnline = false;
 
+  // Funzione per aggiornare il badge originale
   function setBadge(online) {
-    if (isOnline === online) return; // Evita lo sfarfallio
+    if (isOnline === online) return;
     isOnline = online;
     if (!text) return;
     if (online) {
-      text.textContent = 'SYNC ONLINE ✓';
-      dot.style.color = '#4ade80';
-      badge.style.borderColor = '#4ade80';
+      text.textContent = 'SYNC ON';
+      text.style.color = '#4ade80';
+      if(dot) dot.style.color = '#4ade80';
+      if(badge) badge.style.borderColor = '#4ade80';
     } else {
-      text.textContent = 'SYNC OFFLINE';
-      dot.style.color = '#fbbf24';
-      badge.style.borderColor = '#fbbf24';
+      text.textContent = 'SYNC OFF';
+      text.style.color = '#f87171';
+      if(dot) dot.style.color = '#f87171';
+      if(badge) badge.style.borderColor = '#f87171';
     }
   }
 
   setBadge(false);
 
-  // 2. Motore di Sincronizzazione
+  // 2. Motore di Sincronizzazione Automatico
   setInterval(() => {
-    // A. Controlla se le coordinate sono cambiate (in automatico)
+    // A. Invia GPS (se cambiato)
     if (typeof state !== 'undefined' && Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
       if (state.lat !== lastLat || state.lon !== lastLon) {
         lastLat = state.lat; lastLon = state.lon;
-        localStorage.setItem('egastro_cmd_gps', JSON.stringify({ lat: lastLat, lon: lastLon, ts: Date.now() }));
-        console.log('📤 [Pianeta] Nuove coordinate inviate in automatico:', lastLat, lastLon);
+        localStorage.setItem('egastro_sync_gps_auto', JSON.stringify({ lat: lastLat, lon: lastLon, ts: Date.now() }));
+        console.log('📤 [Pianeta] GPS Inviato in automatico:', lastLat, lastLon);
       }
     }
 
-    // B. Controlla se lo stato di connessione è cambiato
+    // B. Invia Connessione (se cambiata)
     if (typeof scopeState !== 'undefined') {
       const isConn = scopeState.connected;
       if (isConn !== lastConn) {
         lastConn = isConn;
-        localStorage.setItem('egastro_cmd_conn', JSON.stringify({ connected: isConn, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
-        console.log('📤 [Pianeta] Stato connessione specchio:', isConn);
+        localStorage.setItem('egastro_sync_conn_auto', JSON.stringify({ connected: isConn, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
+        console.log('📤 [Pianeta] Stato Connessione inviato:', isConn);
       }
     }
 
-    // C. Ascolta la telemetria da Mount
-    const raw = localStorage.getItem('egastro_mount_state');
+    // C. Ricevi Telemetria (muove la mappa)
+    const raw = localStorage.getItem('egastro_sync_telem_auto');
     if (raw) {
       try {
         const m = JSON.parse(raw);
         if (m && m.ts && (Date.now() - m.ts < 3000)) {
           setBadge(true);
           if (m.data && typeof scopeState !== 'undefined') {
+            scopeState.connected = true;
             scopeState.mountAlt = m.data.alt;
             scopeState.mountAz = m.data.az;
             scopeState.isParked = m.data.isParked;
@@ -3316,21 +3322,18 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
     }
   }, 500);
 
-  // 3. Invia i comandi operativi a Mount
+  // 3. Invia comandi di movimento (GOTO, Park, ecc.)
   const origSlew = window.scopeSlewToTarget;
   window.scopeSlewToTarget = function() {
     if (origSlew) origSlew();
-    if (scopeState.target) localStorage.setItem('egastro_cmd_goto', JSON.stringify({ ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180, ts: Date.now() }));
+    if (scopeState.target) localStorage.setItem('egastro_sync_goto_auto', JSON.stringify({ ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180, ts: Date.now() }));
   };
   
   const origPark = window.scopePark;
-  window.scopePark = function() { if (origPark) origPark(); localStorage.setItem('egastro_cmd_park', JSON.stringify({ ts: Date.now() })); };
+  window.scopePark = function() { if (origPark) origPark(); localStorage.setItem('egastro_sync_park_auto', JSON.stringify({ ts: Date.now() })); };
   
   const origUnpark = window.scopeUnpark;
-  window.scopeUnpark = function() { if (origUnpark) origUnpark(); localStorage.setItem('egastro_cmd_unpark', JSON.stringify({ ts: Date.now() })); };
-
-  const origStop = window.scopeEmergencyStop;
-  window.scopeEmergencyStop = function() { if (origStop) origStop(); localStorage.setItem('egastro_cmd_stop', JSON.stringify({ ts: Date.now() })); };
+  window.scopeUnpark = function() { if (origUnpark) origUnpark(); localStorage.setItem('egastro_sync_unpark_auto', JSON.stringify({ ts: Date.now() })); };
 })();
 </script>
 </body>  -->
