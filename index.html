@@ -2948,6 +2948,93 @@ init();
 console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 })();
 </script>
+
+<script id="__sync_bus_planet">
+(function(){
+  if (typeof SyncBus === 'undefined') return;
+  console.log('🔄 [Pianeta] SyncBus inizializzato');
+
+  // 1. Ascolta lo stato da Mount
+  SyncBus.on('mount_state', d => {
+    if (typeof scopeState === 'undefined') return;
+    
+    // Aggiorna stato interno
+    scopeState.connected = true;
+    scopeState.isParked = d.isParked;
+    scopeState.tracking = (d.tracking !== 'off');
+    scopeState.trackRate = d.tracking || 'sidereal';
+    scopeState.slewing = (d.slewMode === 'goto' || d.slewMode === 'park');
+    
+    // Calcola le coordinate Alt/Az per muovere il puntatore sulla mappa di Pianeta
+    if (d.ra !== undefined && d.dec !== undefined) {
+      const raDeg = d.ra * 180 / Math.PI;
+      const decDeg = d.dec * 180 / Math.PI;
+      const pos = getAltAz(raDeg, decDeg, state.currentTime);
+      scopeState.mountAlt = pos.alt;
+      scopeState.mountAz = pos.az;
+    }
+
+    // Aggiorna UI
+    if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+    if (typeof scopeDraw === 'function' && document.getElementById('tab-scope').classList.contains('active')) scopeDraw();
+  });
+
+  // 2. Ascolta i comandi di sincronizzazione dalla UI di Mount
+  SyncBus.on('sync_ui_park', () => { if (typeof scopePark === 'function' && scopeState.connected) scopePark(); });
+  SyncBus.on('sync_ui_unpark', () => { if (typeof scopeUnpark === 'function' && scopeState.connected) scopeUnpark(); });
+  SyncBus.on('sync_ui_stop', () => { if (typeof scopeEmergencyStop === 'function') scopeEmergencyStop(); });
+
+  // 3. Override delle funzioni di Pianeta per inviare comandi a Mount
+  const origGoto = window.scopeSlewToTarget;
+  window.scopeSlewToTarget = function() {
+    if (scopeState.target && SyncBus.isPeerAlive()) {
+      // Invia le coordinate di GOTO a Mount (in radianti)
+      SyncBus.send('cmd_goto', { ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180 });
+      scopeLog('Comando GOTO inviato a Mount', 'ok');
+    } else if (origGoto) {
+      origGoto(); // Fallback stand-alone
+    }
+  };
+
+  const origPark = window.scopePark;
+  window.scopePark = function() {
+    if (SyncBus.isPeerAlive()) SyncBus.send('cmd_park', {});
+    if (origPark) origPark();
+  };
+
+  const origUnpark = window.scopeUnpark;
+  window.scopeUnpark = function() {
+    if (SyncBus.isPeerAlive()) SyncBus.send('cmd_unpark', {});
+    if (origUnpark) origUnpark();
+  };
+
+  const origStop = window.scopeEmergencyStop;
+  window.scopeEmergencyStop = function() {
+    if (SyncBus.isPeerAlive()) SyncBus.send('cmd_stop', {});
+    if (origStop) origStop();
+  };
+
+  const origTrack = window.scopeToggleTracking;
+  window.scopeToggleTracking = function() {
+    if (SyncBus.isPeerAlive()) SyncBus.send('cmd_tracking', { on: !scopeState.tracking });
+    if (origTrack) origTrack();
+  };
+
+  // 4. Quando Pianeta si connette (Simulatore, WiFi, BT), invia richiesta a Mount
+  const origConnect = window.scopeToggleConnect;
+  window.scopeToggleConnect = function() {
+    if (origConnect) origConnect();
+    if (SyncBus.isPeerAlive()) {
+      SyncBus.send('sync_connect', {
+        simulated: scopeState.protocol === 'sim' || scopeState.connType === 'sim',
+        wifiEnabled: scopeState.connType === 'wifi',
+        btEnabled: scopeState.connType === 'bt'
+      });
+    }
+  };
+})();
+</script>
+
 </body>  -->
 
 
