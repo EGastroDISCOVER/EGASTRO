@@ -634,7 +634,7 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       <div style="margin-top:20px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <button class="btn" onclick="updateAll()">Aggiorna Dati</button>
         <button class="btn btn-ghost" onclick="getLocation()">📍 Usa GPS</button>
-        <button class="btn btn-live" id="gpsLiveBtn" onclick="toggleGPSLive()">📡 GPS Live</button><button class="btn" id="btn-send-mount" style="background:#4ade80; color:#000; border:none; margin-left:10px;" onclick="sendGpsToMount()">📡 Invia GPS a Mount</button>
+        <button class="btn btn-live" id="gpsLiveBtn" onclick="toggleGPSLive()">📡 GPS Live</button>
         <span class="msg" id="msg-coord" style="margin:0;">Pronto.</span>
       </div>
       <div class="grid" id="sky-quality-grid" style="margin-top:20px;"></div>
@@ -3130,7 +3130,7 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-  <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
+  
 </div>
 
 
@@ -3142,165 +3142,101 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-  <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
+  
 </div>
 
 
 
 
-  <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
+  
 </div>
-<script id="__ls_sync_planet">
+
+
+
+
+  
+</div>
+
+
+
+
+  
+</div>
+
+
+
+
+
+
+  
+</div>
+
+
+
+
+
+
+
+<script id="__sync_planet_v41">
 (function() {
-  document.addEventListener('DOMContentLoaded', function() {
-    const statusText = document.getElementById('sync-status-text');
-    const gpsBtn = document.getElementById('sync-gps-btn');
-
-    // 1. Funzione che invia i dati tramite LocalStorage
-    function sendToMount(key, data) {
-      localStorage.setItem(key, JSON.stringify({ data: data, ts: Date.now() }));
-      console.log('📤 [Pianeta] Inviato a Mount:', key, data);
-    }
-
-    // 2. Quando premi il bottone: Prova GPS Device, poi IP
-    gpsBtn.onclick = async () => {
-      gpsBtn.innerText = '⏳ Cerco...';
-      let lat = null, lon = null;
-
-      if (navigator.geolocation) {
-        try {
-          const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 }));
-          lat = pos.coords.latitude; lon = pos.coords.longitude;
-        } catch (e) { console.log('GPS device fallito, uso IP.'); }
-      }
-      
-      if (!lat || !lon) {
-        try { const r = await fetch('https://ipapi.co/json/'); const d = await r.json(); lat = d.latitude; lon = d.longitude; } catch (e) {}
-      }
-
-      if (lat && lon) {
-        if (typeof state !== 'undefined') { state.lat = lat; state.lon = lon; }
-        if (typeof applyCoordinates === 'function') applyCoordinates(lat, lon, 'GPS/IP');
-        sendToMount('egastro_sync_gps', { lat, lon });
-        
-        gpsBtn.innerText = '✅ Inviato!'; gpsBtn.style.background = '#4ade80';
-        statusText.innerText = 'ONLINE ✓'; statusText.style.color = '#4ade80';
-        setTimeout(() => { gpsBtn.innerText = '📍 Invia GPS a Mount'; gpsBtn.style.background = '#d4af37'; }, 3000);
-      } else {
-        gpsBtn.innerText = '❌ Errore'; setTimeout(() => gpsBtn.innerText = '📍 Invia GPS a Mount', 2000);
-      }
-    };
-
-    // 3. Invia la Connessione a Mount
-    setInterval(() => {
-      if (typeof scopeState !== 'undefined' && scopeState.connected) {
-        if (!window._connSent) {
-          sendToMount('egastro_sync_conn', { simulated: scopeState.protocol === 'sim' });
-          window._connSent = true;
-        }
-      } else { window._connSent = false; }
-    }, 1000);
-
-    // 4. Ascolta lo stato di Mount (Telemetria)
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'egastro_mount_state') {
-        try {
-          const d = JSON.parse(e.newValue);
-          if (d && d.data && typeof scopeState !== 'undefined') {
-            scopeState.mountAlt = d.data.alt; scopeState.mountAz = d.data.az;
-            scopeState.isParked = d.data.isParked; scopeState.tracking = (d.data.tracking !== 'off');
-            if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-            if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
-            if (!scopeState.connected) {
-              scopeState.connected = true;
-              if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-            }
-          }
-        } catch(err) {}
-      }
-    });
-  });
-})();
-</script>
-
-
-
-  <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
-</div>
-
-
-
-
-  <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
-</div>
-
-
-
-
-
-
-  <button id="btn-send-mount" style="width:100%; padding:12px; background:#d4af37; color:#000; border:none; border-radius:6px; font-weight:900; cursor:pointer; font-family:'Orbitron'; font-size:13px; transition:0.2s;">📡 ESEGUI INVIO</button>
-</div>
-
-
-
-
-
-<script id="__sync_planet_final">
-(function() {
-  // 1. Spegne il vecchio SyncBus
   if (window.SyncBus) { window.SyncBus.stop(); }
 
-  const badge = document.getElementById('syncBadge');
-  const dot = document.getElementById('syncDot');
-  const text = document.getElementById('syncText');
-  
-  let lastLat = null, lastLon = null, lastConn = null;
-  let isOnline = false;
-
-  // Funzione per aggiornare il badge originale
-  function setBadge(online) {
-    if (isOnline === online) return;
-    isOnline = online;
-    if (!text) return;
-    if (online) {
-      text.textContent = 'SYNC ON';
-      text.style.color = '#4ade80';
-      if(dot) dot.style.color = '#4ade80';
-      if(badge) badge.style.borderColor = '#4ade80';
-    } else {
-      text.textContent = 'SYNC OFF';
-      text.style.color = '#f87171';
-      if(dot) dot.style.color = '#f87171';
-      if(badge) badge.style.borderColor = '#f87171';
-    }
+  // 1. Sostituzione fisica del badge (Uccide lo sfarfallio del vecchio codice)
+  const oldB = document.getElementById('syncBadge');
+  let b, d, t;
+  if (oldB && !document.getElementById('syncBadge_v41')) {
+      const newB = oldB.cloneNode(true);
+      newB.id = 'syncBadge_v41';
+      t = newB.querySelector('#syncText'); if (t) t.id = 'syncText_v41';
+      d = newB.querySelector('#syncDot'); if (d) d.id = 'syncDot_v41';
+      oldB.parentNode.replaceChild(newB, oldB);
+      b = newB;
+  } else {
+      b = document.getElementById('syncBadge_v41');
+      t = document.getElementById('syncText_v41');
+      d = document.getElementById('syncDot_v41');
   }
 
+  function setBadge(online) {
+    if (!t) return;
+    if (online) {
+      t.textContent = 'SYNC ON'; t.style.color = '#4ade80';
+      if(d) d.style.color = '#4ade80';
+      if(b) b.style.borderColor = '#4ade80';
+    } else {
+      t.textContent = 'SYNC OFF'; t.style.color = '#f87171';
+      if(d) d.style.color = '#f87171';
+      if(b) b.style.borderColor = '#f87171';
+    }
+  }
   setBadge(false);
 
-  // 2. Motore di Sincronizzazione Automatico
-  setInterval(() => {
-    // A. Invia GPS (se cambiato)
-    if (typeof state !== 'undefined' && Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
+  let lastLat = null, lastLon = null, lastConn = null;
+
+  // 2. Motore di Sincronizzazione
+  if (window._planetSyncEngine) clearInterval(window._planetSyncEngine);
+  window._planetSyncEngine = setInterval(() => {
+    // A. Invia GPS in automatico se cambiato
+    if (typeof state !== 'undefined' && state.lat) {
       if (state.lat !== lastLat || state.lon !== lastLon) {
         lastLat = state.lat; lastLon = state.lon;
-        localStorage.setItem('egastro_sync_gps_auto', JSON.stringify({ lat: lastLat, lon: lastLon, ts: Date.now() }));
+        localStorage.setItem('sync_v41_gps', JSON.stringify({ lat: lastLat, lon: lastLon, ts: Date.now() }));
         console.log('📤 [Pianeta] GPS Inviato in automatico:', lastLat, lastLon);
       }
     }
 
-    // B. Invia Connessione (se cambiata)
+    // B. Invia Connessione in automatico se cambiata
     if (typeof scopeState !== 'undefined') {
       const isConn = scopeState.connected;
       if (isConn !== lastConn) {
         lastConn = isConn;
-        localStorage.setItem('egastro_sync_conn_auto', JSON.stringify({ connected: isConn, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
-        console.log('📤 [Pianeta] Stato Connessione inviato:', isConn);
+        localStorage.setItem('sync_v41_conn', JSON.stringify({ connected: isConn, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
+        console.log('📤 [Pianeta] Stato Connessione:', isConn);
       }
     }
 
-    // C. Ricevi Telemetria (muove la mappa)
-    const raw = localStorage.getItem('egastro_sync_telem_auto');
+    // C. Ricevi Telemetria da Mount
+    const raw = localStorage.getItem('sync_v41_telem');
     if (raw) {
       try {
         const m = JSON.parse(raw);
@@ -3322,18 +3258,16 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
     }
   }, 500);
 
-  // 3. Invia comandi di movimento (GOTO, Park, ecc.)
+  // 3. Invia comandi di movimento
   const origSlew = window.scopeSlewToTarget;
   window.scopeSlewToTarget = function() {
     if (origSlew) origSlew();
-    if (scopeState.target) localStorage.setItem('egastro_sync_goto_auto', JSON.stringify({ ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180, ts: Date.now() }));
+    if (scopeState.target) localStorage.setItem('sync_v41_goto', JSON.stringify({ ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180, ts: Date.now() }));
   };
-  
   const origPark = window.scopePark;
-  window.scopePark = function() { if (origPark) origPark(); localStorage.setItem('egastro_sync_park_auto', JSON.stringify({ ts: Date.now() })); };
-  
+  window.scopePark = function() { if (origPark) origPark(); localStorage.setItem('sync_v41_park', JSON.stringify({ ts: Date.now() })); };
   const origUnpark = window.scopeUnpark;
-  window.scopeUnpark = function() { if (origUnpark) origUnpark(); localStorage.setItem('egastro_sync_unpark_auto', JSON.stringify({ ts: Date.now() })); };
+  window.scopeUnpark = function() { if (origUnpark) origUnpark(); localStorage.setItem('sync_v41_unpark', JSON.stringify({ ts: Date.now() })); };
 })();
 </script>
 </body>  -->
