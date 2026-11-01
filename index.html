@@ -3035,6 +3035,95 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 })();
 </script>
 
+
+
+  <div id="sync-status-badge" style="position:fixed; bottom:10px; right:10px; padding:6px 12px; border-radius:20px; background:rgba(0,0,0,0.8); color:#fff; font-family:'Orbitron',sans-serif; font-size:11px; z-index:99999; border:2px solid #6b778c; transition:all 0.3s;">
+    Sync: <span id="sync-status-text" style="color:#6b778c; font-weight:bold;">WAIT</span>
+  </div>
+<script id="__ultimate_sync_planet_v26">
+(function(){
+  if (typeof SyncBus === 'undefined') { console.error('SyncBus mancante'); return; }
+
+  // Aggiorna il badge visivo
+  setInterval(() => {
+    const b = document.getElementById('sync-status-badge');
+    const t = document.getElementById('sync-status-text');
+    if (!b || !t) return;
+    if (SyncBus.isPeerAlive()) {
+      b.style.borderColor = '#4ade80'; t.textContent = 'ONLINE ✓'; t.style.color = '#4ade80';
+    } else {
+      b.style.borderColor = '#fbbf24'; t.textContent = 'WAIT'; t.style.color = '#fbbf24';
+    }
+  }, 1000);
+
+  // 1. Ascolta Mount e aggiorna la UI in tempo reale
+  SyncBus.on('mount_state', d => {
+    if (typeof scopeState === 'undefined') return;
+    
+    scopeState.connected = d.connected !== false;
+    scopeState.mountAlt = d.alt;
+    scopeState.mountAz = d.az;
+    scopeState.isParked = d.isParked;
+    scopeState.tracking = (d.tracking !== 'off');
+    
+    // Sincronizza GPS se Pianeta non lo ha
+    if (d.gpsActive && d.gpsLat && !state.lat) {
+      state.lat = d.gpsLat; state.lon = d.gpsLon;
+      if (typeof applyCoordinates === 'function') applyCoordinates(d.gpsLat, d.gpsLon, 'Sync Mount');
+    }
+
+    if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+    if (typeof scopeDraw === 'function' && document.getElementById('tab-scope').classList.contains('active')) scopeDraw();
+  });
+
+  // 2. Quando Pianeta calcola il GPS, lo invia a Mount
+  if (typeof applyCoordinates === 'function') {
+    const origApply = window.applyCoordinates;
+    window.applyCoordinates = function(lat, lon, city, acc) {
+      origApply(lat, lon, city, acc);
+      if (SyncBus.isPeerAlive()) {
+        SyncBus.send('sync_gps', { lat: lat, lon: lon });
+        console.log('📍 [Pianeta] GPS inviato a Mount:', lat, lon);
+      }
+    };
+  }
+
+  // 3. Quando premi Connetti su Pianeta, connette anche Mount
+  const origConnect = window.scopeToggleConnect;
+  window.scopeToggleConnect = function() {
+    if (origConnect) origConnect();
+    if (!scopeState.connected && SyncBus.isPeerAlive()) {
+      SyncBus.send('sync_connect', { simulated: (scopeState.protocol === 'sim') });
+    }
+  };
+
+  // 4. Invia comandi di movimento a Mount
+  const origGoto = window.scopeSlewToTarget;
+  window.scopeSlewToTarget = function() {
+    if (scopeState.target && SyncBus.isPeerAlive()) {
+      SyncBus.send('cmd_goto', { ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180 });
+    } else if (origGoto) origGoto();
+  };
+
+  const origPark = window.scopePark;
+  window.scopePark = function() { if (SyncBus.isPeerAlive()) SyncBus.send('cmd_park'); if (origPark) origPark(); };
+  const origUnpark = window.scopeUnpark;
+  window.scopeUnpark = function() { if (SyncBus.isPeerAlive()) SyncBus.send('cmd_unpark'); if (origUnpark) origUnpark(); };
+  const origStop = window.scopeEmergencyStop;
+  window.scopeEmergencyStop = function() { if (SyncBus.isPeerAlive()) SyncBus.send('cmd_stop'); if (origStop) origStop(); };
+  const origTrack = window.scopeToggleTracking;
+  window.scopeToggleTracking = function() {
+    if (SyncBus.isPeerAlive()) SyncBus.send('cmd_tracking', { on: !scopeState.tracking });
+    if (origTrack) origTrack();
+  };
+
+  // 5. Ricevi notifiche di Park/Unpark da Mount
+  SyncBus.on('sync_ui_park', () => { if (typeof scopeState !== 'undefined') { scopeState.isParked = true; const po = document.getElementById('parkOverlay'); if(po) po.classList.add('open'); } });
+  SyncBus.on('sync_ui_unpark', () => { if (typeof scopeState !== 'undefined') { scopeState.isParked = false; const po = document.getElementById('parkOverlay'); if(po) po.classList.remove('open'); } });
+  SyncBus.on('sync_ui_stop', () => { if (typeof scopeEmergencyStop === 'function') scopeEmergencyStop(); });
+})();
+</script>
+
 </body>  -->
 
 
