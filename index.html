@@ -1015,11 +1015,11 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
         <div style="display:flex; gap:6px; margin-top:6px;">
           <div style="flex:1;"><label style="font-size:9px; margin-bottom:2px; display:block;">Velocità Slew</label>
           <select id="scopeSlewSpeedSel" class="conn-select" onchange="scopeChangeSlewSpeed(this.value)">
-            <option value="0.005">Lento</option><option value="0.02" selected>Default</option><option value="0.06">Veloce</option><option value="0.2">Veloce Max</option>
+            <option value="0.005">Lento</option><option value="0.02" selected="">Default</option><option value="0.06">Veloce</option><option value="0.2">Veloce Max</option>
           </select></div>
           <div style="flex:1;"><label style="font-size:9px; margin-bottom:2px; display:block;">Rate Tracking</label>
           <select id="scopeTrackMultiplierSel" class="conn-select" onchange="scopeChangeTrackMultiplier(this.value)">
-            <option value="0.5">0.50x</option><option value="0.75">0.75x</option><option value="1" selected>1.00x</option>
+            <option value="0.5">0.50x</option><option value="0.75">0.75x</option><option value="1" selected="">1.00x</option>
           </select></div>
         </div>
         <div class="track-rate-pills">
@@ -3390,10 +3390,10 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 <div id="my-tunnel-btn" title="Apri Montatura">
   <button id="my-tunnel-btn-click">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"/>
-      <path d="M7 16l-2 6"/>
-      <path d="M3 22h8"/>
-      <path d="M10 6l10-3 2 4-10 3-2-4z"/>
+      <path d="M10 6L7 16l-4-1.5L6 4.5 10 6z"></path>
+      <path d="M7 16l-2 6"></path>
+      <path d="M3 22h8"></path>
+      <path d="M10 6l10-3 2 4-10 3-2-4z"></path>
     </svg>
     <span id="my-tunnel-label">SCOPE</span>
   </button>
@@ -3454,5 +3454,47 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 })();
 </script>
 
-</body>
-</html>
+
+
+<script id="__sync_planet_vfinal">
+    (function() {
+      if (window.SyncBus) { window.SyncBus.stop(); window.SyncBus = null; }
+      
+      // Clona gli elementi interni per bloccare il vecchio codice che sfarfalla
+      const t = document.getElementById('syncText');
+      if (t) { const c = t.cloneNode(true); c.id = 'syncText_new'; t.parentNode.replaceChild(c, t); }
+      const d = document.getElementById('syncDot');
+      if (d) { const c = d.cloneNode(true); c.id = 'syncDot_new'; d.parentNode.replaceChild(c, d); }
+      
+      setInterval(() => {
+        localStorage.setItem('vfinal_hb_p', Date.now());
+        const isAlive = localStorage.getItem('vfinal_hb_m') && (Date.now() - Number(localStorage.getItem('vfinal_hb_m')) < 2000);
+        const t2 = document.getElementById('syncText_new');
+        const d2 = document.getElementById('syncDot_new');
+        const b = document.getElementById('syncBadge');
+        
+        if (t2) {
+          if (isAlive) {
+            t2.textContent = 'SYNC ON'; t2.style.color = '#4ade80';
+            if (d2) d2.style.color = '#4ade80';
+            if (b) { b.style.borderColor = '#4ade80'; b.style.background = 'rgba(74,222,128,0.1)'; }
+          } else {
+            t2.textContent = 'SYNC OFF'; t2.style.color = '#f87171';
+            if (d2) d2.style.color = '#f87171';
+            if (b) { b.style.borderColor = '#f87171'; b.style.background = 'rgba(248,113,113,0.1)'; }
+          }
+        }
+        
+        const latI = document.getElementById('lat'); const lonI = document.getElementById('lon');
+        if(latI && lonI) {
+          const lat = parseFloat(latI.value); const lon = parseFloat(lonI.value);
+          const last = localStorage.getItem('vfinal_gps');
+          if(!isNaN(lat) && !isNaN(lon) && (!last || JSON.parse(last).lat !== lat || JSON.parse(last).lon !== lon)) localStorage.setItem('vfinal_gps', JSON.stringify({lat, lon, ts: Date.now()}));
+        }
+        if(typeof scopeState !== 'undefined') {
+          const lastC = localStorage.getItem('vfinal_conn');
+          if(!lastC || JSON.parse(lastC).connected !== scopeState.connected) localStorage.setItem('vfinal_conn', JSON.stringify({connected: scopeState.connected, sim: scopeState.protocol === 'sim', ts: Date.now()}));
+        }
+      }, 200);
+    })();
+  </script></body></html>
