@@ -3194,6 +3194,90 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 })();
 </script>
 
+
+<div id="sync-status-panel" style="position:fixed;bottom:10px;right:10px;padding:10px;border-radius:10px;background:rgba(13,18,28,0.95);color:#fff;font-family:Orbitron,sans-serif;font-size:11px;z-index:99999;border:2px solid #fbbf24;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 15px rgba(0,0,0,0.5);">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+    <span>STATO PIANETA:</span>
+    <span id="sync-status-text" style="color:#fbbf24;font-weight:bold;">PRONTO</span>
+  </div>
+  <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
+</div>
+<script id="__permanent_sync_planet">
+(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    const bc = new BroadcastChannel('egastro_direct_sync');
+    const statusText = document.getElementById('sync-status-text');
+    const gpsBtn = document.getElementById('sync-gps-btn');
+    let gpsSent = false;
+
+    // Tasto per inviare il GPS
+    gpsBtn.onclick = async () => {
+      gpsBtn.innerText = '⏳ Cerco...';
+      let lat = null, lon = null;
+      
+      // 1. Prova GPS
+      if (navigator.geolocation) {
+        try {
+          const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000, enableHighAccuracy: true }));
+          lat = pos.coords.latitude; lon = pos.coords.longitude;
+        } catch (e) { console.log('GPS bloccato, uso IP.'); }
+      }
+      
+      // 2. Fallback IP
+      if (!lat || !lon) {
+        try { const r = await fetch('https://ipapi.co/json/'); const d = await r.json(); lat = d.latitude; lon = d.longitude; } catch (e) {}
+      }
+
+      // 3. Invia a Mount
+      if (lat && lon) {
+        if (typeof state !== 'undefined') { state.lat = lat; state.lon = lon; }
+        if (typeof applyCoordinates === 'function') applyCoordinates(lat, lon, 'GPS/IP');
+        bc.postMessage({ type: 'sync_gps', data: { lat, lon } });
+        
+        gpsBtn.innerText = '✅ Inviato!';
+        gpsBtn.style.background = '#4ade80';
+        statusText.innerText = 'ONLINE ✓';
+        statusText.style.color = '#4ade80';
+        
+        setTimeout(() => {
+          gpsBtn.innerText = '📍 Invia GPS a Mount';
+          gpsBtn.style.background = '#d4af37';
+        }, 3000);
+        
+        alert('✅ Coordinate inviate al telescopio!\n' + lat.toFixed(4) + ', ' + lon.toFixed(4));
+      } else {
+        gpsBtn.innerText = '❌ Errore';
+        setTimeout(() => gpsBtn.innerText = '📍 Invia GPS a Mount', 2000);
+        alert('❌ Impossibile ottenere le coordinate.');
+      }
+    };
+
+    // Ascolta la telemetria da Mount
+    bc.onmessage = (ev) => {
+      const m = ev.data;
+      if (m.type === 'mount_state' && typeof scopeState !== 'undefined') {
+        scopeState.mountAlt = m.data.alt; scopeState.mountAz = m.data.az;
+        scopeState.isParked = m.data.isParked; scopeState.tracking = (m.data.tracking !== 'off');
+        if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+        if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
+      }
+    };
+
+    // Se Pianeta si connette, avvisa Mount
+    setInterval(() => {
+      if (typeof scopeState !== 'undefined' && scopeState.connected) {
+        if (!window._connSent) {
+          bc.postMessage({ type: 'sync_conn', data: { simulated: scopeState.protocol === 'sim' } });
+          window._connSent = true;
+        }
+      } else {
+        window._connSent = false;
+      }
+    }, 1000);
+  });
+})();
+</script>
+
 </body>  -->
 
 
