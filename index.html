@@ -3305,6 +3305,78 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 })();
 </script>
 
+
+<div id="sync-status-panel" style="position:fixed;bottom:10px;right:10px;padding:10px;border-radius:10px;background:rgba(13,18,28,0.95);color:#fff;font-family:Orbitron,sans-serif;font-size:11px;z-index:99999;border:2px solid #fbbf24;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 15px rgba(0,0,0,0.5);">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+    <span>STATO PIANETA:</span>
+    <span id="sync-status-text" style="color:#fbbf24;font-weight:bold;">PRONTO</span>
+  </div>
+  <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Invia GPS a Mount</button>
+</div>
+<script id="__sync_planet_v32">
+(function() {
+  document.addEventListener('DOMContentLoaded', function() {
+    const bc = new BroadcastChannel('egastro_direct_sync');
+    const statusText = document.getElementById('sync-status-text');
+    const gpsBtn = document.getElementById('sync-gps-btn');
+
+    function sendToMount(type, data) {
+      bc.postMessage({ type, data });
+      localStorage.setItem('egastro_sync_msg', JSON.stringify({ type, data, ts: Date.now() }));
+      console.log('📤 [Pianeta] Inviato:', type, data);
+    }
+
+    function sendGps(lat, lon, source) {
+      if (typeof state !== 'undefined') { state.lat = lat; state.lon = lon; }
+      sendToMount('sync_gps', { lat, lon });
+      statusText.innerText = 'ONLINE ✓'; statusText.style.color = '#4ade80';
+      document.getElementById('sync-status-panel').style.borderColor = '#4ade80';
+      gpsBtn.innerText = '✅ Inviato!'; gpsBtn.style.background = '#4ade80';
+      setTimeout(() => { gpsBtn.innerText = '📍 Invia GPS a Mount'; gpsBtn.style.background = '#d4af37'; }, 3000);
+      alert('✅ GPS inviato a Mount!\nLAT: ' + lat.toFixed(4) + '\nLON: ' + lon.toFixed(4) + '\nFonte: ' + source);
+    }
+
+    // Intercetta TUTTE le funzioni GPS
+    const origApply = window.applyCoordinates;
+    window.applyCoordinates = function(lat, lon, city, acc) {
+      if (origApply) origApply(lat, lon, city, acc);
+      sendGps(lat, lon, city || 'Sistema');
+    };
+
+    gpsBtn.onclick = async () => {
+      gpsBtn.innerText = '⏳ Cerco...';
+      let lat = null, lon = null;
+      if (navigator.geolocation) {
+        try {
+          const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 }));
+          lat = pos.coords.latitude; lon = pos.coords.longitude;
+        } catch (e) { console.warn('GPS nativo fallito'); }
+      }
+      if (!lat || !lon) {
+        try { const r = await fetch('https://ipapi.co/json/'); const d = await r.json(); lat = d.latitude; lon = d.longitude; } catch (e) {}
+      }
+      if (lat && lon) sendGps(lat, lon, 'GPS/IP');
+      else { gpsBtn.innerText = '❌ Errore'; setTimeout(() => gpsBtn.innerText = '📍 Invia GPS a Mount', 2000); }
+    };
+
+    // Ascolta Mount
+    function handleMessage(m) {
+      if (m.type === 'mount_state' && typeof scopeState !== 'undefined') {
+        scopeState.connected = true;
+        scopeState.mountAlt = m.data.alt; scopeState.mountAz = m.data.az;
+        scopeState.isParked = m.data.isParked; scopeState.tracking = (m.data.tracking !== 'off');
+        if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+        if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
+      }
+    }
+    bc.onmessage = (e) => handleMessage(e.data);
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'egastro_mount_msg') { try { handleMessage(JSON.parse(e.newValue)); } catch(err) {} }
+    });
+  });
+})();
+</script>
+
 </body>  -->
 
 
