@@ -2262,25 +2262,21 @@ window.drawMilkyWay = function(cx, cy, isNight) {
   ctx.restore();
 };
 
+
 (function applyMapFixes() {
-  if (typeof drawMap !== 'function' || drawMap._fixedForColors) return; const _origDrawMap = drawMap;
-  window.drawMap = function() {
-    _origDrawMap();
-    try {
-      const isNight = document.body.classList.contains('night-mode'); const canvas = document.getElementById('skyCanvas'); if (!canvas) return; const ctx = canvas.getContext('2d');
-      if (document.getElementById('filtroStelle').checked) {
-        STARS.forEach(s => { const pos = getAltAz(s.ra, s.dec, state.currentTime); if (!isAboveHorizon(pos.alt)) return; const pt = project(pos.alt, pos.az); if (!pt.visible) return; const size = Math.max(1, 4 - s.mag*0.9); const col = isNight ? (s.mag < 1 ? '#ff9999' : '#cc6666') : getStarColorByName(s.n); if (s.mag < 1.2) { const glow = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, size*4); glow.addColorStop(0, col); glow.addColorStop(0.3, col + 'aa'); glow.addColorStop(1, 'transparent'); ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(pt.x, pt.y, size*4, 0, Math.PI*2); ctx.fill(); } ctx.beginPath(); ctx.arc(pt.x, pt.y, size, 0, Math.PI*2); ctx.fillStyle = col; ctx.fill(); });
+  if (typeof drawMap !== 'function' || drawMap._fixedForColors) return;
+  const _origDrawMap = drawMap;
+  window.drawMap = function() { 
+      if (!window._starColorCache) {
+          window._starColorCache = {};
+          const src = (typeof ALL_STARS !== 'undefined' && ALL_STARS.length > 0) ? ALL_STARS : STARS;
+          src.forEach(s => { window._starColorCache[s.n] = getStarColorByName(s.n); });
       }
-      if (document.getElementById('filtroCostellazioni').checked) {
-        CONSTELLATIONS.forEach(c => { if (!c.stars) return; c.stars.forEach(s => { const pos = getAltAz(s.ra, s.dec, state.currentTime); if (!isAboveHorizon(pos.alt)) return; const pt = project(pos.alt, pos.az); if (!pt.visible) return; ctx.beginPath(); ctx.arc(pt.x, pt.y, 1.4, 0, Math.PI * 2); ctx.fillStyle = isNight ? 'rgba(255,180,180,0.6)' : 'rgba(200,220,255,0.7)'; ctx.fill(); }); });
-      }
-      if (document.getElementById('filtroPianeti').checked) {
-        calcPlanetsPrecise(state.currentTime).forEach(p => { if (p.n !== 'Saturno') return; const pos = p.alt !== undefined ? p : getAltAz(p.ra, p.dec, state.currentTime); if (!isAboveHorizon(pos.alt)) return; const pt = project(pos.alt, pos.az); if (!pt.visible) return; ctx.beginPath(); ctx.ellipse(pt.x, pt.y, 15, 5, Math.PI / 6, 0, Math.PI * 2); ctx.strokeStyle = isNight ? '#ff9999' : '#f4e4a1'; ctx.lineWidth = 2.5; ctx.stroke(); });
-      }
-    } catch(e) { console.error("Errore nell'override di drawMap:", e); }
+      _origDrawMap(); 
   };
   window.drawMap._fixedForColors = true;
 })();
+    
 
 let autoTimer = null;
 function loadAllSky() {
@@ -2893,18 +2889,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 </script>
 
 
-<script>
-(function() {
-  function u() {
-    var b=document.getElementById('syncBadge'),d=document.getElementById('syncDot'),t=document.getElementById('syncText');
-    if(!b||!d||!t)return;
-    if(typeof SyncBus==='undefined'){b.style.borderColor='#6b778c';b.style.background='rgba(107,119,140,0.1)';d.style.color='#6b778c';t.textContent='NO BUS';return;}
-    if(SyncBus.isPeerAlive()){b.style.borderColor='#4ade80';b.style.background='rgba(74,222,128,0.15)';d.style.color='#4ade80';t.textContent='SYNC OK · '+(SyncBus.getPeerId()||'?').toUpperCase();}
-    else{b.style.borderColor='#f87171';b.style.background='rgba(248,113,113,0.15)';d.style.color='#f87171';t.textContent='SYNC OFF';}
-  }
-  setInterval(u,1000);u();
-})();
-</script>
+
 
 
 
@@ -3007,183 +2992,15 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 })();
 </script>
 
-<script id="__sync_bus_planet">
-(function(){
-  if (typeof SyncBus === 'undefined') return;
-  console.log('🔄 [Pianeta] SyncBus inizializzato');
-
-  // 1. Ascolta lo stato da Mount
-  SyncBus.on('mount_state', d => {
-    if (typeof scopeState === 'undefined') return;
-    
-    // Aggiorna stato interno
-    scopeState.connected = true;
-    scopeState.isParked = d.isParked;
-    scopeState.tracking = (d.tracking !== 'off');
-    scopeState.trackRate = d.tracking || 'sidereal';
-    scopeState.slewing = (d.slewMode === 'goto' || d.slewMode === 'park');
-    
-    // Calcola le coordinate Alt/Az per muovere il puntatore sulla mappa di Pianeta
-    if (d.ra !== undefined && d.dec !== undefined) {
-      const raDeg = d.ra * 180 / Math.PI;
-      const decDeg = d.dec * 180 / Math.PI;
-      const pos = getAltAz(raDeg, decDeg, state.currentTime);
-      scopeState.mountAlt = pos.alt;
-      scopeState.mountAz = pos.az;
-    }
-
-    // Aggiorna UI
-    if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-    if (typeof scopeDraw === 'function' && document.getElementById('tab-scope').classList.contains('active')) scopeDraw();
-  });
-
-  // 2. Ascolta i comandi di sincronizzazione dalla UI di Mount
-  SyncBus.on('sync_ui_park', () => { if (typeof scopePark === 'function' && scopeState.connected) scopePark(); });
-  SyncBus.on('sync_ui_unpark', () => { if (typeof scopeUnpark === 'function' && scopeState.connected) scopeUnpark(); });
-  SyncBus.on('sync_ui_stop', () => { if (typeof scopeEmergencyStop === 'function') scopeEmergencyStop(); });
-
-  // 3. Override delle funzioni di Pianeta per inviare comandi a Mount
-  const origGoto = window.scopeSlewToTarget;
-  window.scopeSlewToTarget = function() {
-    if (scopeState.target && SyncBus.isPeerAlive()) {
-      // Invia le coordinate di GOTO a Mount (in radianti)
-      SyncBus.send('cmd_goto', { ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180 });
-      scopeLog('Comando GOTO inviato a Mount', 'ok');
-    } else if (origGoto) {
-      origGoto(); // Fallback stand-alone
-    }
-  };
-
-  const origPark = window.scopePark;
-  window.scopePark = function() {
-    if (SyncBus.isPeerAlive()) SyncBus.send('cmd_park', {});
-    if (origPark) origPark();
-  };
-
-  const origUnpark = window.scopeUnpark;
-  window.scopeUnpark = function() {
-    if (SyncBus.isPeerAlive()) SyncBus.send('cmd_unpark', {});
-    if (origUnpark) origUnpark();
-  };
-
-  const origStop = window.scopeEmergencyStop;
-  window.scopeEmergencyStop = function() {
-    if (SyncBus.isPeerAlive()) SyncBus.send('cmd_stop', {});
-    if (origStop) origStop();
-  };
-
-  const origTrack = window.scopeToggleTracking;
-  window.scopeToggleTracking = function() {
-    if (SyncBus.isPeerAlive()) SyncBus.send('cmd_tracking', { on: !scopeState.tracking });
-    if (origTrack) origTrack();
-  };
-
-  // 4. Quando Pianeta si connette (Simulatore, WiFi, BT), invia richiesta a Mount
-  const origConnect = window.scopeToggleConnect;
-  window.scopeToggleConnect = function() {
-    if (origConnect) origConnect();
-    if (SyncBus.isPeerAlive()) {
-      SyncBus.send('sync_connect', {
-        simulated: scopeState.protocol === 'sim' || scopeState.connType === 'sim',
-        wifiEnabled: scopeState.connType === 'wifi',
-        btEnabled: scopeState.connType === 'bt'
-      });
-    }
-  };
-})();
-</script>
 
 
 
-  <div id="sync-status-badge" style="position:fixed; bottom:10px; right:10px; padding:6px 12px; border-radius:20px; background:rgba(0,0,0,0.8); color:#fff; font-family:'Orbitron',sans-serif; font-size:11px; z-index:99999; border:2px solid #6b778c; transition:all 0.3s;">
-    Sync: <span id="sync-status-text" style="color:#6b778c; font-weight:bold;">WAIT</span>
-  </div>
-<script id="__ultimate_sync_planet_v26">
-(function(){
-  if (typeof SyncBus === 'undefined') { console.error('SyncBus mancante'); return; }
 
-  // Aggiorna il badge visivo
-  setInterval(() => {
-    const b = document.getElementById('sync-status-badge');
-    const t = document.getElementById('sync-status-text');
-    if (!b || !t) return;
-    if (SyncBus.isPeerAlive()) {
-      b.style.borderColor = '#4ade80'; t.textContent = 'ONLINE ✓'; t.style.color = '#4ade80';
-    } else {
-      b.style.borderColor = '#fbbf24'; t.textContent = 'WAIT'; t.style.color = '#fbbf24';
-    }
-  }, 1000);
-
-  // 1. Ascolta Mount e aggiorna la UI in tempo reale
-  SyncBus.on('mount_state', d => {
-    if (typeof scopeState === 'undefined') return;
-    
-    scopeState.connected = d.connected !== false;
-    scopeState.mountAlt = d.alt;
-    scopeState.mountAz = d.az;
-    scopeState.isParked = d.isParked;
-    scopeState.tracking = (d.tracking !== 'off');
-    
-    // Sincronizza GPS se Pianeta non lo ha
-    if (d.gpsActive && d.gpsLat && !state.lat) {
-      state.lat = d.gpsLat; state.lon = d.gpsLon;
-      if (typeof applyCoordinates === 'function') applyCoordinates(d.gpsLat, d.gpsLon, 'Sync Mount');
-    }
-
-    if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-    if (typeof scopeDraw === 'function' && document.getElementById('tab-scope').classList.contains('active')) scopeDraw();
-  });
-
-  // 2. Quando Pianeta calcola il GPS, lo invia a Mount
-  if (typeof applyCoordinates === 'function') {
-    const origApply = window.applyCoordinates;
-    window.applyCoordinates = function(lat, lon, city, acc) {
-      origApply(lat, lon, city, acc);
-      if (SyncBus.isPeerAlive()) {
-        SyncBus.send('sync_gps', { lat: lat, lon: lon });
-        console.log('📍 [Pianeta] GPS inviato a Mount:', lat, lon);
-      }
-    };
-  }
-
-  // 3. Quando premi Connetti su Pianeta, connette anche Mount
-  const origConnect = window.scopeToggleConnect;
-  window.scopeToggleConnect = function() {
-    if (origConnect) origConnect();
-    if (!scopeState.connected && SyncBus.isPeerAlive()) {
-      SyncBus.send('sync_connect', { simulated: (scopeState.protocol === 'sim') });
-    }
-  };
-
-  // 4. Invia comandi di movimento a Mount
-  const origGoto = window.scopeSlewToTarget;
-  window.scopeSlewToTarget = function() {
-    if (scopeState.target && SyncBus.isPeerAlive()) {
-      SyncBus.send('cmd_goto', { ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180 });
-    } else if (origGoto) origGoto();
-  };
-
-  const origPark = window.scopePark;
-  window.scopePark = function() { if (SyncBus.isPeerAlive()) SyncBus.send('cmd_park'); if (origPark) origPark(); };
-  const origUnpark = window.scopeUnpark;
-  window.scopeUnpark = function() { if (SyncBus.isPeerAlive()) SyncBus.send('cmd_unpark'); if (origUnpark) origUnpark(); };
-  const origStop = window.scopeEmergencyStop;
-  window.scopeEmergencyStop = function() { if (SyncBus.isPeerAlive()) SyncBus.send('cmd_stop'); if (origStop) origStop(); };
-  const origTrack = window.scopeToggleTracking;
-  window.scopeToggleTracking = function() {
-    if (SyncBus.isPeerAlive()) SyncBus.send('cmd_tracking', { on: !scopeState.tracking });
-    if (origTrack) origTrack();
-  };
-
-  // 5. Ricevi notifiche di Park/Unpark da Mount
-  SyncBus.on('sync_ui_park', () => { if (typeof scopeState !== 'undefined') { scopeState.isParked = true; const po = document.getElementById('parkOverlay'); if(po) po.classList.add('open'); } });
-  SyncBus.on('sync_ui_unpark', () => { if (typeof scopeState !== 'undefined') { scopeState.isParked = false; const po = document.getElementById('parkOverlay'); if(po) po.classList.remove('open'); } });
-  SyncBus.on('sync_ui_stop', () => { if (typeof scopeEmergencyStop === 'function') scopeEmergencyStop(); });
-})();
-</script>
+  
 
 
-<div id="sync-status-badge" style="position:fixed; bottom:10px; right:10px; padding:6px 12px; border-radius:20px; background:rgba(0,0,0,0.8); color:#fff; font-family:'Orbitron',sans-serif; font-size:11px; z-index:99999; border:2px solid #6b778c; transition:all 0.3s;">Sync: <span id="sync-status-text" style="color:#6b778c; font-weight:bold;">WAIT</span></div>
+
+
 
 
 
@@ -3239,112 +3056,102 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<script id="__sync_planet_v44">
-(function() {
-  console.log("🚀 [Pianeta] Motore Sync v44 attivo");
-  if (window.SyncBus) { window.SyncBus.stop(); }
 
-  const badge = document.getElementById('syncBadge');
-  const dot = document.getElementById('syncDot');
-  const text = document.getElementById('syncText');
-  let isOnline = false;
 
-  function setBadge(online) {
-    if (isOnline === online) return;
-    isOnline = online;
-    if (!text) return;
-    if (online) {
-      text.textContent = 'SYNC ON'; text.style.color = '#4ade80';
-      if(dot) dot.style.color = '#4ade80'; if(badge) badge.style.borderColor = '#4ade80';
-    } else {
-      text.textContent = 'SYNC OFF'; text.style.color = '#f87171';
-      if(dot) dot.style.color = '#f87171'; if(badge) badge.style.borderColor = '#f87171';
-    }
-  }
-  setBadge(false);
+<script id="__final_sync_planet_v9">
+(function(){
+  window.SyncBus = {isPeerAlive:()=>false,isLeader:()=>false,requestLeader:()=>false,
+    getPeerId:()=>null,getAppId:()=>'observatory',send:()=>{},on:()=>{},start:()=>{},stop:()=>{},
+    sendWithAck:()=>Promise.resolve(false),version:0,appId:'observatory'};
 
-  let lastLat = null, lastLon = null, lastConn = null;
+  const _snd=(t,d={})=>localStorage.setItem('final_cmd_'+t,JSON.stringify({...d,ts:Date.now()}));
 
-  // 1. Motore di Sincronizzazione (Polling)
-  setInterval(() => {
-    // A. Invia GPS leggendo direttamente gli input HTML
-    const latInput = document.getElementById('lat');
-    const lonInput = document.getElementById('lon');
-    if (latInput && lonInput) {
-      const lat = parseFloat(latInput.value);
-      const lon = parseFloat(lonInput.value);
-      if (!isNaN(lat) && !isNaN(lon) && (lat !== lastLat || lon !== lastLon)) {
-        lastLat = lat; lastLon = lon;
-        localStorage.setItem('v44_gps', JSON.stringify({ lat, lon, ts: Date.now() }));
-        console.log('📤 [Pianeta] GPS Inviato:', lat, lon);
+  // OVERRIDE GOTO: Permette l'invio anche se Pianeta non è connesso in locale, purché Satellite lo sia
+  window.scopeSlewToTarget=function(){
+    const peerAlive=(()=>{try{const m=JSON.parse(localStorage.getItem('final_map_pos')||'null');return m&&(Date.now()-m.ts<2500)}catch(e){return false}})();
+    if(!scopeState.connected&&!peerAlive){scopeLog('Connetti prima (o apri Satellite).','warn');return}
+    if(!scopeState.target){scopeLog('Nessun target.','warn');return}
+    if(scopeState.isParked){scopeLog('In PARK.','err');return}
+    if(scopeState.slewing){scopeLog('Slewing.','warn');return}
+    
+    const t=scopeState.target;
+    scopeLog('GOTO '+t.name+' → Satellite...','');
+    _snd('goto',{ra:t.ra*Math.PI/180,dec:t.dec*Math.PI/180});
+    
+    const pb=document.getElementById('scopePanelGotoBtn');
+    if(pb){pb.disabled=true;pb.innerText='⏳ INVIATO'}
+    setTimeout(()=>{if(pb){pb.disabled=false;pb.innerText='🎯 GOTO'}},2500);
+  };
+
+  // Altri comandi sincronizzati
+  window.scopePark=function(){_snd('park')};
+  window.scopeUnpark=function(){_snd('unpark')};
+  window.scopeEmergencyStop=function(){_snd('stop');scopeState.slewing=false};
+  window.scopeToggleTracking=function(){scopeState.tracking=!scopeState.tracking;_snd('tracking',{on:scopeState.tracking})};
+  
+  const _oc=window.scopeToggleConnect;
+  window.scopeToggleConnect=function(){
+    if(_oc)_oc();
+    setTimeout(()=>localStorage.setItem('final_conn',JSON.stringify({
+      connected:scopeState.connected,sim:scopeState.protocol==='sim',ts:Date.now()
+    })),150);
+  };
+
+  // Polling per aggiornare l'interfaccia di Pianeta
+  let lastLat=null,lastLon=null,lastConn=null;
+  setInterval(()=>{
+    localStorage.setItem('final_hb_p',Date.now());
+    
+    // Invia GPS
+    const latI=document.getElementById('lat'),lonI=document.getElementById('lon');
+    if(latI&&lonI){
+      const lat=parseFloat(latI.value),lon=parseFloat(lonI.value);
+      if(!isNaN(lat)&&!isNaN(lon)&&(lat!==lastLat||lon!==lastLon)){
+        lastLat=lat;lastLon=lon;
+        localStorage.setItem('final_gps',JSON.stringify({lat,lon,ts:Date.now()}));
       }
     }
-
-    // B. Invia Connessione
-    if (typeof scopeState !== 'undefined') {
-      const isConn = scopeState.connected;
-      if (isConn !== lastConn) {
-        lastConn = isConn;
-        localStorage.setItem('v44_conn', JSON.stringify({ connected: isConn, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
-        console.log('📤 [Pianeta] Conn Inviata:', isConn);
+    
+    // Invia Stato Connessione
+    if(typeof scopeState!=='undefined'){
+      if(scopeState.connected!==lastConn){
+        lastConn=scopeState.connected;
+        localStorage.setItem('final_conn',JSON.stringify({connected:scopeState.connected,sim:scopeState.protocol==='sim',ts:Date.now()}));
       }
-    }
-
-    // C. Ricevi Telemetria per muovere la mappa e il badge
-    const raw = localStorage.getItem('v44_telem');
-    if (raw) {
-      try {
-        const m = JSON.parse(raw);
-        if (m.ts && (Date.now() - m.ts < 3000)) {
-          setBadge(true);
-          if (m.data && typeof scopeState !== 'undefined') {
-            scopeState.connected = true; scopeState.mountAlt = m.data.alt; scopeState.mountAz = m.data.az;
-            if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-            if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
+      
+      // RICEVI TELEMETRIA DA SATELLITE (Aggiorna la mappa e l'HUD)
+      const mp=localStorage.getItem('final_map_pos');
+      if(mp){
+        try{
+          const m=JSON.parse(mp);
+          if(Date.now()-m.ts<2500){
+            scopeState.connected=true; // Forza UI connessa se Satellite è online
+            scopeState.mountAlt=m.alt;
+            scopeState.mountAz=m.az;
+            if(typeof scopeUpdateUI==='function') scopeUpdateUI();
+            if(typeof scopeDraw==='function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
           }
-        } else { setBadge(false); }
-      } catch(e) {}
-    }
-  }, 500);
-
-  // 2. Intercetta TUTTI i comandi operativi (Specchio)
-  const sendCmd = (type, extra = {}) => {
-    localStorage.setItem('v44_cmd_' + type, JSON.stringify({ ...extra, ts: Date.now() }));
-    console.log('📤 [Pianeta] Comando Inviato:', type);
-  };
-
-  const origSlew = window.scopeSlewToTarget;
-  window.scopeSlewToTarget = function() {
-    if (origSlew) origSlew();
-    if (scopeState.target) sendCmd('goto', { ra: scopeState.target.ra * Math.PI/180, dec: scopeState.target.dec * Math.PI/180 });
-  };
-
-  const origPark = window.scopePark;
-  window.scopePark = function() { if (origPark) origPark(); sendCmd('park'); };
-
-  const origUnpark = window.scopeUnpark;
-  window.scopeUnpark = function() { if (origUnpark) origUnpark(); sendCmd('unpark'); };
-
-  const origStop = window.scopeEmergencyStop;
-  window.scopeEmergencyStop = function() { if (origStop) origStop(); sendCmd('stop'); };
-
-  const origTrack = window.scopeToggleTracking;
-  window.scopeToggleTracking = function() {
-    if (origTrack) origTrack();
-    if (typeof scopeState !== 'undefined') sendCmd('tracking', { on: scopeState.tracking });
-  };
-
-  const origConnect = window.scopeToggleConnect;
-  window.scopeToggleConnect = function() {
-    if (origConnect) origConnect();
-    setTimeout(() => {
-      if (typeof scopeState !== 'undefined') {
-        localStorage.setItem('v44_conn', JSON.stringify({ connected: scopeState.connected, simulated: scopeState.protocol === 'sim', ts: Date.now() }));
+        }catch(e){}
       }
-    }, 100);
-  };
+    }
+    
+    // Aggiorna Badge SYNC
+    const txt=document.getElementById('syncText'),dot=document.getElementById('syncDot'),badge=document.getElementById('syncBadge');
+    if(txt){
+      const m=localStorage.getItem('final_map_pos');
+      let alive=false;
+      if(m)try{alive=Date.now()-JSON.parse(m).ts<2500}catch(e){}
+      txt.textContent=alive?'SYNC ON':'SYNC OFF';
+      txt.style.color=alive?'#4ade80':'#f87171';
+      if(dot)dot.style.color=alive?'#4ade80':'#f87171';
+      if(badge)badge.style.borderColor=alive?'#4ade80':'#f87171';
+    }
+  },250);
+
+  console.log('✅ [Pianeta v9] Sync finalizzato e GOTO abilitato');
 })();
 </script>
+
 </body>  -->
 
 
@@ -3542,187 +3349,5 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
         menu.classList.remove('hidden-menu');
         arrowBtn.classList.remove('show');
       });
-    })();
-  </script><script id="__sync_planet_v111">
-    (function() {
-      // A. SYNC DI BASE
-      setTimeout(() => { if (typeof populateProvinces === 'function') { const sel = document.getElementById('citySelect'); if (sel && sel.options.length < 50) populateProvinces(); } }, 500);
-      try { if (window.SyncBus) { window.SyncBus.stop(); window.SyncBus = null; } } catch(e) {}
-      const channel = new BroadcastChannel('egastro_sync_channel');
-      let lastPing = 0;
-      channel.onmessage = (e) => { if (e.data.type === 'ping_m') lastPing = Date.now(); };
-      const sendCmd = (type, data={}) => localStorage.setItem('final_cmd_' + type, JSON.stringify({...data, ts: Date.now()}));
-      
-      if (!window._finalHooked) {
-        window._finalHooked = true;
-        const origSlew = window.scopeSlewToTarget;
-        window.scopeSlewToTarget = function() { if(origSlew) origSlew(); if(scopeState.target) sendCmd('goto', {ra: scopeState.target.ra*Math.PI/180, dec: scopeState.target.dec*Math.PI/180}); };
-        const origPark = window.scopePark;
-        window.scopePark = function() { if(origPark) origPark(); sendCmd('park'); };
-        const origUnpark = window.scopeUnpark;
-        window.scopeUnpark = function() { if(origUnpark) origUnpark(); sendCmd('unpark'); };
-        const origStop = window.scopeEmergencyStop;
-        window.scopeEmergencyStop = function() { if(origStop) origStop(); sendCmd('stop'); };
-        const origHome = window.scopeHome;
-        window.scopeHome = function() { if(origHome) origHome(); sendCmd('home'); };
-        const origSetHome = window.scopeSetHome;
-        window.scopeSetHome = function() { if(origSetHome) origSetHome(); sendCmd('sethome'); };
-        const origSetPark = window.scopeSetPark;
-        window.scopeSetPark = function() { if(origSetPark) origSetPark(); sendCmd('setpark'); };
-        const origTrack = window.scopeToggleTracking;
-        window.scopeToggleTracking = function() { if(origTrack) origTrack(); sendCmd('tracking', {on: !scopeState.tracking}); };
-      }
-
-      let lastLat=null, lastLon=null, lastConn=null;
-      setInterval(() => {
-        channel.postMessage({ type: 'ping_p' });
-        localStorage.setItem('final_hb_p', Date.now());
-        const isAlive = (Date.now() - lastPing < 2000) || (localStorage.getItem('final_hb_m') && (Date.now() - Number(localStorage.getItem('final_hb_m')) < 2000));
-        
-        const t = document.getElementById('syncText'); const d = document.getElementById('syncDot'); const b = document.getElementById('syncBadge');
-        if (t) {
-          if (isAlive) { t.textContent='SYNC ON'; t.style.color='#4ade80'; if(d) d.style.color='#4ade80'; if(b) b.style.borderColor='#4ade80'; }
-          else { t.textContent='SYNC OFF'; t.style.color='#f87171'; if(d) d.style.color='#f87171'; if(b) b.style.borderColor='#f87171'; }
-        }
-        
-        const latI = document.getElementById('lat'); const lonI = document.getElementById('lon');
-        if(latI && lonI) { const lat=parseFloat(latI.value); const lon=parseFloat(lonI.value); if(!isNaN(lat)&&!isNaN(lon)&&(lat!==lastLat||lon!==lastLon)){lastLat=lat;lastLon=lon;localStorage.setItem('final_gps', JSON.stringify({lat,lon,ts:Date.now()}));} }
-        
-        if(typeof scopeState !== 'undefined') {
-          const c = scopeState.connected;
-          if(c!==lastConn){lastConn=c;localStorage.setItem('final_conn', JSON.stringify({connected:c,sim:scopeState.protocol==='sim',ts:Date.now()}));}
-          
-          // Aggiorna lo stato locale con la posizione ricevuta dall'app Mount (se connessa)
-          const mapPos = localStorage.getItem('final_map_pos');
-          if(mapPos) { const m = JSON.parse(mapPos); if(Date.now() - m.ts < 2000) { scopeState.mountAlt = m.alt; scopeState.mountAz = m.az; } }
-        }
-      }, 100);
-
-      // B. FUNZIONE DI DISEGNO DEL MIRINO E HUD
-      window.lvDrawTelescope = function(ctx, W, H) {
-        const isAlive = localStorage.getItem('final_hb_m') && (Date.now() - Number(localStorage.getItem('final_hb_m')) < 2000);
-        const isConnected = typeof scopeState !== 'undefined' && (scopeState.connected || isAlive);
-        
-        if (!isConnected || scopeState.mountAlt === undefined) return;
-        
-        const pt = lvProject(scopeState.mountAlt, scopeState.mountAz, W, H);
-        
-        if (pt.visible && pt.zView > 0.08) {
-            ctx.save();
-            ctx.strokeStyle = '#ff4466';
-            ctx.lineWidth = 2;
-            ctx.shadowColor = '#ff4466';
-            ctx.shadowBlur = 12;
-            
-            const pulse = 1 + Math.sin(Date.now()/300)*0.1;
-            ctx.beginPath(); ctx.arc(pt.x, pt.y, 24*pulse, 0, Math.PI*2); ctx.stroke();
-            
-            const b = 16, l = 8;
-            ctx.beginPath();
-            ctx.moveTo(pt.x-b, pt.y-b+l); ctx.lineTo(pt.x-b, pt.y-b); ctx.lineTo(pt.x-b+l, pt.y-b);
-            ctx.moveTo(pt.x+b-l, pt.y-b); ctx.lineTo(pt.x+b, pt.y-b); ctx.lineTo(pt.x+b, pt.y-b+l);
-            ctx.moveTo(pt.x-b, pt.y+b-l); ctx.lineTo(pt.x-b, pt.y+b); ctx.lineTo(pt.x-b+l, pt.y+b);
-            ctx.moveTo(pt.x+b-l, pt.y+b); ctx.lineTo(pt.x+b, pt.y+b); ctx.lineTo(pt.x+b, pt.y+b-l);
-            ctx.stroke();
-            
-            ctx.fillStyle = '#ff4466'; ctx.font = 'bold 13px Orbitron'; ctx.textAlign = 'left';
-            ctx.fillText('TELESCOPIO', pt.x + 30, pt.y + 5);
-            ctx.restore();
-        } else {
-            ctx.save();
-            ctx.strokeStyle = '#ff4466'; ctx.fillStyle = '#ff4466';
-            ctx.lineWidth = 3; ctx.shadowColor = '#ff4466'; ctx.shadowBlur = 10;
-            
-            const cx = W/2, cy = H/2;
-            const dx = pt.x - cx, dy = pt.y - cy;
-            const angle = Math.atan2(dy, dx);
-            const radius = Math.min(W, H) * 0.4;
-            const arrowX = cx + Math.cos(angle) * radius;
-            const arrowY = cy + Math.sin(angle) * radius;
-            
-            ctx.translate(arrowX, arrowY);
-            ctx.rotate(angle);
-            ctx.beginPath(); ctx.moveTo(15,0); ctx.lineTo(-10,10); ctx.lineTo(-10,-10); ctx.closePath(); ctx.fill();
-            ctx.restore();
-            
-            ctx.save();
-            ctx.fillStyle = '#ff4466'; ctx.font = 'bold 10px Orbitron'; ctx.textAlign = 'center';
-            ctx.fillText('TELESCOPIO', arrowX, arrowY - 20);
-            ctx.restore();
-        }
-      };
-
-      // C. OVERRIDE RENDER LOOP (Definitivo)
-      window.lvRenderLoop = function(rafTime) {
-        if (!lvState.rafRunning || !lvState.active) return;
-        const ctx = lvState.ctx; if (!ctx) return;
-        const dt = lvState.lastRenderTime ? Math.min(0.1, (rafTime - lvState.lastRenderTime) / 1000) : 0.016;
-        lvState.lastRenderTime = rafTime;
-        const dpr = window.devicePixelRatio || 1;
-        const W = lvState.canvasEl.width / dpr, H = lvState.canvasEl.height / dpr;
-        ctx.clearRect(0, 0, W, H);
-        const now = state.currentTime, t = performance.now() / 1000;
-        lvState.visibleObjects = [];
-        
-        if (lvState.lockedObj) {
-            const pos = getAltAz(lvState.lockedObj.ra, lvState.lockedObj.dec, now);
-            if (pos.alt > -5) { lvState.camAlt = pos.alt; lvState.camAz = pos.az; }
-        }
-        
-        const focal = (Math.min(W, H) / 2) / Math.tan(rad(lvState.fov) / 2);
-        const horizonY = H / 2 + focal * Math.tan(rad(lvState.camAlt));
-        const sky = lvGetSkyColors();
-        const clipH = Math.max(0, Math.min(H, horizonY));
-        
-        if (clipH > 0) {
-            ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, clipH); ctx.clip();
-            lvDrawDynamicSky(ctx, W, H);
-            if (lvState.showMilkyWay && sky.isNight) lvDrawMilkyWay(ctx, W, H, now, sky);
-            if (lvState.showConstellations) lvDrawConstellations(ctx, W, H, now);
-            if (lvState.showGrid) lvDrawGrid(ctx, W, H, now);
-            lvDrawStars(ctx, W, H, now, t, sky);
-            lvDrawPlanets(ctx, W, H, now, sky);
-            lvDrawDeepObjects(ctx, W, H, now);
-            if (lvState.showMeteors) { lvUpdateMeteors(dt); lvDrawMeteors(ctx, W, H, now); }
-            if (lvState.selectedObj) lvDrawSelectionReticle(ctx, W, H, now, t);
-            
-            // Disegna il mirino
-            window.lvDrawTelescope(ctx, W, H);
-            
-            ctx.restore();
-        }
-        
-        if (lvState.showLandscape) lvDrawLandscape(ctx, W, H, focal, horizonY);
-        lvDrawCardinalPoints(ctx, W, H);
-        
-        const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
-        vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.5)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
-        
-        const cnt = document.getElementById('lv-hud-count'); if (cnt) cnt.textContent = lvState.visibleObjects.length;
-        window.lvUpdateHud();
-        lvState.animFrame = requestAnimationFrame(window.lvRenderLoop);
-      };
-
-      // D. OVERRIDE HUD
-      window.lvUpdateHud = function() {
-        const az = document.getElementById('lv-hud-az'), al = document.getElementById('lv-hud-alt');
-        if (az) az.textContent = lvState.camAz.toFixed(1) + '°';
-        if (al) al.textContent = lvState.camAlt.toFixed(1) + '°';
-        
-        const isAlive = localStorage.getItem('final_hb_m') && (Date.now() - Number(localStorage.getItem('final_hb_m')) < 2000);
-        const isConnected = typeof scopeState !== 'undefined' && (scopeState.connected || isAlive);
-        const rowAz = document.getElementById('lv-tel-row-az'), rowAlt = document.getElementById('lv-tel-row-alt');
-        const tAz = document.getElementById('lv-telescope-az'), tAlt = document.getElementById('lv-telescope-alt');
-        
-        if (isConnected && scopeState.mountAlt !== undefined) {
-            if (tAz) tAz.textContent = scopeState.mountAz.toFixed(1) + '°';
-            if (tAlt) tAlt.textContent = scopeState.mountAlt.toFixed(1) + '°';
-            if (rowAz) rowAz.style.display = 'flex';
-            if (rowAlt) rowAlt.style.display = 'flex';
-        } else {
-            if (rowAz) rowAz.style.display = 'none';
-            if (rowAlt) rowAlt.style.display = 'none';
-        }
-      };
     })();
   </script></body></html>
