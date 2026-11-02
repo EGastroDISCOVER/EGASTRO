@@ -1175,6 +1175,9 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       <div class="lv-hud-row"><span class="lv-hud-k">FOV</span><span class="lv-hud-v" id="lv-hud-fov">65°</span></div>
       <div class="lv-hud-row"><span class="lv-hud-k">OBJ</span><span class="lv-hud-v" id="lv-hud-count">0</span></div>
       <div class="lv-hud-status" id="lv-status">Inizializzazione...</div>
+    
+      <div class="lv-hud-row" id="lv-tel-row-az" style="color:#ff4466; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px; margin-top: 4px; display:none;"><span class="lv-hud-k">TEL AZ</span><span class="lv-hud-v" id="lv-telescope-az">--</span></div>
+      <div class="lv-hud-row" id="lv-tel-row-alt" style="color:#ff4466; display:none;"><span class="lv-hud-k">TEL ALT</span><span class="lv-hud-v" id="lv-telescope-alt">--</span></div>
     </div>
 
     <button class="lv-close" onclick="closeLiveView()" title="Chiudi">✕</button>
@@ -3540,14 +3543,10 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
         arrowBtn.classList.remove('show');
       });
     })();
-  </script><script id="__sync_planet_v108">
+  </script><script id="__sync_planet_v111">
     (function() {
-      setTimeout(() => {
-        if (typeof populateProvinces === 'function') {
-            const sel = document.getElementById('citySelect');
-            if (sel && sel.options.length < 50) populateProvinces();
-        }
-      }, 500);
+      // A. SYNC DI BASE
+      setTimeout(() => { if (typeof populateProvinces === 'function') { const sel = document.getElementById('citySelect'); if (sel && sel.options.length < 50) populateProvinces(); } }, 500);
       try { if (window.SyncBus) { window.SyncBus.stop(); window.SyncBus = null; } } catch(e) {}
       const channel = new BroadcastChannel('egastro_sync_channel');
       let lastPing = 0;
@@ -3573,23 +3572,157 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
         const origTrack = window.scopeToggleTracking;
         window.scopeToggleTracking = function() { if(origTrack) origTrack(); sendCmd('tracking', {on: !scopeState.tracking}); };
       }
+
       let lastLat=null, lastLon=null, lastConn=null;
       setInterval(() => {
         channel.postMessage({ type: 'ping_p' });
         localStorage.setItem('final_hb_p', Date.now());
         const isAlive = (Date.now() - lastPing < 2000) || (localStorage.getItem('final_hb_m') && (Date.now() - Number(localStorage.getItem('final_hb_m')) < 2000));
+        
         const t = document.getElementById('syncText'); const d = document.getElementById('syncDot'); const b = document.getElementById('syncBadge');
         if (t) {
           if (isAlive) { t.textContent='SYNC ON'; t.style.color='#4ade80'; if(d) d.style.color='#4ade80'; if(b) b.style.borderColor='#4ade80'; }
           else { t.textContent='SYNC OFF'; t.style.color='#f87171'; if(d) d.style.color='#f87171'; if(b) b.style.borderColor='#f87171'; }
         }
+        
         const latI = document.getElementById('lat'); const lonI = document.getElementById('lon');
         if(latI && lonI) { const lat=parseFloat(latI.value); const lon=parseFloat(lonI.value); if(!isNaN(lat)&&!isNaN(lon)&&(lat!==lastLat||lon!==lastLon)){lastLat=lat;lastLon=lon;localStorage.setItem('final_gps', JSON.stringify({lat,lon,ts:Date.now()}));} }
+        
         if(typeof scopeState !== 'undefined') {
           const c = scopeState.connected;
           if(c!==lastConn){lastConn=c;localStorage.setItem('final_conn', JSON.stringify({connected:c,sim:scopeState.protocol==='sim',ts:Date.now()}));}
-          localStorage.setItem('final_map_pos', JSON.stringify({alt:scopeState.mountAlt,az:scopeState.mountAz,ts:Date.now()}));
+          
+          // Aggiorna lo stato locale con la posizione ricevuta dall'app Mount (se connessa)
+          const mapPos = localStorage.getItem('final_map_pos');
+          if(mapPos) { const m = JSON.parse(mapPos); if(Date.now() - m.ts < 2000) { scopeState.mountAlt = m.alt; scopeState.mountAz = m.az; } }
         }
       }, 100);
+
+      // B. FUNZIONE DI DISEGNO DEL MIRINO E HUD
+      window.lvDrawTelescope = function(ctx, W, H) {
+        const isAlive = localStorage.getItem('final_hb_m') && (Date.now() - Number(localStorage.getItem('final_hb_m')) < 2000);
+        const isConnected = typeof scopeState !== 'undefined' && (scopeState.connected || isAlive);
+        
+        if (!isConnected || scopeState.mountAlt === undefined) return;
+        
+        const pt = lvProject(scopeState.mountAlt, scopeState.mountAz, W, H);
+        
+        if (pt.visible && pt.zView > 0.08) {
+            ctx.save();
+            ctx.strokeStyle = '#ff4466';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#ff4466';
+            ctx.shadowBlur = 12;
+            
+            const pulse = 1 + Math.sin(Date.now()/300)*0.1;
+            ctx.beginPath(); ctx.arc(pt.x, pt.y, 24*pulse, 0, Math.PI*2); ctx.stroke();
+            
+            const b = 16, l = 8;
+            ctx.beginPath();
+            ctx.moveTo(pt.x-b, pt.y-b+l); ctx.lineTo(pt.x-b, pt.y-b); ctx.lineTo(pt.x-b+l, pt.y-b);
+            ctx.moveTo(pt.x+b-l, pt.y-b); ctx.lineTo(pt.x+b, pt.y-b); ctx.lineTo(pt.x+b, pt.y-b+l);
+            ctx.moveTo(pt.x-b, pt.y+b-l); ctx.lineTo(pt.x-b, pt.y+b); ctx.lineTo(pt.x-b+l, pt.y+b);
+            ctx.moveTo(pt.x+b-l, pt.y+b); ctx.lineTo(pt.x+b, pt.y+b); ctx.lineTo(pt.x+b, pt.y+b-l);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#ff4466'; ctx.font = 'bold 13px Orbitron'; ctx.textAlign = 'left';
+            ctx.fillText('TELESCOPIO', pt.x + 30, pt.y + 5);
+            ctx.restore();
+        } else {
+            ctx.save();
+            ctx.strokeStyle = '#ff4466'; ctx.fillStyle = '#ff4466';
+            ctx.lineWidth = 3; ctx.shadowColor = '#ff4466'; ctx.shadowBlur = 10;
+            
+            const cx = W/2, cy = H/2;
+            const dx = pt.x - cx, dy = pt.y - cy;
+            const angle = Math.atan2(dy, dx);
+            const radius = Math.min(W, H) * 0.4;
+            const arrowX = cx + Math.cos(angle) * radius;
+            const arrowY = cy + Math.sin(angle) * radius;
+            
+            ctx.translate(arrowX, arrowY);
+            ctx.rotate(angle);
+            ctx.beginPath(); ctx.moveTo(15,0); ctx.lineTo(-10,10); ctx.lineTo(-10,-10); ctx.closePath(); ctx.fill();
+            ctx.restore();
+            
+            ctx.save();
+            ctx.fillStyle = '#ff4466'; ctx.font = 'bold 10px Orbitron'; ctx.textAlign = 'center';
+            ctx.fillText('TELESCOPIO', arrowX, arrowY - 20);
+            ctx.restore();
+        }
+      };
+
+      // C. OVERRIDE RENDER LOOP (Definitivo)
+      window.lvRenderLoop = function(rafTime) {
+        if (!lvState.rafRunning || !lvState.active) return;
+        const ctx = lvState.ctx; if (!ctx) return;
+        const dt = lvState.lastRenderTime ? Math.min(0.1, (rafTime - lvState.lastRenderTime) / 1000) : 0.016;
+        lvState.lastRenderTime = rafTime;
+        const dpr = window.devicePixelRatio || 1;
+        const W = lvState.canvasEl.width / dpr, H = lvState.canvasEl.height / dpr;
+        ctx.clearRect(0, 0, W, H);
+        const now = state.currentTime, t = performance.now() / 1000;
+        lvState.visibleObjects = [];
+        
+        if (lvState.lockedObj) {
+            const pos = getAltAz(lvState.lockedObj.ra, lvState.lockedObj.dec, now);
+            if (pos.alt > -5) { lvState.camAlt = pos.alt; lvState.camAz = pos.az; }
+        }
+        
+        const focal = (Math.min(W, H) / 2) / Math.tan(rad(lvState.fov) / 2);
+        const horizonY = H / 2 + focal * Math.tan(rad(lvState.camAlt));
+        const sky = lvGetSkyColors();
+        const clipH = Math.max(0, Math.min(H, horizonY));
+        
+        if (clipH > 0) {
+            ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, clipH); ctx.clip();
+            lvDrawDynamicSky(ctx, W, H);
+            if (lvState.showMilkyWay && sky.isNight) lvDrawMilkyWay(ctx, W, H, now, sky);
+            if (lvState.showConstellations) lvDrawConstellations(ctx, W, H, now);
+            if (lvState.showGrid) lvDrawGrid(ctx, W, H, now);
+            lvDrawStars(ctx, W, H, now, t, sky);
+            lvDrawPlanets(ctx, W, H, now, sky);
+            lvDrawDeepObjects(ctx, W, H, now);
+            if (lvState.showMeteors) { lvUpdateMeteors(dt); lvDrawMeteors(ctx, W, H, now); }
+            if (lvState.selectedObj) lvDrawSelectionReticle(ctx, W, H, now, t);
+            
+            // Disegna il mirino
+            window.lvDrawTelescope(ctx, W, H);
+            
+            ctx.restore();
+        }
+        
+        if (lvState.showLandscape) lvDrawLandscape(ctx, W, H, focal, horizonY);
+        lvDrawCardinalPoints(ctx, W, H);
+        
+        const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
+        vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.5)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+        
+        const cnt = document.getElementById('lv-hud-count'); if (cnt) cnt.textContent = lvState.visibleObjects.length;
+        window.lvUpdateHud();
+        lvState.animFrame = requestAnimationFrame(window.lvRenderLoop);
+      };
+
+      // D. OVERRIDE HUD
+      window.lvUpdateHud = function() {
+        const az = document.getElementById('lv-hud-az'), al = document.getElementById('lv-hud-alt');
+        if (az) az.textContent = lvState.camAz.toFixed(1) + '°';
+        if (al) al.textContent = lvState.camAlt.toFixed(1) + '°';
+        
+        const isAlive = localStorage.getItem('final_hb_m') && (Date.now() - Number(localStorage.getItem('final_hb_m')) < 2000);
+        const isConnected = typeof scopeState !== 'undefined' && (scopeState.connected || isAlive);
+        const rowAz = document.getElementById('lv-tel-row-az'), rowAlt = document.getElementById('lv-tel-row-alt');
+        const tAz = document.getElementById('lv-telescope-az'), tAlt = document.getElementById('lv-telescope-alt');
+        
+        if (isConnected && scopeState.mountAlt !== undefined) {
+            if (tAz) tAz.textContent = scopeState.mountAz.toFixed(1) + '°';
+            if (tAlt) tAlt.textContent = scopeState.mountAlt.toFixed(1) + '°';
+            if (rowAz) rowAz.style.display = 'flex';
+            if (rowAlt) rowAlt.style.display = 'flex';
+        } else {
+            if (rowAz) rowAz.style.display = 'none';
+            if (rowAlt) rowAlt.style.display = 'none';
+        }
+      };
     })();
   </script></body></html>
