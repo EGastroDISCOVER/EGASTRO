@@ -608,9 +608,7 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       <div class="grid">
         <div>
           <label>Città / Provincia (Italia)</label>
-          <select id="citySelect" onchange="loadCity()">
-            <option value="">-- Seleziona una città --</option>
-          </select>
+          <select id="citySelect" onchange="loadCity()"><option value="">-- Seleziona una città --</option><optgroup label="Lazio"><option value="41.9028,12.4964,Roma">Roma</option></optgroup><optgroup label="Lombardia"><option value="45.4642,9.1900,Milano">Milano</option></optgroup><optgroup label="Campania"><option value="40.8518,14.2681,Napoli">Napoli</option></optgroup><optgroup label="Piemonte"><option value="45.0703,7.6869,Torino">Torino</option></optgroup><optgroup label="Sicilia"><option value="38.1157,13.3615,Palermo">Palermo</option></optgroup><optgroup label="Veneto"><option value="45.4408,12.3155,Venezia">Venezia</option></optgroup><optgroup label="Emilia-Romagna"><option value="44.4949,11.3426,Bologna">Bologna</option></optgroup><optgroup label="Toscana"><option value="43.7696,11.2558,Firenze">Firenze</option></optgroup><optgroup label="Puglia"><option value="41.1171,16.8719,Bari">Bari</option></optgroup><optgroup label="Liguria"><option value="44.4056,8.9463,Genova">Genova</option></optgroup></select>
         </div>
         <div>
           <label>Posizioni Salvate</label>
@@ -3413,11 +3411,10 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<script id="__sync_planet_final_v92">
+<script id="__sync_planet_final_v93">
     (function() {
       const sendCmd = (type, data={}) => localStorage.setItem('final_cmd_' + type, JSON.stringify({...data, ts: Date.now()}));
       
-      // Intercetta i pulsanti per inviare i comandi a Mount
       if (!window._finalHooked) {
         window._finalHooked = true;
         const origSlew = window.scopeSlewToTarget;
@@ -3438,7 +3435,6 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
         window.scopeToggleTracking = function() { if(origTrack) origTrack(); sendCmd('tracking', {on: !scopeState.tracking}); };
       }
 
-      // Loop di sincronizzazione
       let lastLat=null, lastLon=null, lastConn=null;
       setInterval(() => {
         localStorage.setItem('final_hb_p', Date.now());
@@ -3450,11 +3446,9 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
           else { t.textContent='SYNC OFF'; t.style.color='#f87171'; if(d) d.style.color='#f87171'; if(b) b.style.borderColor='#f87171'; }
         }
         
-        // Invia GPS
         const latI = document.getElementById('lat'); const lonI = document.getElementById('lon');
         if(latI && lonI) { const lat=parseFloat(latI.value); const lon=parseFloat(lonI.value); if(!isNaN(lat)&&!isNaN(lon)&&(lat!==lastLat||lon!==lastLon)){lastLat=lat;lastLon=lon;localStorage.setItem('final_gps', JSON.stringify({lat,lon,ts:Date.now()}));} }
         
-        // Invia Conn e Mappa
         if(typeof scopeState !== 'undefined') {
           const c = scopeState.connected;
           if(c!==lastConn){lastConn=c;localStorage.setItem('final_conn', JSON.stringify({connected:c,sim:scopeState.protocol==='sim',ts:Date.now()}));}
