@@ -3152,6 +3152,41 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 })();
 </script>
 
+
+<script id="__planet_sync_final">
+(function(){
+  console.log('🔗 [Pianeta] Sync attivo');
+  setInterval(function() {
+    localStorage.setItem('final_hb_p', Date.now());
+    if (typeof scopeState !== 'undefined') {
+      localStorage.setItem('final_conn', JSON.stringify({
+        connected: scopeState.connected || false,
+        sim: scopeState.protocol === 'sim',
+        ts: Date.now()
+      }));
+    }
+    var latI = document.getElementById('lat');
+    var lonI = document.getElementById('lon');
+    if (latI && lonI) {
+      var lat = parseFloat(latI.value), lon = parseFloat(lonI.value);
+      if (!isNaN(lat) && !isNaN(lon)) {
+        localStorage.setItem('final_gps', JSON.stringify({ lat: lat, lon: lon, ts: Date.now() }));
+      }
+    }
+    var txt = document.getElementById('syncText');
+    var dot = document.getElementById('syncDot');
+    var badge = document.getElementById('syncBadge');
+    if (txt) {
+      var hb = localStorage.getItem('final_hb_m');
+      var alive = hb && (Date.now() - Number(hb) < 3000);
+      txt.textContent = alive ? 'SYNC ON' : 'SYNC OFF';
+      txt.style.color = alive ? '#4ade80' : '#f87171';
+      if (dot) dot.style.color = alive ? '#4ade80' : '#f87171';
+      if (badge) badge.style.borderColor = alive ? '#4ade80' : '#f87171';
+    }
+  }, 250);
+})();
+</script>
 </body>  -->
 
 
