@@ -3411,8 +3411,18 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<script id="__sync_planet_final_v93">
+<script id="__sync_planet_v101">
     (function() {
+      try { if (window.SyncBus) { window.SyncBus.stop(); window.SyncBus = null; } } catch(e) {}
+      
+      const channel = new BroadcastChannel('egastro_sync_channel');
+      let lastPing = 0;
+
+      // Ascolta il battito di Mount
+      channel.onmessage = (e) => {
+        if (e.data.type === 'ping_m') lastPing = Date.now();
+      };
+
       const sendCmd = (type, data={}) => localStorage.setItem('final_cmd_' + type, JSON.stringify({...data, ts: Date.now()}));
       
       if (!window._finalHooked) {
@@ -3436,9 +3446,13 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
       }
 
       let lastLat=null, lastLon=null, lastConn=null;
+      
       setInterval(() => {
+        channel.postMessage({ type: 'ping_p' });
         localStorage.setItem('final_hb_p', Date.now());
-        const isAlive = localStorage.getItem('final_hb_m') && (Date.now() - Number(localStorage.getItem('final_hb_m')) < 2000);
+        
+        // Controlla se Mount è vivo (tramite BroadcastChannel o localStorage)
+        const isAlive = (Date.now() - lastPing < 2000) || (localStorage.getItem('final_hb_m') && (Date.now() - Number(localStorage.getItem('final_hb_m')) < 2000));
         
         const t = document.getElementById('syncText'); const d = document.getElementById('syncDot'); const b = document.getElementById('syncBadge');
         if (t) {
@@ -3447,7 +3461,10 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
         }
         
         const latI = document.getElementById('lat'); const lonI = document.getElementById('lon');
-        if(latI && lonI) { const lat=parseFloat(latI.value); const lon=parseFloat(lonI.value); if(!isNaN(lat)&&!isNaN(lon)&&(lat!==lastLat||lon!==lastLon)){lastLat=lat;lastLon=lon;localStorage.setItem('final_gps', JSON.stringify({lat,lon,ts:Date.now()}));} }
+        if(latI && lonI) { 
+          const lat=parseFloat(latI.value); const lon=parseFloat(lonI.value); 
+          if(!isNaN(lat)&&!isNaN(lon)&&(lat!==lastLat||lon!==lastLon)){lastLat=lat;lastLon=lon;localStorage.setItem('final_gps', JSON.stringify({lat,lon,ts:Date.now()}));} 
+        }
         
         if(typeof scopeState !== 'undefined') {
           const c = scopeState.connected;
