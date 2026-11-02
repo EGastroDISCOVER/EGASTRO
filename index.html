@@ -3411,14 +3411,21 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<script id="__sync_planet_v101">
+<script id="__sync_planet_v102">
     (function() {
+      // Forza il caricamento di TUTTE le province
+      setTimeout(() => {
+        if (typeof populateProvinces === 'function') {
+            const sel = document.getElementById('citySelect');
+            if (sel && sel.options.length < 50) populateProvinces();
+        }
+      }, 500);
+
       try { if (window.SyncBus) { window.SyncBus.stop(); window.SyncBus = null; } } catch(e) {}
       
       const channel = new BroadcastChannel('egastro_sync_channel');
       let lastPing = 0;
 
-      // Ascolta il battito di Mount
       channel.onmessage = (e) => {
         if (e.data.type === 'ping_m') lastPing = Date.now();
       };
@@ -3451,7 +3458,6 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
         channel.postMessage({ type: 'ping_p' });
         localStorage.setItem('final_hb_p', Date.now());
         
-        // Controlla se Mount è vivo (tramite BroadcastChannel o localStorage)
         const isAlive = (Date.now() - lastPing < 2000) || (localStorage.getItem('final_hb_m') && (Date.now() - Number(localStorage.getItem('final_hb_m')) < 2000));
         
         const t = document.getElementById('syncText'); const d = document.getElementById('syncDot'); const b = document.getElementById('syncBadge');
