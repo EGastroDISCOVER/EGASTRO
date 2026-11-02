@@ -3295,53 +3295,10 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<script id="__fixPopulateProvinces">
-(function(){
-  function initProvinces(){
-    if (typeof populateProvinces === "function") {
-      var sel = document.getElementById("citySelect");
-      if (sel && sel.options.length <= 1) {
-        populateProvinces();
-        console.log("[Fix] populateProvinces eseguita al caricamento");
-      }
-    }
-  }
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function(){ setTimeout(initProvinces, 100); });
-  } else {
-    setTimeout(initProvinces, 100);
-  }
-})();
-</script>
+
 
 <!-- __syncGPSObserver — Tappa 1: pubblica GPS/coordinate in localStorage -->
-<script id="__syncGPSObserver">
-(function(){
-  "use strict";
-  if (window.__syncGPSObserver) return;
-  window.__syncGPSObserver = true;
-  var KEY = "egastro_sync_obs";
-  function publish(){
-    try {
-      if (typeof state === "undefined" || !state) return;
-      if (!Number.isFinite(state.lat) || !Number.isFinite(state.lon)) return;
-      var target = state.target ? {
-        n: state.target.n || state.target.name,
-        ra: state.target.ra,
-        dec: state.target.dec
-      } : null;
-      localStorage.setItem(KEY, JSON.stringify({
-        coords: { lat: state.lat, lon: state.lon },
-        target: target,
-        ts: Date.now()
-      }));
-    } catch(e) {}
-  }
-  setInterval(publish, 1000);
-  publish();
-  console.log("[Sync GPS] Observatory publishing attivo");
-})();
-</script>
+
 
 
 <!-- ============ PULSANTE SCOPE ============ -->
@@ -3456,45 +3413,53 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<script id="__sync_planet_vfinal">
+<script id="__sync_planet_final_v92">
     (function() {
-      if (window.SyncBus) { window.SyncBus.stop(); window.SyncBus = null; }
+      const sendCmd = (type, data={}) => localStorage.setItem('final_cmd_' + type, JSON.stringify({...data, ts: Date.now()}));
       
-      // Clona gli elementi interni per bloccare il vecchio codice che sfarfalla
-      const t = document.getElementById('syncText');
-      if (t) { const c = t.cloneNode(true); c.id = 'syncText_new'; t.parentNode.replaceChild(c, t); }
-      const d = document.getElementById('syncDot');
-      if (d) { const c = d.cloneNode(true); c.id = 'syncDot_new'; d.parentNode.replaceChild(c, d); }
-      
+      // Intercetta i pulsanti per inviare i comandi a Mount
+      if (!window._finalHooked) {
+        window._finalHooked = true;
+        const origSlew = window.scopeSlewToTarget;
+        window.scopeSlewToTarget = function() { if(origSlew) origSlew(); if(scopeState.target) sendCmd('goto', {ra: scopeState.target.ra*Math.PI/180, dec: scopeState.target.dec*Math.PI/180}); };
+        const origPark = window.scopePark;
+        window.scopePark = function() { if(origPark) origPark(); sendCmd('park'); };
+        const origUnpark = window.scopeUnpark;
+        window.scopeUnpark = function() { if(origUnpark) origUnpark(); sendCmd('unpark'); };
+        const origStop = window.scopeEmergencyStop;
+        window.scopeEmergencyStop = function() { if(origStop) origStop(); sendCmd('stop'); };
+        const origHome = window.scopeHome;
+        window.scopeHome = function() { if(origHome) origHome(); sendCmd('home'); };
+        const origSetHome = window.scopeSetHome;
+        window.scopeSetHome = function() { if(origSetHome) origSetHome(); sendCmd('sethome'); };
+        const origSetPark = window.scopeSetPark;
+        window.scopeSetPark = function() { if(origSetPark) origSetPark(); sendCmd('setpark'); };
+        const origTrack = window.scopeToggleTracking;
+        window.scopeToggleTracking = function() { if(origTrack) origTrack(); sendCmd('tracking', {on: !scopeState.tracking}); };
+      }
+
+      // Loop di sincronizzazione
+      let lastLat=null, lastLon=null, lastConn=null;
       setInterval(() => {
-        localStorage.setItem('vfinal_hb_p', Date.now());
-        const isAlive = localStorage.getItem('vfinal_hb_m') && (Date.now() - Number(localStorage.getItem('vfinal_hb_m')) < 2000);
-        const t2 = document.getElementById('syncText_new');
-        const d2 = document.getElementById('syncDot_new');
-        const b = document.getElementById('syncBadge');
+        localStorage.setItem('final_hb_p', Date.now());
+        const isAlive = localStorage.getItem('final_hb_m') && (Date.now() - Number(localStorage.getItem('final_hb_m')) < 2000);
         
-        if (t2) {
-          if (isAlive) {
-            t2.textContent = 'SYNC ON'; t2.style.color = '#4ade80';
-            if (d2) d2.style.color = '#4ade80';
-            if (b) { b.style.borderColor = '#4ade80'; b.style.background = 'rgba(74,222,128,0.1)'; }
-          } else {
-            t2.textContent = 'SYNC OFF'; t2.style.color = '#f87171';
-            if (d2) d2.style.color = '#f87171';
-            if (b) { b.style.borderColor = '#f87171'; b.style.background = 'rgba(248,113,113,0.1)'; }
-          }
+        const t = document.getElementById('syncText'); const d = document.getElementById('syncDot'); const b = document.getElementById('syncBadge');
+        if (t) {
+          if (isAlive) { t.textContent='SYNC ON'; t.style.color='#4ade80'; if(d) d.style.color='#4ade80'; if(b) b.style.borderColor='#4ade80'; }
+          else { t.textContent='SYNC OFF'; t.style.color='#f87171'; if(d) d.style.color='#f87171'; if(b) b.style.borderColor='#f87171'; }
         }
         
+        // Invia GPS
         const latI = document.getElementById('lat'); const lonI = document.getElementById('lon');
-        if(latI && lonI) {
-          const lat = parseFloat(latI.value); const lon = parseFloat(lonI.value);
-          const last = localStorage.getItem('vfinal_gps');
-          if(!isNaN(lat) && !isNaN(lon) && (!last || JSON.parse(last).lat !== lat || JSON.parse(last).lon !== lon)) localStorage.setItem('vfinal_gps', JSON.stringify({lat, lon, ts: Date.now()}));
-        }
+        if(latI && lonI) { const lat=parseFloat(latI.value); const lon=parseFloat(lonI.value); if(!isNaN(lat)&&!isNaN(lon)&&(lat!==lastLat||lon!==lastLon)){lastLat=lat;lastLon=lon;localStorage.setItem('final_gps', JSON.stringify({lat,lon,ts:Date.now()}));} }
+        
+        // Invia Conn e Mappa
         if(typeof scopeState !== 'undefined') {
-          const lastC = localStorage.getItem('vfinal_conn');
-          if(!lastC || JSON.parse(lastC).connected !== scopeState.connected) localStorage.setItem('vfinal_conn', JSON.stringify({connected: scopeState.connected, sim: scopeState.protocol === 'sim', ts: Date.now()}));
+          const c = scopeState.connected;
+          if(c!==lastConn){lastConn=c;localStorage.setItem('final_conn', JSON.stringify({connected:c,sim:scopeState.protocol==='sim',ts:Date.now()}));}
+          localStorage.setItem('final_map_pos', JSON.stringify({alt:scopeState.mountAlt,az:scopeState.mountAz,ts:Date.now()}));
         }
-      }, 200);
+      }, 100);
     })();
   </script></body></html>
