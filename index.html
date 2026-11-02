@@ -559,7 +559,64 @@ console.log('[SyncBus v'+V+' INLINE] '+A+' / '+I+' · '+(bc?'BC':'LS'));
 if(document.readyState==='complete'||document.readyState==='interactive')setTimeout(st,100);else g.addEventListener('load',function(){setTimeout(st,100)})})(window);
 </script>
 
-</head>
+<style>
+    :root { --header-height: 150px; } /* Fallback */
+    
+    /* Assicuriamoci che l'header non abbia margini che creano spazi */
+    header { margin-bottom: 0 !important; }
+    
+    #menu {
+      position: sticky !important;
+      top: var(--header-height) !important;
+      z-index: 101 !important;
+      margin-top: 0 !important;
+      border-top: none !important; /* Rimuove eventuali bordi che creano stacco */
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+    }
+    
+    #menu.hidden-menu {
+      transform: translateY(-100%) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    
+    /* La linguetta centrata esattamente sulla linea */
+    #menu-arrow-btn {
+      position: fixed !important;
+      top: calc(var(--header-height) - 1px) !important; /* -1px per fondersi con il bordo */
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      background: var(--bg2) !important; /* Stesso colore dell'header */
+      border: 1px solid var(--accent) !important;
+      border-top: none !important;
+      color: var(--accent) !important;
+      border-radius: 0 0 8px 8px !important;
+      padding: 2px 16px !important;
+      z-index: 100 !important;
+      cursor: pointer !important;
+      display: none !important;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.5) !important;
+      transition: all 0.2s ease !important;
+    }
+    
+    #menu-arrow-btn:hover {
+      background: var(--accent) !important;
+      color: #000 !important;
+      padding-bottom: 6px !important;
+    }
+
+    #menu-arrow-btn.show {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      animation: slideDownMenu 0.3s ease-out forwards !important;
+    }
+    
+    @keyframes slideDownMenu {
+      from { transform: translateX(-50%) translateY(-100%); }
+      to { transform: translateX(-50%) translateY(0); }
+    }
+  </style></head>
 <body id="appBody">
 
 <header>
@@ -3411,25 +3468,90 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
 
 
 
-<script id="__sync_planet_v105">
+
+  <!-- REGISTRAZIONE PWA -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+        .then((registration) => {
+          console.log('✅ Service Worker registrato con successo. La PWA è attiva.');
+        })
+        .catch((error) => {
+          console.log('❌ Errore nella registrazione del Service Worker:', error);
+        });
+    });
+  }
+</script>
+
+
+<script>
     (function() {
-      // Forza il caricamento di TUTTE le province
+      // Funzione che calcola l'altezza precisa dell'header
+      function updateHeaderHeight() {
+        const header = document.querySelector('header');
+        if (header) {
+          const height = header.getBoundingClientRect().height;
+          document.documentElement.style.setProperty('--header-height', height + 'px');
+        }
+      }
+      
+      // Aggiorna la posizione in vari momenti critici
+      window.addEventListener('load', updateHeaderHeight);
+      window.addEventListener('resize', updateHeaderHeight);
+      setTimeout(updateHeaderHeight, 100); // Dopo il caricamento dei font
+      setTimeout(updateHeaderHeight, 500); // Dopo che le immagini (logo) sono caricate
+
+      // Crea la linguetta
+      const arrowBtn = document.createElement('div');
+      arrowBtn.id = 'menu-arrow-btn';
+      arrowBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+      document.body.appendChild(arrowBtn);
+
+      let lastScrollY = window.scrollY;
+      let isMenuManuallyOpen = false;
+
+      window.addEventListener('scroll', () => {
+        const currentScrollY = window.scrollY;
+        const menu = document.getElementById('menu');
+        
+        // Se scorriamo in basso
+        if (currentScrollY > lastScrollY && currentScrollY > 100) {
+          if (!isMenuManuallyOpen) {
+            menu.classList.add('hidden-menu');
+            arrowBtn.classList.add('show');
+          }
+        } 
+        // Se scorriamo in alto
+        else if (currentScrollY < lastScrollY) {
+          menu.classList.remove('hidden-menu');
+          arrowBtn.classList.remove('show');
+          isMenuManuallyOpen = false;
+        }
+        
+        lastScrollY = currentScrollY;
+      });
+
+      // Al clic della freccia, il menu ricompare
+      arrowBtn.addEventListener('click', () => {
+        isMenuManuallyOpen = true;
+        const menu = document.getElementById('menu');
+        menu.classList.remove('hidden-menu');
+        arrowBtn.classList.remove('show');
+      });
+    })();
+  </script><script id="__sync_planet_v108">
+    (function() {
       setTimeout(() => {
         if (typeof populateProvinces === 'function') {
             const sel = document.getElementById('citySelect');
             if (sel && sel.options.length < 50) populateProvinces();
         }
       }, 500);
-
       try { if (window.SyncBus) { window.SyncBus.stop(); window.SyncBus = null; } } catch(e) {}
-      
       const channel = new BroadcastChannel('egastro_sync_channel');
       let lastPing = 0;
-
-      channel.onmessage = (e) => {
-        if (e.data.type === 'ping_m') lastPing = Date.now();
-      };
-
+      channel.onmessage = (e) => { if (e.data.type === 'ping_m') lastPing = Date.now(); };
       const sendCmd = (type, data={}) => localStorage.setItem('final_cmd_' + type, JSON.stringify({...data, ts: Date.now()}));
       
       if (!window._finalHooked) {
@@ -3451,27 +3573,18 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
         const origTrack = window.scopeToggleTracking;
         window.scopeToggleTracking = function() { if(origTrack) origTrack(); sendCmd('tracking', {on: !scopeState.tracking}); };
       }
-
       let lastLat=null, lastLon=null, lastConn=null;
-      
       setInterval(() => {
         channel.postMessage({ type: 'ping_p' });
         localStorage.setItem('final_hb_p', Date.now());
-        
         const isAlive = (Date.now() - lastPing < 2000) || (localStorage.getItem('final_hb_m') && (Date.now() - Number(localStorage.getItem('final_hb_m')) < 2000));
-        
         const t = document.getElementById('syncText'); const d = document.getElementById('syncDot'); const b = document.getElementById('syncBadge');
         if (t) {
           if (isAlive) { t.textContent='SYNC ON'; t.style.color='#4ade80'; if(d) d.style.color='#4ade80'; if(b) b.style.borderColor='#4ade80'; }
           else { t.textContent='SYNC OFF'; t.style.color='#f87171'; if(d) d.style.color='#f87171'; if(b) b.style.borderColor='#f87171'; }
         }
-        
         const latI = document.getElementById('lat'); const lonI = document.getElementById('lon');
-        if(latI && lonI) { 
-          const lat=parseFloat(latI.value); const lon=parseFloat(lonI.value); 
-          if(!isNaN(lat)&&!isNaN(lon)&&(lat!==lastLat||lon!==lastLon)){lastLat=lat;lastLon=lon;localStorage.setItem('final_gps', JSON.stringify({lat,lon,ts:Date.now()}));} 
-        }
-        
+        if(latI && lonI) { const lat=parseFloat(latI.value); const lon=parseFloat(lonI.value); if(!isNaN(lat)&&!isNaN(lon)&&(lat!==lastLat||lon!==lastLon)){lastLat=lat;lastLon=lon;localStorage.setItem('final_gps', JSON.stringify({lat,lon,ts:Date.now()}));} }
         if(typeof scopeState !== 'undefined') {
           const c = scopeState.connected;
           if(c!==lastConn){lastConn=c;localStorage.setItem('final_conn', JSON.stringify({connected:c,sim:scopeState.protocol==='sim',ts:Date.now()}));}
@@ -3479,20 +3592,4 @@ console.log('[ONE-BTN-BLINDATO] Ready:', detected);
         }
       }, 100);
     })();
-  </script>
-  <!-- REGISTRAZIONE PWA -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js', { scope: './' })
-        .then((registration) => {
-          console.log('✅ Service Worker registrato con successo. La PWA è attiva.');
-        })
-        .catch((error) => {
-          console.log('❌ Errore nella registrazione del Service Worker:', error);
-        });
-    });
-  }
-</script>
-</body>
-</html>
+  </script></body></html>
