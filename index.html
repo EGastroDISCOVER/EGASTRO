@@ -3431,4 +3431,19 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
 else init();
 })();
 </script>
+  <script>
+window.toggleSimulator = function() {
+  scopeState.protocol = (scopeState.protocol === 'sim') ? 'onstep' : 'sim';
+  scopeState.connected = (scopeState.protocol === 'sim');
+  scopeState.simulated = (scopeState.protocol === 'sim');
+  localStorage.setItem('final_conn', JSON.stringify({
+    connected: scopeState.connected,
+    sim: scopeState.simulated,
+    ts: Date.now()
+  }));
+  if (typeof updateLinkButtons === 'function') updateLinkButtons();
+  if (typeof updateTelemetry === 'function') updateTelemetry();
+  console.log('SIM cliccato:', scopeState.protocol);
+};
+</script>
 </body></html>
