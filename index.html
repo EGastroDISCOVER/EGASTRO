@@ -3368,7 +3368,6 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   });
 })();
 </script>
- <script id="__fix-big-goto-sync-v2">
 (function(){
   'use strict';
 
@@ -3415,5 +3414,85 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   setTimeout(tryPatch, 3000);
 })();
 </script>
+<script id="__fix-sync-v3">
+(function(){
+  'use strict';
 
+  function install() {
+    if (typeof scopeStepAction !== 'function' || typeof scopeState === 'undefined') {
+      setTimeout(install, 400); return;
+    }
+    if (window.__fixSyncV3) return;
+    window.__fixSyncV3 = true;
+
+    const _origStep = window.scopeStepAction;
+    window.scopeStepAction = function() {
+      if (!scopeState.target) return;
+      if (!scopeState.connected) { scopeLog('Connetti prima.', 'warn'); return; }
+
+      if (scopeState.step === 1) {
+        const t = scopeState.target;
+        if (scopeState.isParked) { scopeLog('In PARK.', 'err'); return; }
+
+        localStorage.setItem('final_cmd_goto', JSON.stringify({
+          ra: t.ra * Math.PI / 180,
+          dec: t.dec * Math.PI / 180,
+          ts: Date.now()
+        }));
+        scopeLog(`📡 GOTO ${t.name} → inviato al Mount`, 'ok');
+        console.log('✅ [FIX v3] GOTO inviato:', t.name);
+
+        const btn = document.getElementById('scopeStepBtn');
+        if (btn) { btn.disabled = true; btn.className = 'btn-goto-large slewing'; btn.innerText = 'SLEWING...'; }
+
+        const targetPos = getAltAz(t.ra, t.dec, state.currentTime);
+        const watcher = setInterval(() => {
+          const mp = JSON.parse(localStorage.getItem('final_map_pos') || 'null');
+          if (!mp) return;
+          const dAlt = Math.abs(mp.alt - targetPos.alt);
+          const dAz = Math.abs(((mp.az - targetPos.az + 540) % 360) - 180);
+          if (dAlt < 1.5 && dAz < 1.5) {
+            clearInterval(watcher);
+            scopeState.step = 2;
+            if (btn) { btn.disabled = false; btn.className = 'btn-goto-large'; }
+            scopeUpdateStepUI();
+            scopeLog(`✓ ${t.name} raggiunto`, 'ok');
+          }
+        }, 500);
+        setTimeout(() => clearInterval(watcher), 45000);
+        return;
+      }
+      return _origStep.apply(this, arguments);
+    };
+
+    window.scopeHome = function() {
+      if (!scopeState.connected) { scopeLog('Connetti prima.', 'warn'); return; }
+      localStorage.setItem('final_cmd_home', JSON.stringify({ ts: Date.now() }));
+      scopeLog('📡 HOME → Satellite', 'ok');
+      console.log('✅ [FIX v3] HOME inviato');
+    };
+
+    window.scopeSetHome = function() {
+      const mp = JSON.parse(localStorage.getItem('final_map_pos') || 'null');
+      if (!mp) { scopeLog('Nessuna telemetria.', 'warn'); return; }
+      localStorage.setItem('final_cmd_sethome', JSON.stringify({ alt: mp.alt, az: mp.az, ts: Date.now() }));
+      scopeLog('📡 SET HOME → Satellite', 'ok');
+      console.log('✅ [FIX v3] SET HOME inviato');
+    };
+
+    window.scopeSetPark = function() {
+      const mp = JSON.parse(localStorage.getItem('final_map_pos') || 'null');
+      if (!mp) { scopeLog('Nessuna telemetria.', 'warn'); return; }
+      localStorage.setItem('final_cmd_setpark', JSON.stringify({ alt: mp.alt, az: mp.az, ts: Date.now() }));
+      scopeLog('📡 SET PARK → Satellite', 'ok');
+      console.log('✅ [FIX v3] SET PARK inviato');
+    };
+
+    console.log('✅ [FIX v3] Installato');
+  }
+
+  window.addEventListener('load', () => setTimeout(install, 1500));
+  setTimeout(install, 2500);
+})();
+</script>
 </body></html>
