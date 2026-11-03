@@ -3320,4 +3320,52 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   }
 })();
 </script>
+  <script id="__planet-persist">
+(function(){
+  const KEYS = ['lat', 'lon'];
+  const SKEY = 'planet_ui_state';
+
+  function saveState() {
+    const s = {};
+    KEYS.forEach(k => {
+      const el = document.getElementById(k);
+      if (el) s[k] = el.value;
+    });
+    try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch(e) {}
+  }
+
+  function restoreState() {
+    try {
+      const s = JSON.parse(localStorage.getItem(SKEY) || '{}');
+      let changed = false;
+      KEYS.forEach(k => {
+        const el = document.getElementById(k);
+        if (el && s[k] !== undefined && s[k] !== '') {
+          el.value = s[k];
+          changed = true;
+        }
+      });
+      if (changed) {
+        setTimeout(() => {
+          if (typeof readInputs === 'function') readInputs();
+          if (typeof updateAll === 'function') updateAll();
+        }, 150);
+      }
+    } catch(e) {}
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(restoreState, 250);
+    KEYS.forEach(k => {
+      const el = document.getElementById(k);
+      if (el) {
+        el.addEventListener('change', saveState);
+        el.addEventListener('input', saveState);
+      }
+    });
+    const gpsBtn = document.querySelector('[onclick="activateGPS()"]');
+    if (gpsBtn) gpsBtn.addEventListener('click', () => setTimeout(saveState, 3000));
+  });
+})();
+</script>
 </body></html>
