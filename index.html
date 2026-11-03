@@ -3368,4 +3368,49 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   });
 })();
 </script>
+  <script id="__fix-big-goto-sync">
+(function(){
+  'use strict';
+
+  function attach() {
+    if (typeof scopeState === 'undefined') { setTimeout(attach, 300); return; }
+    const bigBtn = document.getElementById('scopeStepBtn');
+    if (!bigBtn) { setTimeout(attach, 300); return; }
+    if (bigBtn._syncFixAttached) return;
+
+    bigBtn.addEventListener('click', function(e) {
+      // Intercetta SOLO il click in fase 1 (GOTO iniziale)
+      if (scopeState.step !== 1) return;
+      if (!scopeState.target) return;
+      if (!scopeState.connected) return;
+
+      const t = scopeState.target;
+      const raRad = t.ra * Math.PI / 180;
+      const decRad = t.dec * Math.PI / 180;
+
+      try {
+        localStorage.setItem('final_cmd_goto', JSON.stringify({
+          ra: raRad,
+          dec: decRad,
+          ts: Date.now()
+        }));
+        console.log('✅ [FIX] final_cmd_goto scritto →', t.name,
+                    '| RA rad:', raRad.toFixed(4), '| DEC rad:', decRad.toFixed(4));
+        if (typeof scopeLog === 'function') {
+          scopeLog(`📡 GOTO ${t.name} → inviato al Mount`, 'ok');
+        }
+      } catch(err) {
+        console.warn('Fix GOTO error:', err);
+      }
+    }, true); // capture: true → esegue PRIMA dell'handler originale
+
+    bigBtn._syncFixAttached = true;
+    console.log('✅ [FIX] Big GOTO → sync Mount attivo');
+  }
+
+  window.addEventListener('load', () => setTimeout(attach, 2000));
+  setTimeout(attach, 3000);
+})();
+</script>
+
 </body></html>
