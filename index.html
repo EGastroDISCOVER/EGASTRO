@@ -3368,52 +3368,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   });
 })();
 </script>
-(function(){
-  'use strict';
 
-  function tryPatch() {
-    if (typeof window.scopeStepAction !== 'function') {
-      setTimeout(tryPatch, 300);
-      return;
-    }
-    if (window.scopeStepAction._patched) return;
-
-    const _orig = window.scopeStepAction;
-    window.scopeStepAction = function() {
-      console.log('🔍 [FIX] scopeStepAction | step=', scopeState?.step,
-                  '| connected=', scopeState?.connected,
-                  '| target=', scopeState?.target?.name);
-
-      // Invia comando al Mount se c'è target e connessione
-      if (scopeState && scopeState.target && scopeState.connected) {
-        const t = scopeState.target;
-        const raRad = t.ra * Math.PI / 180;
-        const decRad = t.dec * Math.PI / 180;
-        try {
-          localStorage.setItem('final_cmd_goto', JSON.stringify({
-            ra: raRad, dec: decRad, ts: Date.now()
-          }));
-          console.log('✅ [FIX] final_cmd_goto scritto →', t.name,
-                      '| RA rad:', raRad.toFixed(4),
-                      '| DEC rad:', decRad.toFixed(4));
-          if (typeof scopeLog === 'function') {
-            scopeLog(`📡 GOTO ${t.name} → inviato al Mount`, 'ok');
-          }
-        } catch(e) { console.warn('[FIX] err:', e); }
-      } else {
-        console.log('⚠️ [FIX] GOTO non inviato (target o connessione mancante)');
-      }
-
-      return _orig.apply(this, arguments);
-    };
-    window.scopeStepAction._patched = true;
-    console.log('✅ [FIX v2] scopeStepAction intercettata');
-  }
-
-  window.addEventListener('load', () => setTimeout(tryPatch, 2000));
-  setTimeout(tryPatch, 3000);
-})();
-</script>
 <script id="__fix-sync-v3">
 (function(){
   'use strict';
