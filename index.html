@@ -3462,27 +3462,28 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     if (window.__moveFixInstalled) return;
     window.__moveFixInstalled = true;
 
-    // 1. FIX DIREZIONI
+    // 1. FIX DIREZIONI (case-insensitive, gestisce E/O/N/S e up/down/left/right)
     Protocols.onstep.move = function(dir, rate) {
-      console.log('🕹️ [PATCH] Movimento:', dir);
+      const d = String(dir).toLowerCase();
+      console.log('🕹️ [PATCH] Movimento:', d);
       let moved = false;
       
-      if (dir === 'up' || dir === 'n') { Transport.send(':Mn#'); moved = true; }
-      if (dir === 'down' || dir === 's') { Transport.send(':Ms#'); moved = true; }
-      if (dir === 'left' || dir === 'w') { Transport.send(':Mw#'); moved = true; }
-      if (dir === 'right' || dir === 'e') { Transport.send(':Me#'); moved = true; }
+      if (d === 'up' || d === 'n') { Transport.send(':Mn#'); moved = true; }
+      if (d === 'down' || d === 's') { Transport.send(':Ms#'); moved = true; }
+      if (d === 'left' || d === 'o' || d === 'w') { Transport.send(':Mw#'); moved = true; }
+      if (d === 'right' || d === 'e') { Transport.send(':Me#'); moved = true; }
       
-      if (dir === 'up-left') { Transport.send(':Mn#'); Transport.send(':Mw#'); moved = true; }
-      if (dir === 'up-right') { Transport.send(':Mn#'); Transport.send(':Me#'); moved = true; }
-      if (dir === 'down-left') { Transport.send(':Ms#'); Transport.send(':Mw#'); moved = true; }
-      if (dir === 'down-right') { Transport.send(':Ms#'); Transport.send(':Me#'); moved = true; }
+      if (d === 'up-left' || d === 'nw') { Transport.send(':Mn#'); Transport.send(':Mw#'); moved = true; }
+      if (d === 'up-right' || d === 'ne') { Transport.send(':Mn#'); Transport.send(':Me#'); moved = true; }
+      if (d === 'down-left' || d === 'sw') { Transport.send(':Ms#'); Transport.send(':Mw#'); moved = true; }
+      if (d === 'down-right' || d === 'se') { Transport.send(':Ms#'); Transport.send(':Me#'); moved = true; }
 
       if (moved) {
         setTimeout(() => Transport.send(':Q#'), 200);
       }
     };
 
-    // 2. BYPASS PARK
+    // 2. BYPASS PARK (permette movimento locale)
     const originalManualMove = window.scopeManualMove;
     window.scopeManualMove = function(dir) {
       const oldParked = scopeState.isParked;
@@ -3491,51 +3492,44 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       scopeState.isParked = oldParked;
     };
 
-    // 3. PARK
+    // 3. PARK (solo sync, niente comando :hP# che fa reset)
     window.scopePark = function() {
-      console.log('🅿️ [PATCH] PARK inviato');
-      Transport.send(':hP#');
+      console.log('🅿️ [PATCH] PARK (sync only)');
       localStorage.setItem('final_cmd_park', JSON.stringify({ ts: Date.now() }));
       scopeState.isParked = true;
       if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-      if (typeof scopeLog === 'function') scopeLog('PARK → montatura', 'ok');
+      if (typeof scopeLog === 'function') scopeLog('PARK → fai dal pannello web', 'warn');
     };
 
-    // 4. UNPARK
+    // 4. UNPARK (solo sync)
     window.scopeUnpark = function() {
-      console.log('🔓 [PATCH] UNPARK inviato');
-      Transport.send(':hR#');
+      console.log('🔓 [PATCH] UNPARK (sync only)');
       localStorage.setItem('final_cmd_unpark', JSON.stringify({ ts: Date.now() }));
       scopeState.isParked = false;
       if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-      if (typeof scopeLog === 'function') scopeLog('UNPARK → montatura', 'ok');
+      if (typeof scopeLog === 'function') scopeLog('UNPARK → fai dal pannello web', 'warn');
     };
 
-    // 5. HOME
+    // 5. HOME (solo sync, :hN# fa reset)
     window.scopeHome = function() {
-      console.log('🏠 [PATCH] HOME inviato');
-      Transport.send(':hN#');
+      console.log('🏠 [PATCH] HOME (sync only)');
       localStorage.setItem('final_cmd_home', JSON.stringify({ ts: Date.now() }));
-      if (typeof scopeLog === 'function') scopeLog('HOME → montatura', 'ok');
+      if (typeof scopeLog === 'function') scopeLog('HOME → fai dal pannello web', 'warn');
     };
 
-    // 6. SET HOME
+    // 6. SET HOME (solo sync)
     window.scopeSetHome = function() {
-      console.log('📍 [PATCH] SET HOME inviato');
-      Transport.send(':hC#');
+      console.log('📍 [PATCH] SET HOME (sync only)');
       localStorage.setItem('final_cmd_sethome', JSON.stringify({ ts: Date.now() }));
-      if (typeof scopeLog === 'function') scopeLog('SET HOME → montatura', 'ok');
     };
 
-    // 7. SET PARK
+    // 7. SET PARK (solo sync)
     window.scopeSetPark = function() {
-      console.log('📍 [PATCH] SET PARK inviato');
-      Transport.send(':hF#');
+      console.log('📍 [PATCH] SET PARK (sync only)');
       localStorage.setItem('final_cmd_setpark', JSON.stringify({ ts: Date.now() }));
-      if (typeof scopeLog === 'function') scopeLog('SET PARK → montatura', 'ok');
     };
 
-    // 8. TRACKING ON/OFF
+    // 8. TRACKING ON/OFF (funziona)
     window.scopeToggleTracking = function() {
       scopeState.tracking = !scopeState.tracking;
       console.log('⭐ [PATCH] Tracking:', scopeState.tracking ? 'ON' : 'OFF');
@@ -3544,9 +3538,9 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
     };
 
-    // 9. STOP emergenza
+    // 9. STOP emergenza (funziona)
     window.scopeEmergencyStop = function() {
-      console.log('🛑 [PATCH] STOP emergenza');
+      console.log('🛑 [PATCH] STOP');
       Transport.send(':Q#');
       scopeState.slewing = false;
       scopeState.tracking = false;
@@ -3554,7 +3548,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
     };
 
-    console.log('✅ [FIX] Direzioni + Park + Unpark + Home + Tracking + Stop');
+    console.log('✅ [FIX v2] Direzioni fix + keep-alive-ready');
   }
 
   window.addEventListener('load', () => setTimeout(install, 2000));
