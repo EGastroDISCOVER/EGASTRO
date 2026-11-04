@@ -3459,17 +3459,17 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       setTimeout(install, 500);
       return;
     }
-    if (window.__moveFixInstalledV3) return;
-    window.__moveFixInstalledV3 = true;
+    if (window.__moveFixInstalledV4) return;
+    window.__moveFixInstalledV4 = true;
 
-    // 1. FIX DIREZIONI e DURATA (1 secondo di movimento)
+    // 1. FIX MOVIMENTO: Velocità massima (R9) e durata 1 secondo
     Protocols.onstep.move = function(dir, rate) {
       const d = String(dir).toLowerCase();
-      console.log('🕹️ [PATCH] Movimento continuo:', d);
+      console.log('🕹️ [PATCH] Movimento veloce:', d);
       let moved = false;
       
-      // Imposta una velocità di movimento più alta (es. 8x siderale)
-      Transport.send(':R2#'); // Rate 2 = 4x o 8x a seconda della config
+      // Imposta velocità massima (OnStepX: R9 = Max Slew Speed)
+      Transport.send(':R9#'); 
       
       if (d === 'up' || d === 'n') { Transport.send(':Mn#'); moved = true; }
       if (d === 'down' || d === 's') { Transport.send(':Ms#'); moved = true; }
@@ -3482,12 +3482,11 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       if (d === 'down-right' || d === 'se') { Transport.send(':Ms#'); Transport.send(':Me#'); moved = true; }
 
       if (moved) {
-        // Invece di 200ms, lascialo muovere per 1 secondo intero
-        setTimeout(() => Transport.send(':Q#'), 1000);
+        setTimeout(() => Transport.send(':Q#'), 1000); // 1 secondo di movimento
       }
     };
 
-    // 2. BYPASS PARK
+    // 2. BYPASS PARK (locale)
     const originalManualMove = window.scopeManualMove;
     window.scopeManualMove = function(dir) {
       const oldParked = scopeState.isParked;
@@ -3496,28 +3495,70 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       scopeState.isParked = oldParked;
     };
 
-    // 3. RICEZIONE POSIZIONE (Sincronizzazione Mappa)
-    // Ascoltiamo i dati che arrivano dalla montatura
+    // 3. FUNZIONE DI CONVERSIONE (LX200 string -> Gradi)
+    function parseLX200RA(str) {
+      // Formato: HH:MM:SS# -> Ore decimali -> Gradi
+      const parts = str.replace('#','').split(':');
+      if (parts.length < 3) return null;
+      const hours = parseInt(parts[0]) + parseInt(parts[1])/60 + parseInt(parts[2])/3600;
+      return hours * 15; // Converti in gradi
+    }
+    function parseLX200DEC(str) {
+      // Formato: sDD*MM:SS# -> Gradi decimali
+      const sign = str[0] === '-' ? -1 : 1;
+      const clean = str.replace(/[+#]/g, '').replace('*', ':');
+      const parts = clean.split(':');
+      if (parts.length < 2) return null;
+      const deg = parseInt(parts[0]) + (parseInt(parts[1]) || 0)/60 + (parseInt(parts[2]) || 0)/3600;
+      return deg * sign;
+    }
+
+    // 4. INTERCETTA LA POSIZIONE DALLA MONTATURA
+    let pendingRA = null;
     const originalOnData = Transport._onData;
     Transport._onData = function(data) {
-      // Se la montatura risponde a :GR# (RA) e :GD# (Dec)
-      if (data.startsWith('+') || data.startsWith('-') || (data.includes('*') && data.length < 20)) {
-         console.log('📡 Dati posizione da montatura:', data);
-         // Qui si potrebbe parsare e aggiornare scopeState.mountAlt, ma il formato LX200 è complesso.
-         // Per ora logghiamo per capire se arrivano.
+      if (typeof data === 'string') {
+        // Intercetta risposta RA (es. 12:34:56#)
+        if (data.includes(':') && data.includes('#') && data.split(':')[0].length <= 2) {
+           const ra = parseLX200RA(data.trim());
+           if (ra !== null) pendingRA = ra;
+        } 
+        // Intercetta risposta DEC (es. +41*12:34#)
+        else if (data.includes('*') && data.includes('#')) {
+           const dec = parseLX200DEC(data.trim());
+           if (dec !== null && pendingRA !== null) {
+               // Abbiamo sia RA che DEC! Aggiorniamo la mappa.
+               const lat = Number.isFinite(MS?.gpsLat) ? MS.gpsLat : 41.9; // Usa GPS o default
+               const lon = Number.isFinite(MS?.gpsLon) ? MS.gpsLon : 12.5;
+               
+               // Calcola Alt/Az dalla RA/DEC letta
+               const pos = getAltAz(pendingRA, dec, new Date());
+               
+               // Aggiorna la mappa e il 3D del Pianeta
+               if (typeof scopeState !== 'undefined') {
+                   scopeState.mountAlt = pos.alt;
+                   scopeState.mountAz = pos.az;
+                   scopeState.connected = true; // Forza UI connessa
+                   
+                   if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+                   if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
+               }
+           }
+        }
       }
       if (originalOnData) originalOnData(data);
     };
 
-    // 4. POLLING POSIZIONE (Chiedi la posizione ogni 1 secondo)
+    // 5. POLLING POSIZIONE (Ogni 500ms)
     setInterval(() => {
-      if (scopeState.connected) {
-        Transport.send(':GR#'); // Get RA
-        setTimeout(() => Transport.send(':GD#'), 50); // Get DEC
+      if (scopeState.connected && !scopeState.slewing) {
+        pendingRA = null;
+        Transport.send(':GR#'); // Chiedi RA
+        setTimeout(() => Transport.send(':GD#'), 100); // Chiedi DEC
       }
-    }, 1000);
+    }, 500);
 
-    console.log('✅ [FIX v3] Movimento 1s + Lettura posizione attiva');
+    console.log('✅ [FIX v4] Movimento Veloce (R9) + Lettura Posizione Reale attiva');
   }
 
   window.addEventListener('load', () => setTimeout(install, 2000));
