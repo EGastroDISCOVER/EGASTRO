@@ -3450,119 +3450,45 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   setTimeout(install, 2500);
 })();
 </script>
-<script id="__fix-move-directions-and-park">
+<script id="__fix-smooth-move">
 (function(){
-  'use strict';
-
   function install() {
-    if (typeof Protocols === 'undefined' || !Protocols.onstep || typeof window.scopeManualMove !== 'function') {
-      setTimeout(install, 500);
-      return;
+    if (typeof Transport === 'undefined' || typeof Protocols === 'undefined') {
+      setTimeout(install, 500); return;
     }
-    if (window.__moveFixInstalledV4) return;
-    window.__moveFixInstalledV4 = true;
-
-    // 1. FIX MOVIMENTO: Velocità massima (R9) e durata 1 secondo
-    Protocols.onstep.move = function(dir, rate) {
-      const d = String(dir).toLowerCase();
-      console.log('🕹️ [PATCH] Movimento veloce:', d);
-      let moved = false;
-      
-      // Imposta velocità massima (OnStepX: R9 = Max Slew Speed)
-      Transport.send(':R9#'); 
-      
-      if (d === 'up' || d === 'n') { Transport.send(':Mn#'); moved = true; }
-      if (d === 'down' || d === 's') { Transport.send(':Ms#'); moved = true; }
-      if (d === 'left' || d === 'o' || d === 'w') { Transport.send(':Mw#'); moved = true; }
-      if (d === 'right' || d === 'e') { Transport.send(':Me#'); moved = true; }
-      
-      if (d === 'up-left' || d === 'nw') { Transport.send(':Mn#'); Transport.send(':Mw#'); moved = true; }
-      if (d === 'up-right' || d === 'ne') { Transport.send(':Mn#'); Transport.send(':Me#'); moved = true; }
-      if (d === 'down-left' || d === 'sw') { Transport.send(':Ms#'); Transport.send(':Mw#'); moved = true; }
-      if (d === 'down-right' || d === 'se') { Transport.send(':Ms#'); Transport.send(':Me#'); moved = true; }
-
-      if (moved) {
-        setTimeout(() => Transport.send(':Q#'), 1000); // 1 secondo di movimento
-      }
+    
+    // Comandi fluidi
+    window.startMoveDir = function(dir) {
+      console.log('▶️ Inizio movimento:', dir);
+      Transport.send(':R9#'); // Velocità massima
+      if (dir === 'up') Transport.send(':Mn#');
+      if (dir === 'down') Transport.send(':Ms#');
+      if (dir === 'left') Transport.send(':Mw#');
+      if (dir === 'right') Transport.send(':Me#');
     };
 
-    // 2. BYPASS PARK (locale)
-    const originalManualMove = window.scopeManualMove;
-    window.scopeManualMove = function(dir) {
-      const oldParked = scopeState.isParked;
-      scopeState.isParked = false;
-      originalManualMove.apply(this, arguments);
-      scopeState.isParked = oldParked;
+    window.stopMoveDir = function() {
+      console.log('⏹️ Stop movimento');
+      Transport.send(':Q#');
     };
 
-    // 3. FUNZIONE DI CONVERSIONE (LX200 string -> Gradi)
-    function parseLX200RA(str) {
-      // Formato: HH:MM:SS# -> Ore decimali -> Gradi
-      const parts = str.replace('#','').split(':');
-      if (parts.length < 3) return null;
-      const hours = parseInt(parts[0]) + parseInt(parts[1])/60 + parseInt(parts[2])/3600;
-      return hours * 15; // Converti in gradi
-    }
-    function parseLX200DEC(str) {
-      // Formato: sDD*MM:SS# -> Gradi decimali
-      const sign = str[0] === '-' ? -1 : 1;
-      const clean = str.replace(/[+#]/g, '').replace('*', ':');
-      const parts = clean.split(':');
-      if (parts.length < 2) return null;
-      const deg = parseInt(parts[0]) + (parseInt(parts[1]) || 0)/60 + (parseInt(parts[2]) || 0)/3600;
-      return deg * sign;
-    }
-
-    // 4. INTERCETTA LA POSIZIONE DALLA MONTATURA
-    let pendingRA = null;
-    const originalOnData = Transport._onData;
-    Transport._onData = function(data) {
-      if (typeof data === 'string') {
-        // Intercetta risposta RA (es. 12:34:56#)
-        if (data.includes(':') && data.includes('#') && data.split(':')[0].length <= 2) {
-           const ra = parseLX200RA(data.trim());
-           if (ra !== null) pendingRA = ra;
-        } 
-        // Intercetta risposta DEC (es. +41*12:34#)
-        else if (data.includes('*') && data.includes('#')) {
-           const dec = parseLX200DEC(data.trim());
-           if (dec !== null && pendingRA !== null) {
-               // Abbiamo sia RA che DEC! Aggiorniamo la mappa.
-               const lat = Number.isFinite(MS?.gpsLat) ? MS.gpsLat : 41.9; // Usa GPS o default
-               const lon = Number.isFinite(MS?.gpsLon) ? MS.gpsLon : 12.5;
-               
-               // Calcola Alt/Az dalla RA/DEC letta
-               const pos = getAltAz(pendingRA, dec, new Date());
-               
-               // Aggiorna la mappa e il 3D del Pianeta
-               if (typeof scopeState !== 'undefined') {
-                   scopeState.mountAlt = pos.alt;
-                   scopeState.mountAz = pos.az;
-                   scopeState.connected = true; // Forza UI connessa
-                   
-                   if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-                   if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
-               }
-           }
-        }
-      }
-      if (originalOnData) originalOnData(data);
-    };
-
-    // 5. POLLING POSIZIONE (Ogni 500ms)
-    setInterval(() => {
-      if (scopeState.connected && !scopeState.slewing) {
-        pendingRA = null;
-        Transport.send(':GR#'); // Chiedi RA
-        setTimeout(() => Transport.send(':GD#'), 100); // Chiedi DEC
-      }
-    }, 500);
-
-    console.log('✅ [FIX v4] Movimento Veloce (R9) + Lettura Posizione Reale attiva');
+    // Aggancia i pulsanti del D-Pad
+    setTimeout(() => {
+      document.querySelectorAll('.dpad-btn').forEach(btn => {
+        const dir = btn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+        if (!dir) return;
+        
+        btn.removeAttribute('onclick'); // Rimuove il vecchio comando a scatto
+        
+        // Eventi Touch e Mouse
+        btn.addEventListener('pointerdown', (e) => { e.preventDefault(); window.startMoveDir(dir); });
+        btn.addEventListener('pointerup', (e) => { e.preventDefault(); window.stopMoveDir(); });
+        btn.addEventListener('pointerleave', (e) => { e.preventDefault(); window.stopMoveDir(); });
+      });
+      console.log('✅ [FIX] D-Pad fluido installato (Hold to Move)');
+    }, 2000);
   }
-
   window.addEventListener('load', () => setTimeout(install, 2000));
-  setTimeout(install, 3000);
 })();
 </script>
 </body></html>
