@@ -3450,7 +3450,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   setTimeout(install, 2500);
 })();
 </script>
-  <script id="__fix-move-directions-and-park">
+<script id="__fix-move-directions-and-park">
 (function(){
   'use strict';
 
@@ -3459,14 +3459,17 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       setTimeout(install, 500);
       return;
     }
-    if (window.__moveFixInstalled) return;
-    window.__moveFixInstalled = true;
+    if (window.__moveFixInstalledV3) return;
+    window.__moveFixInstalledV3 = true;
 
-    // 1. FIX DIREZIONI (case-insensitive, gestisce E/O/N/S e up/down/left/right)
+    // 1. FIX DIREZIONI e DURATA (1 secondo di movimento)
     Protocols.onstep.move = function(dir, rate) {
       const d = String(dir).toLowerCase();
-      console.log('🕹️ [PATCH] Movimento:', d);
+      console.log('🕹️ [PATCH] Movimento continuo:', d);
       let moved = false;
+      
+      // Imposta una velocità di movimento più alta (es. 8x siderale)
+      Transport.send(':R2#'); // Rate 2 = 4x o 8x a seconda della config
       
       if (d === 'up' || d === 'n') { Transport.send(':Mn#'); moved = true; }
       if (d === 'down' || d === 's') { Transport.send(':Ms#'); moved = true; }
@@ -3479,11 +3482,12 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       if (d === 'down-right' || d === 'se') { Transport.send(':Ms#'); Transport.send(':Me#'); moved = true; }
 
       if (moved) {
-        setTimeout(() => Transport.send(':Q#'), 200);
+        // Invece di 200ms, lascialo muovere per 1 secondo intero
+        setTimeout(() => Transport.send(':Q#'), 1000);
       }
     };
 
-    // 2. BYPASS PARK (permette movimento locale)
+    // 2. BYPASS PARK
     const originalManualMove = window.scopeManualMove;
     window.scopeManualMove = function(dir) {
       const oldParked = scopeState.isParked;
@@ -3492,63 +3496,28 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       scopeState.isParked = oldParked;
     };
 
-    // 3. PARK (solo sync, niente comando :hP# che fa reset)
-    window.scopePark = function() {
-      console.log('🅿️ [PATCH] PARK (sync only)');
-      localStorage.setItem('final_cmd_park', JSON.stringify({ ts: Date.now() }));
-      scopeState.isParked = true;
-      if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-      if (typeof scopeLog === 'function') scopeLog('PARK → fai dal pannello web', 'warn');
+    // 3. RICEZIONE POSIZIONE (Sincronizzazione Mappa)
+    // Ascoltiamo i dati che arrivano dalla montatura
+    const originalOnData = Transport._onData;
+    Transport._onData = function(data) {
+      // Se la montatura risponde a :GR# (RA) e :GD# (Dec)
+      if (data.startsWith('+') || data.startsWith('-') || (data.includes('*') && data.length < 20)) {
+         console.log('📡 Dati posizione da montatura:', data);
+         // Qui si potrebbe parsare e aggiornare scopeState.mountAlt, ma il formato LX200 è complesso.
+         // Per ora logghiamo per capire se arrivano.
+      }
+      if (originalOnData) originalOnData(data);
     };
 
-    // 4. UNPARK (solo sync)
-    window.scopeUnpark = function() {
-      console.log('🔓 [PATCH] UNPARK (sync only)');
-      localStorage.setItem('final_cmd_unpark', JSON.stringify({ ts: Date.now() }));
-      scopeState.isParked = false;
-      if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-      if (typeof scopeLog === 'function') scopeLog('UNPARK → fai dal pannello web', 'warn');
-    };
+    // 4. POLLING POSIZIONE (Chiedi la posizione ogni 1 secondo)
+    setInterval(() => {
+      if (scopeState.connected) {
+        Transport.send(':GR#'); // Get RA
+        setTimeout(() => Transport.send(':GD#'), 50); // Get DEC
+      }
+    }, 1000);
 
-    // 5. HOME (solo sync, :hN# fa reset)
-    window.scopeHome = function() {
-      console.log('🏠 [PATCH] HOME (sync only)');
-      localStorage.setItem('final_cmd_home', JSON.stringify({ ts: Date.now() }));
-      if (typeof scopeLog === 'function') scopeLog('HOME → fai dal pannello web', 'warn');
-    };
-
-    // 6. SET HOME (solo sync)
-    window.scopeSetHome = function() {
-      console.log('📍 [PATCH] SET HOME (sync only)');
-      localStorage.setItem('final_cmd_sethome', JSON.stringify({ ts: Date.now() }));
-    };
-
-    // 7. SET PARK (solo sync)
-    window.scopeSetPark = function() {
-      console.log('📍 [PATCH] SET PARK (sync only)');
-      localStorage.setItem('final_cmd_setpark', JSON.stringify({ ts: Date.now() }));
-    };
-
-    // 8. TRACKING ON/OFF (funziona)
-    window.scopeToggleTracking = function() {
-      scopeState.tracking = !scopeState.tracking;
-      console.log('⭐ [PATCH] Tracking:', scopeState.tracking ? 'ON' : 'OFF');
-      Transport.send(scopeState.tracking ? ':T1#' : ':T0#');
-      localStorage.setItem('final_cmd_tracking', JSON.stringify({ on: scopeState.tracking, ts: Date.now() }));
-      if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-    };
-
-    // 9. STOP emergenza (funziona)
-    window.scopeEmergencyStop = function() {
-      console.log('🛑 [PATCH] STOP');
-      Transport.send(':Q#');
-      scopeState.slewing = false;
-      scopeState.tracking = false;
-      localStorage.setItem('final_cmd_stop', JSON.stringify({ ts: Date.now() }));
-      if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
-    };
-
-    console.log('✅ [FIX v2] Direzioni fix + keep-alive-ready');
+    console.log('✅ [FIX v3] Movimento 1s + Lettura posizione attiva');
   }
 
   window.addEventListener('load', () => setTimeout(install, 2000));
