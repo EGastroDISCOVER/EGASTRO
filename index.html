@@ -1087,16 +1087,16 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
           <div class="track-pill" id="pillLunar" onclick="scopeSetTrackRate('lunar')">Lunare</div>
         </div>
 
-        <div class="dpad-container">
-          <button class="dpad-btn d-up-left" onclick="scopeManualMove('up-left')">↖</button>
-          <button class="dpad-btn d-up" onclick="scopeManualMove('up')">↑</button>
-          <button class="dpad-btn d-up-right" onclick="scopeManualMove('up-right')">↗</button>
-          <button class="dpad-btn d-left" onclick="scopeManualMove('left')">←</button>
+       <div class="dpad-container">
+          <button class="dpad-btn d-up-left" onpointerdown="startScopeMove('up-left')" onpointerup="stopScopeMove()" onpointerleave="stopScopeMove()">↖</button>
+          <button class="dpad-btn d-up" onpointerdown="startScopeMove('up')" onpointerup="stopScopeMove()" onpointerleave="stopScopeMove()">↑</button>
+          <button class="dpad-btn d-up-right" onpointerdown="startScopeMove('up-right')" onpointerup="stopScopeMove()" onpointerleave="stopScopeMove()">↗</button>
+          <button class="dpad-btn d-left" onpointerdown="startScopeMove('left')" onpointerup="stopScopeMove()" onpointerleave="stopScopeMove()">←</button>
           <button class="dpad-stop" onclick="scopeStopSlewing()">STOP</button>
-          <button class="dpad-btn d-right" onclick="scopeManualMove('right')">→</button>
-          <button class="dpad-btn d-down-left" onclick="scopeManualMove('down-left')">↙</button>
-          <button class="dpad-btn d-down" onclick="scopeManualMove('down')">↓</button>
-          <button class="dpad-btn d-down-right" onclick="scopeManualMove('down-right')">↘</button>
+          <button class="dpad-btn d-right" onpointerdown="startScopeMove('right')" onpointerup="stopScopeMove()" onpointerleave="stopScopeMove()">→</button>
+          <button class="dpad-btn d-down-left" onpointerdown="startScopeMove('down-left')" onpointerup="stopScopeMove()" onpointerleave="stopScopeMove()">↙</button>
+          <button class="dpad-btn d-down" onpointerdown="startScopeMove('down')" onpointerup="stopScopeMove()" onpointerleave="stopScopeMove()">↓</button>
+          <button class="dpad-btn d-down-right" onpointerdown="startScopeMove('down-right')" onpointerup="stopScopeMove()" onpointerleave="stopScopeMove()">↘</button>
         </div>
 
         <div style="font-size:11px; color:var(--muted); margin-bottom:2px;">Oggetti visibili ora</div>
@@ -2534,22 +2534,76 @@ function scopeSetTrackRate(rate) {
 
 function scopeMoveToContinuous(targetGetter, onComplete, progressButtonId) { if (scopeState.slewing) { scopeLog("Slewing in corso.", "warn"); return false; } scopeState.slewing = true; scopeState.slewCancelled = false; scopeState.synced = false; let lastTime = performance.now(); const initialTgt = targetGetter(); let dAlt0 = initialTgt.alt - scopeState.mountAlt, dAz0 = initialTgt.az - scopeState.mountAz; while (dAz0 > 180) dAz0 -= 360; while (dAz0 < -180) dAz0 += 360; const initialDist = Math.sqrt(dAlt0*dAlt0 + dAz0*dAz0); scopeState.slewInitialDist = initialDist; function step(time) { if (!scopeState.slewing || scopeState.slewCancelled) { scopeState.slewing = false; return; } let dt = (time-lastTime)/1000; if (!isFinite(dt) || dt<0) dt = 0.016; dt = Math.min(dt, 0.15); lastTime = time; if (!isFinite(scopeState.mountAlt)) scopeState.mountAlt = 0; if (!isFinite(scopeState.mountAz)) scopeState.mountAz = 0; const tgt = targetGetter(); if (!isFinite(tgt.alt) || !isFinite(tgt.az)) { scopeState.slewing = false; return; } let dAlt = tgt.alt - scopeState.mountAlt, dAz = tgt.az - scopeState.mountAz; while (dAz > 180) dAz -= 360; while (dAz < -180) dAz += 360; const dist = Math.sqrt(dAlt*dAlt + dAz*dAz); const stepDist = getSlewSpeedDegPerSec() * dt; const btn = document.getElementById(progressButtonId || 'scopeStepBtn'); if (btn && scopeState.slewing) { const progress = initialDist > 0.01 ? Math.min(99, Math.round((1-dist/initialDist)*100)) : 50; btn.innerText = `SLEWING ${progress}% · ${dist.toFixed(2)}°`; } if (dist <= stepDist) { scopeState.mountAlt = tgt.alt; scopeState.mountAz = norm360(tgt.az); scopeState.slewing = false; scopeUpdateUI(); scopeDraw(); if (onComplete) onComplete(); return; } const factor = stepDist / dist; scopeState.mountAlt = clamp(scopeState.mountAlt + dAlt*factor, -5, 90); scopeState.mountAz = norm360(scopeState.mountAz + dAz*factor); scopeUpdateUI(); scopeDraw(); requestAnimationFrame(step); } requestAnimationFrame(step); return true; }
 
-function scopeManualMove(dir) {
+function startScopeMove(dir) {
     if (!scopeState.connected) { scopeLog("Connetti prima.", "warn"); return; }
     if (scopeState.isParked) { scopeLog("Montatura in PARK.", "err"); return; }
     if (scopeState.slewing) return;
-    const step = getManualStepDeg();
-    if (dir.includes('up')) scopeState.mountAlt = clamp(scopeState.mountAlt + step, 0, 90);
-    if (dir.includes('down')) scopeState.mountAlt = clamp(scopeState.mountAlt - step, 0, 90);
-    if (dir.includes('left')) scopeState.mountAz = norm360(scopeState.mountAz - step);
-    if (dir.includes('right')) scopeState.mountAz = norm360(scopeState.mountAz + step);
+    
+    console.log('▶️ Movimento fluido:', dir);
     scopeState.tracking = false; scopeState.trackingTarget = false; scopeState.synced = false; stopTrackingLoop();
     document.getElementById('scopeTrackBtn').innerText = "Track ON"; document.getElementById('scopeTrackBtn').className = "triton-btn";
-    scopeUpdateUI(); scopeDraw();
     
     const proto = Protocols[scopeState.protocol];
-    if (proto && proto.move) proto.move(dir, scopeState.rate);
+    if (proto && proto.move) {
+        // Imposta la velocità massima (R9) e invia il movimento
+        Transport.send(':R9#'); 
+        const d = String(dir).toLowerCase();
+        if (d.includes('up') || d === 'n') Transport.send(':Mn#');
+        if (d.includes('down') || d === 's') Transport.send(':Ms#');
+        if (d.includes('left') || d === 'o' || d === 'w') Transport.send(':Mw#');
+        if (d.includes('right') || d === 'e') Transport.send(':Me#');
+    }
 }
+
+function stopScopeMove() {
+    if (!scopeState.connected) return;
+    console.log('⏹️ Stop movimento');
+    Transport.send(':Q#');
+}
+
+// --- SINCRONIZZAZIONE MAPPA: Legge la posizione reale dalla montatura ---
+function parseLX200RA(str) {
+    const parts = str.replace('#','').split(':');
+    if (parts.length < 3) return null;
+    return (parseInt(parts[0]) + parseInt(parts[1])/60 + parseInt(parts[2])/3600) * 15;
+}
+function parseLX200DEC(str) {
+    const sign = str[0] === '-' ? -1 : 1;
+    const clean = str.replace(/[+#]/g, '').replace('*', ':');
+    const parts = clean.split(':');
+    if (parts.length < 2) return null;
+    return sign * (parseInt(parts[0]) + (parseInt(parts[1]) || 0)/60 + (parseInt(parts[2]) || 0)/3600);
+}
+
+let pendingRA = null;
+const originalOnData = Transport._onData;
+Transport._onData = function(data) {
+    if (typeof data === 'string') {
+        if (data.includes(':') && data.includes('#') && data.split(':')[0].length <= 2) {
+            const ra = parseLX200RA(data.trim());
+            if (ra !== null) pendingRA = ra;
+        } else if (data.includes('*') && data.includes('#')) {
+            const dec = parseLX200DEC(data.trim());
+            if (dec !== null && pendingRA !== null) {
+                const pos = getAltAz(pendingRA, dec, new Date());
+                scopeState.mountAlt = pos.alt;
+                scopeState.mountAz = pos.az;
+                if (typeof scopeUpdateUI === 'function') scopeUpdateUI();
+                if (typeof scopeDraw === 'function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
+            }
+        }
+    }
+    if (originalOnData) originalOnData(data);
+};
+
+// Chiedi la posizione alla montatura ogni 500ms
+setInterval(() => {
+    if (scopeState.connected && !scopeState.slewing) {
+        pendingRA = null;
+        Transport.send(':GR#'); 
+        setTimeout(() => Transport.send(':GD#'), 50);
+    }
+}, 500);
 
 function startEdgeMove(dir) {
     if (!scopeState.connected || scopeState.isParked) return;
@@ -3045,18 +3099,16 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
       }
     }
     
-    // Aggiorna Badge SYNC
+     // Aggiorna Badge SYNC (basato sulla connessione reale)
     const txt=document.getElementById('syncText'),dot=document.getElementById('syncDot'),badge=document.getElementById('syncBadge');
-    if(txt){
-      const m=localStorage.getItem('final_map_pos');
-      let alive=false;
-      if(m)try{alive=Date.now()-JSON.parse(m).ts<2500}catch(e){}
-      txt.textContent=alive?'SYNC ON':'SYNC OFF';
-      txt.style.color=alive?'#4ade80':'#f87171';
-      if(dot)dot.style.color=alive?'#4ade80':'#f87171';
-      if(badge)badge.style.borderColor=alive?'#4ade80':'#f87171';
-    }
-  },250);
+    if(txt && typeof scopeState !== 'undefined'){
+      const isConnected = scopeState.connected === true;
+      txt.textContent=isConnected?'SYNC ON':'SYNC OFF';
+      txt.style.color=isConnected?'#4ade80':'#f87171';
+      if(dot)dot.style.color=isConnected?'#4ade80':'#f87171';
+      if(badge)badge.style.borderColor=isConnected?'#4ade80':'#f87171';
+  }
+    ,250);
 
   console.log('✅ [Pianeta v9] Sync finalizzato e GOTO abilitato');
 })();
