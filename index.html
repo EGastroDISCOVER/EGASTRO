@@ -616,7 +616,11 @@ if(document.readyState==='complete'||document.readyState==='interactive')setTime
       from { transform: translateX(-50%) translateY(-100%); }
       to { transform: translateX(-50%) translateY(0); }
     }
-  </style></head>
+    /* TUNNEL DISABILITATO (Rimuovi questo blocco per riattivare) */
+  #tunnel-btn, #my-tunnel-btn, #__oneBtn, #tunnel-frame-wrap { 
+    display: none !important; 
+  }
+</style></head>
 <body id="appBody">
 
 <header>
@@ -2917,7 +2921,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 
 
 
-  <button id="sync-gps-btn" style="background:#d4af37;color:#000;border:none;border-radius:4px;padding:6px;cursor:pointer;font-weight:bold;">📍 Forza GPS/IP e Invia</button>
+
 </div>
 
 
@@ -3237,7 +3241,7 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
   console.log('✅ [Pianeta v9] Sync finalizzato e GOTO abilitato');
 })();
 </script>
-<script id="__tunnel-unified-v4">
+<script id="__tunnel-unified-v4" type="text/plain">
 (function(){
   'use strict';
   if (window.self !== window.top) return;
