@@ -3022,97 +3022,6 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
 
 
 
-<script id="__final_sync_planet_v9">
-(function(){
-  window.SyncBus = {isPeerAlive:()=>false,isLeader:()=>false,requestLeader:()=>false,
-    getPeerId:()=>null,getAppId:()=>'observatory',send:()=>{},on:()=>{},start:()=>{},stop:()=>{},
-    sendWithAck:()=>Promise.resolve(false),version:0,appId:'observatory'};
-
-  const _snd=(t,d={})=>localStorage.setItem('final_cmd_'+t,JSON.stringify({...d,ts:Date.now()}));
-
-  // OVERRIDE GOTO: Permette l'invio anche se Pianeta non è connesso in locale, purché Satellite lo sia
-  window.scopeSlewToTarget=function(){
-    const peerAlive=(()=>{try{const m=JSON.parse(localStorage.getItem('final_map_pos')||'null');return m&&(Date.now()-m.ts<2500)}catch(e){return false}})();
-    if(!scopeState.connected&&!peerAlive){scopeLog('Connetti prima (o apri Satellite).','warn');return}
-    if(!scopeState.target){scopeLog('Nessun target.','warn');return}
-    if(scopeState.isParked){scopeLog('In PARK.','err');return}
-    if(scopeState.slewing){scopeLog('Slewing.','warn');return}
-    
-    const t=scopeState.target;
-    scopeLog('GOTO '+t.name+' → Satellite...','');
-    _snd('goto',{ra:t.ra*Math.PI/180,dec:t.dec*Math.PI/180});
-    
-    const pb=document.getElementById('scopePanelGotoBtn');
-    if(pb){pb.disabled=true;pb.innerText='⏳ INVIATO'}
-    setTimeout(()=>{if(pb){pb.disabled=false;pb.innerText='🎯 GOTO'}},2500);
-  };
-
-  // Altri comandi sincronizzati
-  window.scopePark=function(){_snd('park')};
-  window.scopeUnpark=function(){_snd('unpark')};
-  window.scopeEmergencyStop=function(){_snd('stop');scopeState.slewing=false};
-  window.scopeToggleTracking=function(){scopeState.tracking=!scopeState.tracking;_snd('tracking',{on:scopeState.tracking})};
-  
-  const _oc=window.scopeToggleConnect;
-  window.scopeToggleConnect=function(){
-    if(_oc)_oc();
-    setTimeout(()=>localStorage.setItem('final_conn',JSON.stringify({
-      connected:scopeState.connected,sim:scopeState.protocol==='sim',ts:Date.now()
-    })),150);
-  };
-
-  // Polling per aggiornare l'interfaccia di Pianeta
-  let lastLat=null,lastLon=null,lastConn=null;
-  setInterval(()=>{
-    localStorage.setItem('final_hb_p',Date.now());
-    
-    // Invia GPS
-    const latI=document.getElementById('lat'),lonI=document.getElementById('lon');
-    if(latI&&lonI){
-      const lat=parseFloat(latI.value),lon=parseFloat(lonI.value);
-      if(!isNaN(lat)&&!isNaN(lon)&&(lat!==lastLat||lon!==lastLon)){
-        lastLat=lat;lastLon=lon;
-        localStorage.setItem('final_gps',JSON.stringify({lat,lon,ts:Date.now()}));
-      }
-    }
-    
-    // Invia Stato Connessione
-    if(typeof scopeState!=='undefined'){
-      if(scopeState.connected!==lastConn){
-        lastConn=scopeState.connected;
-        localStorage.setItem('final_conn',JSON.stringify({connected:scopeState.connected,sim:scopeState.protocol==='sim',ts:Date.now()}));
-      }
-      
-      // RICEVI TELEMETRIA DA SATELLITE (Aggiorna la mappa e l'HUD)
-      const mp=localStorage.getItem('final_map_pos');
-      if(mp){
-        try{
-          const m=JSON.parse(mp);
-          if(Date.now()-m.ts<2500){
-            scopeState.connected=true; // Forza UI connessa se Satellite è online
-            scopeState.mountAlt=m.alt;
-            scopeState.mountAz=m.az;
-            if(typeof scopeUpdateUI==='function') scopeUpdateUI();
-            if(typeof scopeDraw==='function' && document.getElementById('tab-scope')?.classList.contains('active')) scopeDraw();
-          }
-        }catch(e){}
-      }
-    }
-    
-     // Aggiorna Badge SYNC (basato sulla connessione reale)
-    const txt=document.getElementById('syncText'),dot=document.getElementById('syncDot'),badge=document.getElementById('syncBadge');
-    if(txt && typeof scopeState !== 'undefined'){
-      const isConnected = scopeState.connected === true;
-      txt.textContent=isConnected?'SYNC ON':'SYNC OFF';
-      txt.style.color=isConnected?'#4ade80':'#f87171';
-      if(dot)dot.style.color=isConnected?'#4ade80':'#f87171';
-      if(badge)badge.style.borderColor=isConnected?'#4ade80':'#f87171';
-  }
-    ,250);
-
-  console.log('✅ [Pianeta v9] Sync finalizzato e GOTO abilitato');
-})();
-</script>
 
 
 
@@ -3278,16 +3187,15 @@ setInterval(() => { try { const ref = getTonightReferenceDate(); const rs = ref.
     }
     
     // Aggiorna Badge SYNC
-    const txt=document.getElementById('syncText'),dot=document.getElementById('syncDot'),badge=document.getElementById('syncBadge');
-    if(txt){
-      const m=localStorage.getItem('final_map_pos');
-      let alive=false;
-      if(m)try{alive=Date.now()-JSON.parse(m).ts<2500}catch(e){}
-      txt.textContent=alive?'SYNC ON':'SYNC OFF';
-      txt.style.color=alive?'#4ade80':'#f87171';
-      if(dot)dot.style.color=alive?'#4ade80':'#f87171';
-      if(badge)badge.style.borderColor=alive?'#4ade80':'#f87171';
-    }
+   const txt=document.getElementById('syncText'),dot=document.getElementById('syncDot'),badge=document.getElementById('syncBadge');
+      if(txt && typeof scopeState !== 'undefined'){
+        // Si accende se premi Connetti (WiFi/BT/SIM)
+        const isConnected = scopeState.connected === true;
+        txt.textContent=isConnected?'SYNC ON':'SYNC OFF';
+        txt.style.color=isConnected?'#4ade80':'#f87171';
+        if(dot)dot.style.color=isConnected?'#4ade80':'#f87171';
+        if(badge)badge.style.borderColor=isConnected?'#4ade80':'#f87171';
+      }
   },250);
 
   console.log('✅ [Pianeta v9] Sync finalizzato e GOTO abilitato');
